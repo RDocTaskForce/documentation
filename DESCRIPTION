@@ -1,0 +1,17 @@
+Package: documentation
+Type: Package
+Title: R Documentation Infrastructure
+Version: 0.1
+Date: 2016-12-13
+Authors@R: c(
+    person("Andrew", "Redd", , "andrew.redd@hsc.utah.edu", c("aut", "cre")),
+    person("R Documentation Task Force", role=c("aut"))
+    )
+Maintainer: Andrew Redd <andrew.redd@hsc.utah.edu>
+License: GPL-2
+Imports:
+    methods,
+    utils
+Description: This package provides infrastructure for containing 
+    documentation within R object, creating documentation objects
+    and exporting documentation objects into different formats.
