@@ -12,6 +12,12 @@ License: GPL-2
 Imports:
     methods,
     utils
-Description: This package provides infrastructure for containing 
+Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
+Collate:
+    'Vector.R'
+    'Class-References.R'
+    'Class-Documentation.R'
+    'Class-arg-Documentation.R'
+    'Class-data.frame-Documentation.R'
