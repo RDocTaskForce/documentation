@@ -1,15 +1,16 @@
 #' @include Class-References.R
+#' @include Class-Documentation-Keyword.R
 #' @importFrom utils person
 #' @import methods
 
-#TODO
-#' only text stored in an HTML5/XHTML compliant format.
-setClass( "FormattedText", contains = 'list')
 
 #TODO
 #' contains formatted text and code chunks
 setClass( "Prose", contains = 'list')
 
+setVector( element = "Prose"
+         , Class   = "SectionList"
+         )
 
 setOldClass('person')
 
@@ -20,8 +21,9 @@ setClass( "Documentation"
                    , references  = "References"
                    , seealso     = "FormattedText"
                    , examples    = "Prose"
-                   , keywords    = "character"
+                   , keywords    = "Documentation-Keyword"
+                   , alias       = "character"
+                   , sections    = "SectionList"
                    )
         )
-
 
