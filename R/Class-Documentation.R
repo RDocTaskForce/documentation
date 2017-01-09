@@ -1,5 +1,6 @@
 #' @include Class-References.R
 #' @include Class-Documentation-Keyword.R
+#' @include Class-FormattedText.R
 #' @importFrom utils person
 #' @import methods
 

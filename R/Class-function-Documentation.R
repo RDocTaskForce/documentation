@@ -1,4 +1,5 @@
 #' @include Class-arg-Documentation.R
+#' @include Class-FormattedText.R
 
 function_documentation <- 
 setClass('function-Documentation', contains = 'Documentation'

@@ -1,8 +1,5 @@
 #' @include Vector.R
 
-.no.default <- formals(function(a){})$a
-
-
 arg_ <-
 setClass( "arg-Documentation"
         , slots = c( name        = 'name'

@@ -1,9 +1,7 @@
-#' @import htmltools
-
 #TODO
 #' only text stored in an HTML5/XHTML compliant format.
 setClass( "FormattedText", contains = 'character')
-
+#TODO: needs validation for valid HTML5 text.
 
 
 if(FALSE){

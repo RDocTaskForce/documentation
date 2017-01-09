@@ -19,11 +19,15 @@ Description: This package provides infrastructure for containing
 Collate:
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
+    'Class-FormattedText.R'
     'Vector.R'
     'Class-References.R'
     'Class-Documentation.R'
     'Class-arg-Documentation.R'
-    'Class-data.frame-Documentation.R'
     'Class-function-Documentation.R'
-    'class-FormattedText.R'
+    'Class-S4-Documentation.R'
+    'Class-data.frame-Documentation.R'
+    'Fun-format_md.R'
     'util-comma_list.R'
+    'util-interleave.R'
+RoxygenNote: 5.0.1
