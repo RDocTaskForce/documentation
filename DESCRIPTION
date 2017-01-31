@@ -23,6 +23,8 @@ Collate:
     'Vector.R'
     'Class-References.R'
     'Class-Documentation.R'
+    'documentation.R'
+    'utils-backslash.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'

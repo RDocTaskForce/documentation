@@ -1,7 +1,11 @@
 #' @include Class-function-Documentation.R
 #' @include Vector.R
+#' @include utils-backslash.R
+#' @include documentation.R
 
-setClass('slot-Documentation', contains = 'arg-Documentation')
+setClass('slot-Documentation', contains = 'arg-Documentation'
+        , slots= c(valid.class='character')
+        )
 
 setVector( element = "slot-Documentation"
          , Class   = "Slots-Documentation"
@@ -9,23 +13,119 @@ setVector( element = "slot-Documentation"
 
 S4_documentation <- 
 setClass( 'S4-Documentation', contains='Documentation'
-        , slots = c( Slots = 'Slots-Documentation' )
+        , slots = c( Slots = 'Slots-Documentation' 
+                   , documented.class = 'character'
+                   , origin.package   = 'character'
+                   )
         )
+#~ setMethod('initialize', 'S4-Documentation', 
+#~     function(.Object, class, pkg, ...){
+#~         .Object <- callNextMethod(.Object...)
+#~     })
+
+get_S4_documentation <- 
+function( Class  #< A [classRepresentation] or a string representing a class.
+        , ... #< passed on to getClassDef if `Class` is a character, discarded otherwise.
+        ){
+    if(inherits(Class, 'character'))
+        Class <- getClassDef(Class, ...)
+    if(!is(Class, 'classRepresentation'))
+        stop('`Class` argument must be either classRepresentation, ' %\%
+             'obtained from getClass, or a character specifying the' %\%
+             ' name of a class.')
+    
+    dname <- documentationMetaName(Class@className, packageSlot(Class))
+    value <- get0(dname, envir=env, mode='S4', inherits=TRUE)
+    if(!is.null(value)) return(value)
+
+    dname <- documentationMetaName(cname,'')
+    env   <- .classEnv(Class, topenv(parent.frame()), TRUE)
+    value <- get0(dname, envir=env, mode='S4', inherits = FALSE)
+    if(!is.null(value)) return(value)
+
+}
+
+
+setMethod('documentation', 'classRepresentation', 
+function( object    #< the classRepresentation object
+        , ...       #< Currently ignored
+        ){
+    #' Get documentation for an S4 class.
+    #' 
+    #' Documentation in subsequent packages takes precedence over 
+    #' the documentation in the package.
+    #' 
+    #' 
+    #' 
+    cname <- object@className
+    dname <- documentationMetaName(cname, package)
+    value <- get0(dname, mode='S4', inherits=TRUE)
+    if(!is.null(value)) return(value)
+
+    dname <- documentationMetaName(cname,'')
+    env   <- .classEnv(Class, topenv(parent.frame()), TRUE)
+    value <- get0(dname, envir=env, mode='S4', inherits = FALSE)
+    if(!is.null(value)) return(value)
+
+    message('Documentation not found!.')
+})
+if(F){
+    object <- getClass('S4-Documentation')
+    
+}
+
+
+set_S4_documentation <- 
+function( Class  #< A [classRepresentation] or a string representing a class.
+        , docs    #< [S4-Documentation] The documentation for the class represented by `Class`.
+        , where   = topenv(parent.frame())  #< where to store the documentation
+        , verbose = getOption("documentation::verbose", FALSE) #< Should informational messages be shown?
+        , ... #< passed on to getClassDef if `Class` is a character, discarded otherwise.
+        ){
+    if(inherits(Class, 'character'))
+        Class <- getClassDef(Class, where=where, ...)
+    if(!is(Class, 'classRepresentation'))
+        stop('`Class` argument must be either classRepresentation, ' %\%
+             'obtained from getClass, or a character specifying the' %\%
+             ' name of a class.')
+    if(getPackageName(where) == packageSlot(Class))
+        dname <- documentationMetaName(Class@className, '')
+    else 
+        dname <- documentationMetaName(Class@className, packageSlot(Class))
+    if(verbose)
+        if(exists(dname, where, mode='S4', inherits=FALSE))
+            message("documentation already exists; overwriting.")
+    assign(dname, docs, envir=where)
+}
+setMethod('documentation<-', c('classRepresentation', 'S4-Documentation'), 
+function(object, value){
+    set_S4_documentation(object, value)
+})
+setMethod('documentation<-', c('ANY', 'S4-Documentation'), 
+function(object, value){
+    stop('S4-Documentation objects can only be set for objects ' %\%
+         'of, or inheriting from, the classRepresentation class.')
+})
 
 setClass('S4-Method-Documentation', contains='function-Documentation'
         , slots = c(signature= 'character')
         )
 
-docs.S4_documentation <- 
-S4_documentation( author      = person("Andrew", "Redd", "Andrew.Redd@hsc.utah.edu")
+documentation.S4_Documentation <- 
+S4_documentation( author      = person("Andrew", "Redd", email="Andrew.Redd@hsc.utah.edu")
                 , title       = "Documentation for S4 classes"
-                , description = ""
-                , seealso     = "Documentation"
-                , examples    = "Prose"
-                , keywords    = "Documentation-Keyword"
-                , alias       = "character"
-                , sections    = "SectionList"
+                , description = "The Documentation S4 class provides the basis for all" %\%
+                                "complete documentation in the documentation package system."
+                , seealso     = "\\code{\\link{Documentation}}"
+                , keywords    = "documentation"
                 )
-                
+set_S4_documentation('S4-Documentation', documentation.S4_Documentation)
 
 
+if(FALSE){#! @testing
+    expect_true(exists('.__Documentation__S4-Documentation'
+                      , envir=asNamespace('documentation')
+                      , mode='S4', inherits=FALSE))
+    expect_is()
+
+}
