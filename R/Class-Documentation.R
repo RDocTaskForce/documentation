@@ -26,5 +26,29 @@ setClass( "Documentation"
                    , alias       = "character"
                    , sections    = "SectionList"
                    )
+        , prototype = list( author = person() )
         )
+
+setMethod("initialize", 'Documentation', 
+    function( .Object
+            , ...
+            , author      = NULL
+            , description = NULL
+            , keywords    = NULL
+            , seealso     = NULL
+            )
+    {
+        .Object <- callNextMethod( .Object, ...)
+        if (!is.null(keywords   ))  .Object@keywords    <- new("Documentation-Keyword", keywords   )
+        if (!is.null(description))  .Object@description <- new("FormattedText"        , description)
+        if (!is.null(seealso    ))  .Object@seealso     <- new("FormattedText"        , seealso    )
+        return(.Object)
+    })
+
+if(FALSE){#!@testing
+    x <- new('Documentation')
+    expect_identical(x@author, person())
+    expect_identical(x@title, character(0))
+}
+
 
