@@ -64,8 +64,9 @@ if(FALSE){#! @testing
 }
 #' Create a cannonical name for independent documentation objects
 documentationMetaName <- 
-function( object.name   #< name of the object that is being documented such as class
-        , pkg=attr(object.name, 'package')  #< package name, optional.
+function( object.name   #< [character] name of the object that is being documented such as class
+        , pkg=attr(object.name, 'package')  #< [character] package name, optional.
+        , subsystem = NULL                  #< [character] documentation subsystem.                     
         ){
 #' This function supports S4 and similar class documentation, where the
 #' documentation needs to exist and be associated with the definition
@@ -78,5 +79,8 @@ function( object.name   #< name of the object that is being documented such as c
 
     if(is.null(pkg)) pkg <- ''
     stopifnot(is.character(object.name))
-    methodsPackageMetaName('Documentation', object.name, pkg)
+    prefix <- 'Documenation'
+    if(!is.null(subsystem))
+        prefix <- paste0(prefix, '/', subsystem)
+    methodsPackageMetaName(prefix, object.name, pkg)
 }

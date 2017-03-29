@@ -1,5 +1,6 @@
 #TODO
 #' only text stored in an HTML5/XHTML compliant format.
+FormattedText <- 
 setClass( "FormattedText", contains = 'character')
 #TODO: needs validation for valid HTML5 text.
 
