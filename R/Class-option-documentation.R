@@ -12,14 +12,11 @@ setMethod('initialize', 'option-Documentation',
     function( .Object
             , key                       #< [character] name of the argument
             , description               #< [character] description of the argument
-            , default =                 #< default value
-                 new('Documentation-No-Default-Value')
             , constraints = list()      #< list of constraints
             ){
         #! Create documenation for a function argument.
         .Object@key         <- as.character(key)
         .Object@description <- FormattedText(as.character(description))
-        .Object@default     <- as(default, 'Documentation-Default-Value')
         .Object@constraints <- constraints
         return(.Object)
     })

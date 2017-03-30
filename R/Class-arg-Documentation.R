@@ -1,4 +1,6 @@
 #' @include Vector.R
+#' @include Fun-format_md.R
+#' @include Fun-format_Rd.R
 
 arg_ <-
 setClass( "arg-Documentation"
@@ -82,6 +84,97 @@ if(FALSE){#! @testing
     expect_identical(L, M)
 }
 
+setMethod('format_Rd', 'arg-Documentation', 
+function(object, ...){
+    #Question: does thise need to include more details like default value?
+    sprintf("\\item{%s}{%s}", as.character(object@name), object@description)
+})
+
+if(FALSE){#! @testing
+    a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
+    expect_identical(format_Rd(a), "\\item{testing}{a testing argument}")
+}
 
 
+setMethod('format_Rd', 'ArgumentList', 
+function( object
+        , ...
+        , indent          = default(indent        )
+        , indent.with     = default(indent.with   )
+        , collapse.lines  = default(collapse.lines)
+        , collapse.with   = default(collapse.with )
+        ){
+    formatted.args <- sapply(object, format_Rd, ...)
+    if(indent)
+        formatted.args <- paste0(indent.with, formatted.args)
+    lines <- 
+        c( '\\arguments{' 
+         , formatted.args
+         , '}'
+         )
+    if(collapse.lines)
+        lines <- paste(lines, collapse = collapse.with)
+    return(lines)
+})
+
+if(FALSE){#! @testing
+    trace("format_Rd", browser, signature='ArgumentList')
+    
+    a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
+    b <- arg_('testing', 'a testing argument')
+    
+    object <- 
+        ArgumentList( arg_('x', 'an argument')
+                    , arg_('y', 'another argument')
+                    )
+
+    expect_equal( format_Rd(object, indent = FALSE, collapse.lines=FALSE)
+                , c( '\\arguments{'
+                   , '\\item{x}{an argument}'
+                   , '\\item{y}{another argument}'
+                   , '}'
+                   )
+                )
+    expect_equal( format_Rd(object, indent = FALSE, collapse.lines=FALSE)
+                , c( '\\arguments{'
+                   , '\\item{x}{an argument}'
+                   , '\\item{y}{another argument}'
+                   , '}'
+                   )
+                )
+    expect_equal( format_Rd(object, indent = TRUE, indent.with='    '
+                                  , collapse.lines=FALSE)
+                , c( '\\arguments{'
+                   , '    \\item{x}{an argument}'
+                   , '    \\item{y}{another argument}'
+                   , '}'
+                   )
+                )
+    expect_equal( format_Rd(object, indent = TRUE, indent.with='\t'
+                                  , collapse.lines=FALSE)
+                , c( '\\arguments{'
+                   , '\t\\item{x}{an argument}'
+                   , '\t\\item{y}{another argument}'
+                   , '}'
+                   )
+                )
+    expect_equal( format_Rd(object, indent = FALSE, indent.with='    '
+                           , collapse.lines=TRUE, collapse.with='\n'
+                           )
+                , paste( '\\arguments{'
+                       , '\\item{x}{an argument}'
+                       , '\\item{y}{another argument}'
+                       , '}'
+                       , sep='\n')
+                )
+    expect_equal( format_Rd(object, indent = TRUE, indent.with='    '
+                           , collapse.lines=TRUE, collapse.with='\n'
+                           )
+                , paste( '\\arguments{'
+                       , '    \\item{x}{an argument}'
+                       , '    \\item{y}{another argument}'
+                       , '}'
+                       , sep='\n')
+                )
+}
 
