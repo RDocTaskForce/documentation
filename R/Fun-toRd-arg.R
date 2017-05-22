@@ -17,19 +17,15 @@ if(FALSE){#! @testing
 setMethod('toRd', 'ArgumentList', 
 function( obj
         , ...
-        , indent          = default(indent        )
-        , indent.with     = default(indent.with   )
-        , collapse.lines  = default(collapse.lines)
-        , collapse.with   = default(collapse.with )
+        , indent          = default(indent        , FALSE )
+        , indent.with     = default(indent.with   , '    ')
+        , collapse.lines  = default(collapse.lines, FALSE )
+        , collapse.with   = default(collapse.with , '\n'  )
         ){
     formatted.args <- sapply(obj, toRd, ...)
     if(indent)
         formatted.args <- paste0(indent.with, formatted.args)
-    lines <- 
-        c( '\\arguments{' 
-         , formatted.args
-         , '}'
-         )
+    lines <- Rd_tag(formatted.args, 'arguments')
     if(collapse.lines)
         lines <- paste(lines, collapse = collapse.with)
     return(lines)

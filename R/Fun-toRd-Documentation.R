@@ -6,15 +6,15 @@ function( obj
         , ...
         ){
     "Convert Documentation to Rd format."
-    to_tag <- function(name) Rd_tag( getElement(object, name) , name)
+    to_tag <- function(name) Rd_tag( getElement(obj, name) , name)
     
-    slots <- slotNames(object) 
+    slots <- slotNames(obj) 
     Rd <-lapply(slots, to_tag) %>% structure(names = slots)
     
-    Rd$author   <- Rd_tag('author', comma_list(toRd(object@author)))
-    Rd$keywords <- toRd(object@keywords)
-    Rd$aliases  <- Rd_tag(object@aliases, 'alias')
-    Rd$concepts <- Rd_tag(object@concepts, 'concept')
+    Rd$author   <- Rd_tag(comma_list(toRd(obj@author)), 'author')
+    Rd$keywords <- toRd(obj@keywords)
+    Rd$aliases  <- Rd_tag(obj@aliases, 'alias')
+    Rd$concepts <- Rd_tag(obj@concepts, 'concept')
     Filter(length, Rd)
 })
 if(FALSE){#! @testing
@@ -39,6 +39,7 @@ if(FALSE){#! @testing
     expect_true(all(names(as.rd) %in% expected.names))
     expect_true(all(expected.names %in% names(as.rd)))
     
+    expect_equal(as.rd$author, "\\author{Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue}")
     expect_equal(as.rd$title, "\\title{Create function documentation}")
     expect_equal(as.rd$keywords, "\\keyword{internal}")
     expect_equal(as.rd$aliases, "\\alias{test-alias}")

@@ -112,10 +112,21 @@ function( obj
     #! Convert formatted text into Rd lines.
     #! 
     #! \\note{ Assumes that each element of the text is a paragraph.)
-    head(interleave(obj, rep('', length(obj))),-1)
+    if( length(obj) == 0) return(character(0))
+    else if( length(obj) == 1) return(obj@.Data)
+    else return( head(interleave(obj, rep('', length(obj))),-1) )
+
 })
 if(FALSE){#! @testing
+    obj <- FormattedText()
+    expect_identical(toRd(obj), character(0))
+    
+    obj <- FormattedText('Hello world!')
+    expect_identical(toRd(obj), 'Hello world!')
+    expect_false(identical(toRd(obj), obj))
+    
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
+    expect_is(as.rd, 'character')
 }
