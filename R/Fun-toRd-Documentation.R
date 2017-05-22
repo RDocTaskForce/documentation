@@ -1,5 +1,5 @@
 #' @include Class-Documentation.R
-#' @include Fun-format_Rd.R
+#' @include Fun-toRd.R
 
 setMethod('toRd', 'Documentation',
 function( obj
