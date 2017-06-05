@@ -29,7 +29,7 @@ if(FALSE){#! @testing
               )
     Rd <- toRd(obj)
     expect_is(Rd, 'list')
-    expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(as.rd)))
+    expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
     expect_equal(Rd$name, '\\name{function_documentation}')
     expect_equal(Rd$value, '\\value{A function-Documentation obj.}')
     expect_equal(Rd$usage, '\\usage{function_documentation(name, arguments, usage, ...)}')
