@@ -1,6 +1,5 @@
 #' @include Class-arg-Documentation.R
 #' @include Class-FormattedText.R
-#' @include Fun-format_yaml.R
 
 function_documentation <- 
 setClass('function-Documentation', contains = 'Documentation'
@@ -35,7 +34,6 @@ setMethod('initialize', 'function-Documentation',
         .Object@usage     <- as.call(usage)
         .Object
     })
-
 if(FALSE){#! @testing
     object <- new( "function-Documentation"
                  , name = as.name('function_documentation')
@@ -57,31 +55,4 @@ if(FALSE){#! @testing
     object <- function_documentation(arguments = arg("only one arg"))
     
 }
-
-setMethod('format_yaml', 'function-Documentation', 
-function( object
-        , include = slotNames(object)
-        , ...
-        ){
-    #' 
-    
-    i = include[[1L]]
-    .hasSlot(object, i)
-    
-    lapply(include, slot, object=object)
-    
-#~     %>%
-#~         Filter(length,.) %>% length
-    
-#~     as.yaml(slot(object, i))
-})
-if(F){
-    include <- c('title', 'author')
-    
-    slot(object, include[[1]])
-    slot(object, include[[2]])
-    object@author
-    
-}
-
 
