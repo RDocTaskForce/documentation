@@ -71,7 +71,6 @@ function( object    #< the classRepresentation object
 })
 if(F){
     object <- getClass('S4-Documentation')
-    
 }
 
 
@@ -107,25 +106,63 @@ function(object, value){
          'of, or inheriting from, the classRepresentation class.')
 })
 
-setClass('S4-Method-Documentation', contains='function-Documentation'
-        , slots = c(signature= 'character')
-        )
-
-documentation.S4_Documentation <- 
-S4_documentation( author      = person("Andrew", "Redd", email="Andrew.Redd@hsc.utah.edu")
-                , title       = "Documentation for S4 classes"
-                , description = "The Documentation S4 class provides the basis for all" %\%
-                                "complete documentation in the documentation package system."
-                , seealso     = "\\code{\\link{Documentation}}"
-                , keywords    = "documentation"
-                )
-set_S4_documentation('S4-Documentation', documentation.S4_Documentation)
+if(FALSE){#
+#~ documentation.S4_Documentation <- 
+#~ S4_documentation( author      = person("Andrew", "Redd", email="Andrew.Redd@hsc.utah.edu")
+#~                 , title       = "Documentation for S4 classes"
+#~                 , description = "The Documentation S4 class provides the basis for all" %\%
+#~                                 "complete documentation in the documentation package system."
+#~                 , seealso     = "\\code{\\link{Documentation}}"
+#~                 , keywords    = "documentation"
+#~                 )
+#~ set_S4_documentation('S4-Documentation', documentation.S4_Documentation)
 
 
-if(FALSE){#! @testing
-    expect_true(exists('.__Documentation__S4-Documentation'
-                      , envir=asNamespace('documentation')
-                      , mode='S4', inherits=FALSE))
-    expect_is()
+#~     expect_true(exists('.__Documentation__S4-Documentation'
+#~                       , envir=asNamespace('documentation')
+#~                       , mode='S4', inherits=FALSE))
+#~     expect_is()
 
 }
+
+
+setClass('S4-Method-Documentation', contains='function-Documentation'
+        , slots = c( signature = 'character'
+                   , package.of.generic = 'character'
+                   )
+        )
+if(F){
+    x <- 
+    new('S4-Method-Documentation', name = 'documentation<-'
+       , signature = c(object='classRepresentation', value='S4-Documentation')
+       , title = 'Assign documentation to a S4 Class'
+       )
+       
+       
+    mdef <- GetMethod
+}
+
+S4_method_meta_name <- 
+function( f
+        , signature
+        ){
+# Question:
+# the methods are stored in an enclosing environment for the generic function.
+# Should the documentation objects be included in that environment or 
+# in the environment/package where the method is being defined?
+# If it is in the original environment of the generic function there 
+# should be a catalog of documentation stored externally so that all 
+# documentation objects can be accounted for.
+            
+}
+
+set_S4_methods_documentation <- 
+function( docs      #< [S4-Method-Documentation] Documentation for the S4 method.
+        , where   = topenv(parent.frame())  #< where to store the documentation
+        , verbose = getOption("documentation::verbose", FALSE) #< Should informational messages be shown?
+        , ... 
+        ){
+            
+            
+}
+

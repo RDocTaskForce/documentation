@@ -61,7 +61,6 @@ if(FALSE){#! @testing
                  , description = "create documentation for a function"
                  , value = "A function-Documentation object."
                  )
-#~     trace('initialize', browser, signature='function-Documentation')
     object <- function_documentation()
     expect_equal(deparse(object@name), "<UNDEFINED>")
 }

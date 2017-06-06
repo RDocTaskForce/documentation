@@ -53,7 +53,6 @@ if(FALSE){#! @testing
     expect_identical(attr(x, 'documentation'), y)
     expect_identical(documentation(x), y)
     
-    trace('documentation<-', browser, sig = c('ANY', 'ANY'))
     expect_error( documentation(x) <- 'this should not work'
                 , 'Documentation can only be set with objects ' %\% 
                   'of, or inheriting from, the `Documentation` class.'

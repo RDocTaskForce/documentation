@@ -35,12 +35,9 @@ Collate:
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'
     'Class-data.frame-Documentation.R'
-    'Fun-format_md.R'
-    'Fun-format_md-arg.R'
     'Fun-toRd-Documentation.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'
     'util-comma_list.R'
     'util-interleave.R'
-    'utils-markdown.R'
 RoxygenNote: 6.0.1

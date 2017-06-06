@@ -13,7 +13,6 @@ function( obj
     return(Rd)
 })
 if(FALSE){#! @testing
-    trace('toRd', signature = 'function-Documentation', browser)
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')
               , title = 'Create function documentation'
