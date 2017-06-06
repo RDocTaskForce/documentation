@@ -11,25 +11,36 @@ Maintainer: Andrew Redd <andrew.redd@hsc.utah.edu>
 License: GPL-2
 Imports:
     methods,
-    utils,
-    htmltools
+    utils, 
+    tools
+Suggests:
+    htmltools,
+    testthat
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
-Collate:
+Collate: 
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
     'Class-FormattedText.R'
     'Vector.R'
-    'Class-References.R'
     'Class-Documentation.R'
     'documentation.R'
     'utils-backslash.R'
+    'util-str_rep.R'
+    'Class-option-documentation.R'
+    'options.R'
+    'Fun-toRd.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'
     'Class-data.frame-Documentation.R'
     'Fun-format_md.R'
+    'Fun-format_md-arg.R'
+    'Fun-toRd-Documentation.R'
+    'Fun-toRd-arg.R'
+    'Fun-toRd-function.R'
     'util-comma_list.R'
     'util-interleave.R'
-RoxygenNote: 5.0.1
+    'utils-markdown.R'
+RoxygenNote: 6.0.1

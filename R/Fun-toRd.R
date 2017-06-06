@@ -9,14 +9,10 @@ set_option_documentation( "documentation::toRd::indent"
    )
 
 
-#~ defaults$toRd$indent.with <- '    '
-
 set_option_documentation( "documentation::toRd::indent.with"
-   , description = "Determines what to indent with, when getOption('documentation::format_md::indent') is TRUE."
+   , description = "Determines what to indent with, when getOption('documentation::toRd::indent') is TRUE."
    )
 
-
-#~ defaults$format_md$collapse.lines <- FALSE
 
 set_option_documentation("documentation::toRd::collapse.lines"
    , description = "should documentation functions return a single " %\%
@@ -24,9 +20,8 @@ set_option_documentation("documentation::toRd::collapse.lines"
                    "representing the lines of documentation."
    )
 
-#~ defaults$format_md$collapse.with <- '\n'
 set_option_documentation("documentation::toRd::collapse.with"
-   , description = "when \\code{getOption(documentation::format_md::collapse.lines)}" %\%
+   , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %\%
                    "is \\code{TRUE} what the lines should be separated with."
    )
 Rd_tag  <- function(content, name=deparse(substitute(content))){

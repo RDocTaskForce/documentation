@@ -148,7 +148,7 @@ set_option_documentation( "defaults::documentation::indent"
 #~ defaults$indent.with <- '    '
 
 set_option_documentation( "defaults::documentation::indent.with"
-   , description = "Determines what to indent with, when getOption('documentation::format_md::indent') is TRUE."
+   , description = "Determines what to indent with, when getOption('defaults::documentation::indent') is TRUE."
    )
 
 
@@ -162,7 +162,7 @@ set_option_documentation("defaults::documentation::collapse.lines"
 
 #~ defaults$collapse.with <- '\n'
 set_option_documentation("defaults::documentation::collapse.with"
-   , description = "when \\code{getOption(documentation::format_md::collapse.lines)}" %\%
+   , description = "when \\code{getOption('defaults::documentation::collapse.lines\')}" %\%
                    "is \\code{TRUE} what the lines should be separated with."
    )
 
