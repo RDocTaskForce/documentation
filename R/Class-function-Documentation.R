@@ -19,7 +19,9 @@ setMethod('initialize', 'function-Documentation',
             ){
         .Object           <- callNextMethod(.Object, ...)
         if(!missing(name))
-            .Object@name      <- as.name(name)
+            .Object@name <- as.name(name)
+        else
+            .Object@name <- as.name("<UNDEFINED>")
         if(inherits(arguments, 'ArgumentList'))
             .Object@arguments <- arguments
         else if(  inherits(arguments, 'arg-Documentation'))
@@ -35,6 +37,16 @@ setMethod('initialize', 'function-Documentation',
         .Object
     })
 if(FALSE){#! @testing
+    empty.object <- new( "function-Documentation")
+    expect_is(empty.object, "function-Documentation")
+    
+    named.object <- new("function-Documentation", name = "Heisenburg")
+    expect_is(named.object,"function-Documentation")
+    expect_equal(deparse(getElement(named.object, 'name')), "Heisenburg")
+    
+    named.object <- new("function-Documentation", name = as.name("Heisenburg"))
+    
+    
     object <- new( "function-Documentation"
                  , name = as.name('function_documentation')
                  , title = 'Create function documentation'
@@ -46,13 +58,11 @@ if(FALSE){#! @testing
                                            , arg(usage    , "Usage string to override default, constructed from the name and arguments.", class="call")
                                            , arg('...'    , "other arguments to contruct the Documentation object.")
                                            )
+                 , description = "create documentation for a function"
                  , value = "A function-Documentation object."
                  )
 #~     trace('initialize', browser, signature='function-Documentation')
     object <- function_documentation()
     expect_equal(deparse(object@name), "<UNDEFINED>")
-    
-    object <- function_documentation(arguments = arg("only one arg"))
-    
 }
 

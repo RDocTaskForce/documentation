@@ -36,8 +36,7 @@ setMethod('initialize', 'Documentation-Default-Value:language',
 
 setAs('language', 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:language'      , from)})
 
-if(FALSE){#!@testing
-    expect_is(new('Documentation-Default-Value:name'      , as.name("hello") ), 'Documentation-Default-Value:name'      )
+if(FALSE){#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )
     expect_is(new('Documentation-Default-Value:list'      , list(1,2,3)      ), 'Documentation-Default-Value:list'      )

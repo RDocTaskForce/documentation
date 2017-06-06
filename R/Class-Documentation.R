@@ -111,7 +111,7 @@ if(FALSE){#! @testing
              , description = stringi::stri_rand_lipsum(3)
              , seealso     = '\\link{documentation-package}'
              , keywords    = 'internal'
-             , alias       = 'test-alias'
+             , aliases     = 'test-alias'
              , references  = citation()
              )
     object.as.list <- as.list(object)

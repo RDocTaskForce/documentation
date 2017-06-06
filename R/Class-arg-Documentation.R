@@ -73,7 +73,8 @@ if(FALSE){#! @testing arg
     e <- arg(testing, NA, NULL)
     expect_identical(e@description, NA_character_)
     
-    b <- arg(name= as.name('testing'), description='a testing argument')
+    testing <- "SAY MY NAME!"
+    b <- arg(name= testing, description='a testing argument')
     expect_identical(a,b)
     
     L <- new("ArgumentList")

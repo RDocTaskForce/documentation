@@ -46,8 +46,6 @@ function(object, value){
     object
 })
 if(FALSE){#! @testing
-    trace('documentation<-', browser, sig = c('ANY', 'Documentation'))
-        
     x <- 1
     y <- new('Documentation', title='testing')
     

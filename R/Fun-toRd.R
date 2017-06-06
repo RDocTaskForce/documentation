@@ -80,7 +80,7 @@ if(FALSE){#! @testing
 }
 
 tools::bibstyle('documentation', collapse = collapse, .init=TRUE)
-if(FALSE){#!@testing
+if(FALSE){#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     toRd(object)
     
