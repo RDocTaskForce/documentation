@@ -38,18 +38,18 @@ if(FALSE){#! @testing
            , 'defaults::global.arg' = "abc"
            )
 
-    expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1)
-    expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2)
-    expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3)
+    expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1    )
+    expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2    )
+    expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3    )
     expect_equal(default_('global.arg'    , TRUE, fun='default_test_function', pkg='documentation'), 'abc')
-    expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation'))
+    expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation')       )
  
     options( 'defaults::default_test_function::test.arg' = 1
            , 'defaults::inherited.arg' = 2
            )
 
     default_test_function <- 
-    function( which = .T(test, inherited, no)
+    function( which = c('test', 'inherited', 'no')
             , test.arg      = default_('test.arg'      , FALSE, pkg=NULL)
             , inherited.arg = default_('inherited.arg' , FALSE, pkg=NULL)
             , no.arg        = default_('no.arg'        , FALSE, pkg=NULL)
@@ -108,7 +108,7 @@ if(FALSE){#! @testing
            )
 
     default_test_function <- 
-    function( which = .T(test, inherited, global, no)
+    function( which = c('test', 'inherited', 'global', 'no')
             , test.arg      = default(test.arg      , FALSE, pkg=NULL)
             , inherited.arg = default(inherited.arg , FALSE, pkg=NULL)
             , global.arg    = default(global.arg    , FALSE, pkg=NULL)    

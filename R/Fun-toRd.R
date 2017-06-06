@@ -77,19 +77,10 @@ if(FALSE){#! @testing
 tools::bibstyle('documentation', collapse = collapse, .init=TRUE)
 if(FALSE){#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
-    toRd(object)
+    default.style <- toRd(object, style='JSS')
+    doc.style     <- toRd(object, style='documentation')
     
-    toRd(object, style='documentation')
-    
-    
-    
-    
-    
-    bs <- bibstyle()
-    bs %>% ls()
-    bs %$% collapse
-    
-    
+    expect_true(default.style != doc.style)
 }
 
 
