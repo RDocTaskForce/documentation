@@ -15,13 +15,13 @@ set_option_documentation( "documentation::toRd::indent.with"
 
 
 set_option_documentation("documentation::toRd::collapse.lines"
-   , description = "should documentation functions return a single " %\%
-                   "string (TRUE) or a array of strings (FALSE) " %\%
+   , description = "should documentation functions return a single " %<<%
+                   "string (TRUE) or a array of strings (FALSE) " %<<%
                    "representing the lines of documentation."
    )
 
 set_option_documentation("documentation::toRd::collapse.with"
-   , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %\%
+   , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %<<%
                    "is \\code{TRUE} what the lines should be separated with."
    )
 Rd_tag  <- function(content, name=deparse(substitute(content))){

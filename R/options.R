@@ -1,5 +1,5 @@
 #' @include Class-option-documentation.R
-#' @include utils-backslash.R
+#' @include util-infix.R
 
 default_ <- 
 function( name
@@ -155,14 +155,14 @@ set_option_documentation( "defaults::documentation::indent.with"
 #~ defaults$collapse.lines <- FALSE
 
 set_option_documentation("defaults::documentation::collapse.lines"
-   , description = "should documentation functions return a single " %\%
-                   "string (TRUE) or a array of strings (FALSE) " %\%
+   , description = "should documentation functions return a single " %<<%
+                   "string (TRUE) or a array of strings (FALSE) " %<<%
                    "representing the lines of documentation."
    )
 
 #~ defaults$collapse.with <- '\n'
 set_option_documentation("defaults::documentation::collapse.with"
-   , description = "when \\code{getOption('defaults::documentation::collapse.lines\')}" %\%
+   , description = "when \\code{getOption('defaults::documentation::collapse.lines\')}" %<<%
                    "is \\code{TRUE} what the lines should be separated with."
    )
 

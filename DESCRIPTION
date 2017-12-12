@@ -28,7 +28,7 @@ Collate:
     'Vector.R'
     'Class-Documentation.R'
     'documentation.R'
-    'utils-backslash.R'
+    'util-infix.R'
     'util-str_rep.R'
     'Class-option-documentation.R'
     'options.R'

@@ -1,6 +1,6 @@
 #' @include Class-function-Documentation.R
 #' @include Vector.R
-#' @include utils-backslash.R
+#' @include util-infix.R
 #' @include documentation.R
 
 setClass('slot-Documentation', contains = 'arg-Documentation'
@@ -30,9 +30,9 @@ function( Class  #< A [classRepresentation] or a string representing a class.
     if(inherits(Class, 'character'))
         Class <- getClassDef(Class, ...)
     if(!is(Class, 'classRepresentation'))
-        stop('`Class` argument must be either classRepresentation, ' %\%
-             'obtained from getClass, or a character specifying the' %\%
-             ' name of a class.')
+        stop('`Class` argument must be either classRepresentation,'  %<<%
+             'obtained from getClass, or a character specifying the' %<<%
+             'name of a class.')
     
     dname <- documentationMetaName(Class@className, packageSlot(Class))
     value <- get0(dname, envir=env, mode='S4', inherits=TRUE)
@@ -84,9 +84,9 @@ function( Class  #< A [classRepresentation] or a string representing a class.
     if(inherits(Class, 'character'))
         Class <- getClassDef(Class, where=where, ...)
     if(!is(Class, 'classRepresentation'))
-        stop('`Class` argument must be either classRepresentation, ' %\%
-             'obtained from getClass, or a character specifying the' %\%
-             ' name of a class.')
+        stop('`Class` argument must be either classRepresentation,'  %<<%
+             'obtained from getClass, or a character specifying the' %<<%
+             'name of a class.')
     if(getPackageName(where) == packageSlot(Class))
         dname <- documentationMetaName(Class@className, '')
     else 
@@ -102,7 +102,7 @@ function(object, value){
 })
 setMethod('documentation<-', c('ANY', 'S4-Documentation'), 
 function(object, value){
-    stop('S4-Documentation objects can only be set for objects ' %\%
+    stop('S4-Documentation objects can only be set for objects'   %<<%
          'of, or inheriting from, the classRepresentation class.')
 })
 
@@ -110,7 +110,7 @@ if(FALSE){#
 #~ documentation.S4_Documentation <- 
 #~ S4_documentation( author      = person("Andrew", "Redd", email="Andrew.Redd@hsc.utah.edu")
 #~                 , title       = "Documentation for S4 classes"
-#~                 , description = "The Documentation S4 class provides the basis for all" %\%
+#~                 , description = "The Documentation S4 class provides the basis for all" %<<%
 #~                                 "complete documentation in the documentation package system."
 #~                 , seealso     = "\\code{\\link{Documentation}}"
 #~                 , keywords    = "documentation"
