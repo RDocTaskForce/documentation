@@ -10,6 +10,7 @@ setClass('Documentation-Default-Value:expression', contains=c('Documentation-Def
 setClass('Documentation-Default-Value:character' , contains=c('Documentation-Default-Value', 'character' ))
 setClass('Documentation-Default-Value:formula'   , contains=c('Documentation-Default-Value', 'formula'   ))
 setClass('Documentation-Default-Value:function'  , contains=c('Documentation-Default-Value', 'function'  ))
+setClass('Documentation-Default-Value:name'      , contains=c('Documentation-Default-Value', 'name'      ))
 setClass('Documentation-Default-Value:NULL'      , contains=c('Documentation-Default-Value', 'NULL', prototype=NULL))
 setClass('Documentation-No-Default-Value'        , contains='Documentation-Default-Value' )
 .no.default <- new('Documentation-No-Default-Value')
@@ -20,6 +21,7 @@ setAs('list'      , 'Documentation-Default-Value', function(from){new('Documenta
 setAs('expression', 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:expression', from)})
 setAs('character' , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:character' , from)})
 setAs('function'  , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:function'  , from)})
+setAs('name'      , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:name'      , from)})
 setAs('NULL'      , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:NULL'      , from)})
 
 setClass( 'Documentation-Default-Value:language'
@@ -43,6 +45,7 @@ if(FALSE){#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:expression', expression()     ), 'Documentation-Default-Value:expression')
     expect_is(new('Documentation-Default-Value:character' , ""               ), 'Documentation-Default-Value:character' )
     expect_is(new('Documentation-Default-Value:function'  , function(){}     ), 'Documentation-Default-Value:function'  )
+    expect_is(new('Documentation-Default-Value:name'      , as.name('test')  ), 'Documentation-Default-Value:name'      )
     expect_is(new('Documentation-Default-Value:NULL'                         ), 'Documentation-Default-Value:NULL'      )
     expect_is(new('Documentation-Default-Value:NULL'      , NULL             ), 'Documentation-Default-Value:NULL'      )
     
