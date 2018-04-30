@@ -36,7 +36,7 @@ setGeneric( 'documentation'
 setGeneric( 'documentation<-'
           , simpleInheritanceOnly = TRUE
           , function(object, value){
-        stop('Documentation can only be set with objects ' %\% 
+        stop('Documentation can only be set with objects ' %<<% 
              'of, or inheriting from, the `Documentation` class.')
     })
 
@@ -56,7 +56,7 @@ if(FALSE){#! @testing
     expect_identical(documentation(x), y)
     
     expect_error( documentation(x) <- 'this should not work'
-                , 'Documentation can only be set with objects ' %\% 
+                , 'Documentation can only be set with objects ' %<<% 
                   'of, or inheriting from, the `Documentation` class.'
                 )
     

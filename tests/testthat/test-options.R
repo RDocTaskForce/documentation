@@ -1,35 +1,8 @@
-#' @include Class-option-documentation.R
-#' @include util-infix.R
-
-default_ <- 
-function( name
-        , default.value = NULL
-        , which = -1
-        , fun   = as.character(sys.call(which))[[1L]]
-        , where = topenv(environment(sys.function(which)))
-        , pkg   = getPackageName(where)
-        , pkg.name = name
-        , search.global = TRUE
-        , global.name = pkg.name
-        ){
-    #' Find the defaults that might be specified for the package.
-    if(!is.null(pkg) && pkg =='.GlobalEnv') pkg <- NULL
-    if(!is.null(pkg) && pkg == '') pkg <- NULL
-    if(!is.null(fun) && fun == '') fun <- NULL
-    value <- NULL
-    if(is.null(value) && !is.null(pkg) && !is.null(fun))
-        value <- getOption( paste('defaults', pkg,  fun,        name, sep='::'), NULL)
-    if(is.null(value) && search.global && !is.null(fun))
-        value <- getOption( paste('defaults',       fun, global.name, sep='::'), NULL)
-    if(is.null(value) && !is.null(pkg))
-        value <- getOption( paste('defaults', pkg,          pkg.name, sep='::'), NULL)
-    if(is.null(value) && search.global)
-        value <- getOption( paste('defaults',            global.name, sep='::'), NULL)
-    if(is.null(value))
-        value <- default.value
-    return(value)
-}
-if(FALSE){#! @testing
+#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! changes will be overwritten.
+context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/options.R`')
+#line 32 "/mnt/data/projects/rdtf/documentation/R/options.R"
+test_that('default_', {#! @testing
     opar <- options()
     
     options( 'defaults::documentation::default_test_function::test.arg' = 1
@@ -67,28 +40,9 @@ if(FALSE){#! @testing
     expect_equal(default_test_function('no'), FALSE)
     
     options(opar)
-}
-
-default <- 
-function( arg 
-        , default.value = NULL
-        , ...
-        , which = -1
-        , fun   = as.character(sys.call(which))[[1L]]
-        , where = topenv(environment(sys.function(which)))
-        , pkg   = getPackageName(where)
-        , search.global = FALSE
-        ){
-    name <- deparse(substitute(arg))
-    
-    force(fun)
-    force(pkg)
-    default_( name=name, default.value=default.value
-            , fun=fun, pkg=pkg
-            , ...
-            )
-}
-if(FALSE){#! @testing
+})
+#line 91 "/mnt/data/projects/rdtf/documentation/R/options.R"
+test_that('default', {#! @testing
     opar <- options()
     options( 'defaults::documentation::default_test_function::test.arg' = 1
            , 'defaults::documentation::inherited.arg'                   = 2
@@ -128,44 +82,4 @@ if(FALSE){#! @testing
     expect_equal(default_test_function('global'), 'abc')
     expect_equal(default_test_function('no'), FALSE)
     options(opar)
-}
-
-if(FALSE){
-    undebug(default)
-    debug(default)
-    
-    options(test_function)
-}
-
-
-#~ defaults$indent <- FALSE
-
-set_option_documentation( "defaults::documentation::indent"
-   , description = "Determines if code should be indented when formatted."
-   )
-
-
-#~ defaults$indent.with <- '    '
-
-set_option_documentation( "defaults::documentation::indent.with"
-   , description = "Determines what to indent with, when getOption('defaults::documentation::indent') is TRUE."
-   )
-
-
-#~ defaults$collapse.lines <- FALSE
-
-set_option_documentation("defaults::documentation::collapse.lines"
-   , description = "should documentation functions return a single " %<<%
-                   "string (TRUE) or a array of strings (FALSE) " %<<%
-                   "representing the lines of documentation."
-   )
-
-#~ defaults$collapse.with <- '\n'
-set_option_documentation("defaults::documentation::collapse.with"
-   , description = "when \\code{getOption('defaults::documentation::collapse.lines\')}" %<<%
-                   "is \\code{TRUE} what the lines should be separated with."
-   )
-
-set_option_documentation("defaults::documentation::verbose"
-   , description = "Should verbose message be given?"
-   )
+})
