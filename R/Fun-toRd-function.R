@@ -8,8 +8,8 @@ function( obj
         ){
     #' format the function documenation obj to markdown/CommonMark
     Rd <- callNextMethod()
-    Rd$arguments <- toRd(obj@arguments)
-    Rd$usage     <- Rd_tag(deparse(obj@usage), 'usage')
+    Rd[['arguments']] <- collapse(toRd(obj@arguments), '\n')
+    Rd[['usage']]     <- Rd_tag(deparse(obj@usage), 'usage')
     return(Rd)
 })
 if(FALSE){#! @testing
@@ -27,10 +27,10 @@ if(FALSE){#! @testing
               , value = "A function-Documentation obj."
               )
     Rd <- toRd(obj)
-    expect_is(Rd, 'list')
+    expect_is(Rd, 'character')
     expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
-    expect_equal(Rd$name, '\\name{function_documentation}')
-    expect_equal(Rd$value, '\\value{A function-Documentation obj.}')
-    expect_equal(Rd$usage, '\\usage{function_documentation(name, arguments, usage, ...)}')
-    expect_equal(length(Rd$arguments), 7)
+    expect_equal(Rd[['name']], '\\name{function_documentation}')
+    expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
+    expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
+    expect_equal(length(Rd[['arguments']]), 1)
 }

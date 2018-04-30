@@ -1,6 +1,8 @@
 #' @include Class-arg-Documentation.R
 #' @include Class-FormattedText.R
 
+#' @export function_documentation
+#' @export
 function_documentation <- 
 setClass('function-Documentation', contains = 'Documentation'
         , slots = c( name       = 'name' 
@@ -65,3 +67,23 @@ if(FALSE){#! @testing
     expect_equal(deparse(object@name), "<UNDEFINED>")
 }
 
+setMethod('documentation<-', c('function', 'function-Documentation'), 
+function(object, value){
+    if (getOption("documentation::verbose", FALSE) && !is.null(attr(object, 'documentation')))
+        message("documentation already exists, replacing documentation")
+    #TODO 
+    # this evaluates to `*tmp*` not to the name of the object.
+    # How do we fix this?
+    if (deparse(value@name) == "<UNDEFINED>")
+        value@name <- substitute(object)
+        
+    attr(object, 'documentation') <- value
+    object
+})
+if(FALSE){#@testing
+    trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
+    hw <- function(){print("hello world")}
+    documentation(hw) <- function_documentation(title = "the standard Hello world")
+
+
+}

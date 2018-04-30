@@ -12,6 +12,7 @@
 #' * S4 documentation is stored in an independent object with an 
 #'   appropriately name.  The same for S4 derived classes such as 
 #'   <ReferenceClasses>.
+#' @export
 setGeneric( 'documentation'
           , valueClass = 'Documentation'
           , simpleInheritanceOnly = TRUE
@@ -31,6 +32,7 @@ setGeneric( 'documentation'
 #' retrieval function this cannot set documentation for individual 
 #' instances or objects, but must operate on the class definition for 
 #' S4 objects. 
+#' @export
 setGeneric( 'documentation<-'
           , simpleInheritanceOnly = TRUE
           , function(object, value){

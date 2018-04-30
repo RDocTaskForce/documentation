@@ -81,17 +81,22 @@ if(FALSE){#!@testing
     expect_equal(x@author, person('Andrew', 'Redd'))
 }
 
+#' @export
 setGeneric("documented", 
 function(object, ...){
     return( 
         structure( object
-                 , docs   = new(paste0(class(object)[[1]], '-Documentation'), ...)
+                 , documentation = new(paste0(class(object)[[1]], '-Documentation') , ...)
                  )
           )
     
 })
-if(FALSE){
+if(FALSE){#@testing
     object <- function(msg="hello world"){print(msg)}
+    dobj <- documented(object, name='object', title="hello world example")
+    
+    expect_false(is.null(attr(dobj, 'documentation')))
+    expect_is(attr(dobj, 'documentation'), 'function-Documentation')
     
 }
 
