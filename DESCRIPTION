@@ -15,7 +15,8 @@ Imports:
     tools
 Suggests:
     htmltools,
-    testthat
+    testthat,
+    covr
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
@@ -38,6 +39,7 @@ Collate:
     'Fun-toRd-Documentation.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'
+    'extract_tests.R'
     'util-comma_list.R'
     'util-interleave.R'
 RoxygenNote: 6.0.1

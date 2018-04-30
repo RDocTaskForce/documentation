@@ -1,6 +1,7 @@
 #' @include options.R 
 #' @include util-str_rep.R 
 
+#' @export
 #' @importFrom tools toRd
 setGeneric('toRd', tools::toRd)
 
@@ -24,22 +25,32 @@ set_option_documentation("documentation::toRd::collapse.with"
    , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %\%
                    "is \\code{TRUE} what the lines should be separated with."
    )
+
 Rd_tag  <- function(content, name=deparse(substitute(content))){
+    if(length(name) != 1 || !is(name, 'character')) stop("Rd tag name must be a single character.")
     if(!identical(class(content), 'character')) content <- toRd(content)
-    if(length(name)==0 || length(content)==0) return(character(0))
+    if(length(content)==0) return(character(0))
     if(length(content) == 1)
         return( sprintf("\\%s{%s}", name, content) )
     else 
         return( c(sprintf("\\%s{", name), content, "}") )
 }
 if(FALSE){#! @testing
+    expect_error(Rd_tag('test', NULL), "Rd tag name must be a single character")
+    expect_error(Rd_tag('test', c('a', 'b')), "Rd tag name must be a single character")
+    expect_error(Rd_tag('test', 1), "Rd tag name must be a single character")
     expect_equal(Rd_tag('my name', 'name'), "\\name{my name}")
-    expect_equal(Rd_tag('test', NULL), character(0))
     expect_equal( Rd_tag(c('line1', 'line2'), 'name')
                 , c('\\name{', 'line1', 'line2', '}')
                 )
     name <- 'testing'
     expect_equal(Rd_tag(name), '\\name{testing}')
+    
+    obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
+    as.tag <- Rd_tag(obj)
+    expect_is(as.tag, 'character')
+    expect_length(as.tag, 7)
+    expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
 }
 
 #' @export
@@ -116,3 +127,18 @@ if(FALSE){#! @testing
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'character')
 }
+
+
+#' @export
+toRd.vector <- function(obj, name=deparse(substitute(obj)), ...){
+    if (length(obj) == 0) return(character(0))
+    if(is.atomic(obj)) Rd_tag(as.character(obj), name=name)
+    Rd_tag(sapply(obj, toRd), name=name)
+}
+if(FALSE){#@testing
+    obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
+    expect_is(obj, 'vector')
+    as.rd <- toRd(obj, 'description')
+    
+}
+

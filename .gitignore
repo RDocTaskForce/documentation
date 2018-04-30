@@ -36,3 +36,4 @@ vignettes/*.pdf
 # documentation is self contained.
 man
 
+.Rproj.user
