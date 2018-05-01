@@ -28,11 +28,6 @@ setClass("Documentation-Keyword", contains='character'
 if(FALSE){#! @testing
     x <- new('Documentation-Keyword', 'utilities')
     expect_true(validObject(x))
-    
     expect_error(new('Documentation-Keyword', 'utils'))
-    
-    validObject(as('utilities', 'Documentation-Keyword'))
-    
-    
-    
+    expect_true(validObject(as('utilities', 'Documentation-Keyword')))
 }

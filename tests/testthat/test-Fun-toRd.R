@@ -1,17 +1,25 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:21
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R`')
-#line 35 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R`')
+#line 38 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
+    expect_error(Rd_tag('test', NULL), "Rd tag name must be a single character")
+    expect_error(Rd_tag('test', c('a', 'b')), "Rd tag name must be a single character")
+    expect_error(Rd_tag('test', 1), "Rd tag name must be a single character")
     expect_equal(Rd_tag('my name', 'name'), "\\name{my name}")
-    expect_equal(Rd_tag('test', NULL), character(0))
     expect_equal( Rd_tag(c('line1', 'line2'), 'name')
                 , c('\\name{', 'line1', 'line2', '}')
                 )
     name <- 'testing'
     expect_equal(Rd_tag(name), '\\name{testing}')
+    
+    obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
+    as.tag <- Rd_tag(obj)
+    expect_is(as.tag, 'character')
+    expect_length(as.tag, 7)
+    expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
 })
-#line 55 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R"
+#line 66 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     expect_equal(toRd(object), 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}')
@@ -33,7 +41,7 @@ test_that('toRd.person', {#! @testing
         
 
 })
-#line 78 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R"
+#line 89 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
 test_that('documentation bibstyle', {#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     default.style <- toRd(object, style='JSS')
@@ -41,12 +49,12 @@ test_that('documentation bibstyle', {#!@testing documentation bibstyle
     
     expect_true(default.style != doc.style)
 })
-#line 88 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R"
+#line 99 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd.Documentation-Keyword', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     expect_equal(toRd(obj), c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 106 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd.R"
+#line 117 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd.FormattedText', {#! @testing
     obj <- FormattedText()
     expect_identical(toRd(obj), character(0))
@@ -59,4 +67,11 @@ test_that('toRd.FormattedText', {#! @testing
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'character')
+})
+#line 138 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd.vector', {#@testing
+    obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
+    expect_is(obj, 'vector')
+    as.rd <- toRd(obj, 'description')
+    
 })

@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:21
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/options.R`')
-#line 32 "/mnt/data/projects/rdtf/documentation/R/options.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/options.R`')
+#line 32 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/options.R"
 test_that('default_', {#! @testing
     opar <- options()
     
@@ -41,7 +41,7 @@ test_that('default_', {#! @testing
     
     options(opar)
 })
-#line 91 "/mnt/data/projects/rdtf/documentation/R/options.R"
+#line 91 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/options.R"
 test_that('default', {#! @testing
     opar <- options()
     options( 'defaults::documentation::default_test_function::test.arg' = 1

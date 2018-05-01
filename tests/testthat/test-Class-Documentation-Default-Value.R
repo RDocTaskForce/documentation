@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:19
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/Class-Documentation-Default-Value.R`')
-#line 39 "/mnt/data/projects/rdtf/documentation/R/Class-Documentation-Default-Value.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation-Default-Value.R`')
+#line 41 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation-Default-Value.R"
 test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )
@@ -9,6 +9,7 @@ test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:expression', expression()     ), 'Documentation-Default-Value:expression')
     expect_is(new('Documentation-Default-Value:character' , ""               ), 'Documentation-Default-Value:character' )
     expect_is(new('Documentation-Default-Value:function'  , function(){}     ), 'Documentation-Default-Value:function'  )
+    expect_is(new('Documentation-Default-Value:name'      , as.name('test')  ), 'Documentation-Default-Value:name'      )
     expect_is(new('Documentation-Default-Value:NULL'                         ), 'Documentation-Default-Value:NULL'      )
     expect_is(new('Documentation-Default-Value:NULL'      , NULL             ), 'Documentation-Default-Value:NULL'      )
     

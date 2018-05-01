@@ -81,9 +81,9 @@ function(object, value){
     object
 })
 if(FALSE){#@testing
-    trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
+    # trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
-
-
+    
+    
 }

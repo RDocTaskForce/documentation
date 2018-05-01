@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/Class-function-Documentation.R`')
-#line 39 "/mnt/data/projects/rdtf/documentation/R/Class-function-Documentation.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R`')
+#line 41 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('initialize.function-Documentation', {#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
@@ -29,4 +29,12 @@ test_that('initialize.function-Documentation', {#! @testing
                  )
     object <- function_documentation()
     expect_equal(deparse(object@name), "<UNDEFINED>")
+})
+#line 83 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R"
+test_that('documentation<-.,(,,,,,)', {#@testing
+    trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
+    hw <- function(){print("hello world")}
+    documentation(hw) <- function_documentation(title = "the standard Hello world")
+
+
 })

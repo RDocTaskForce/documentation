@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:22
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/Vector.R`')
-#line 19 "/mnt/data/projects/rdtf/documentation/R/Vector.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Vector.R`')
+#line 19 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Vector.R"
 test_that('setVector', {#! @testing
     new.class <- setVector('name') # creates `Vector()`
     name.vector <- new.class()

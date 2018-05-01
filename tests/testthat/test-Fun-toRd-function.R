@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2017-06-20 13:15:39
+#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
 #! changes will be overwritten.
-context('tests extracted from file `/mnt/data/projects/rdtf/documentation/R/Fun-toRd-function.R`')
-#line 15 "/mnt/data/projects/rdtf/documentation/R/Fun-toRd-function.R"
+context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-function.R`')
+#line 15 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-function.R"
 test_that('toRd.function-Documentation', {#! @testing
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')
@@ -17,10 +17,10 @@ test_that('toRd.function-Documentation', {#! @testing
               , value = "A function-Documentation obj."
               )
     Rd <- toRd(obj)
-    expect_is(Rd, 'list')
+    expect_is(Rd, 'character')
     expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
-    expect_equal(Rd$name, '\\name{function_documentation}')
-    expect_equal(Rd$value, '\\value{A function-Documentation obj.}')
-    expect_equal(Rd$usage, '\\usage{function_documentation(name, arguments, usage, ...)}')
-    expect_equal(length(Rd$arguments), 7)
+    expect_equal(Rd[['name']], '\\name{function_documentation}')
+    expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
+    expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
+    expect_equal(length(Rd[['arguments']]), 1)
 })

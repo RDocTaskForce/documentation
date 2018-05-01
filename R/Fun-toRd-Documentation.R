@@ -34,11 +34,11 @@ if(FALSE){#! @testing
                  , aliases     = 'test-alias'
                  , concepts    = 'test concept'
                  , references  = citation()
-                 )
+    )
     as.rd <- toRd(object)
     expected.names <- c( 'author', 'title', 'description', 'seealso', 'keywords'
-                       , 'aliases', 'references', 'concepts'
-                       )
+                         , 'aliases', 'references', 'concepts'
+    )
     expect_true(all(names(as.rd) %in% expected.names))
     expect_true(all(expected.names %in% names(as.rd)))
     
