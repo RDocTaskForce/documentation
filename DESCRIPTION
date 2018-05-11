@@ -16,11 +16,12 @@ Imports:
 Suggests:
     htmltools,
     testthat,
-    covr
+    covr,
+    rstudioapi
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
-Collate: 
+Collate:
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
     'Class-FormattedText.R'
@@ -43,3 +44,4 @@ Collate:
     'util-comma_list.R'
     'util-interleave.R'
 RoxygenNote: 6.0.1
+Enhances: devtools

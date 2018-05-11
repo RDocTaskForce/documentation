@@ -1,0 +1,4 @@
+Name: Extract and run tests
+Description: Run `documentation::extract_tests()` and `devtools::test()`
+Binding: addin_test
+Interactive: false

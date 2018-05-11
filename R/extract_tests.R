@@ -41,6 +41,7 @@ function( file              #< file to extract tests from
         , file.out  = NULL  #< file to write tests to, if provided must be fully specified, ie. `dir` will be ignored.
         , test.dir  = NULL  #< directory where to store extracted blocks.
         , verbose   = getOption('verbose', FALSE) #< Show progress messages?
+        , full.path = FALSE
         ){
     if (verbose) message("* Extracting test from file `", file, "`.")
     if (is.null(file.out)){
@@ -60,7 +61,8 @@ function( file              #< file to extract tests from
         if(verbose) message("No testing blocks found in ", file)
         return(invisible(character(0)))
     }
-    context.line <- sprintf("context('tests extracted from file `%s`')", file)
+    context.line <- sprintf("context('tests extracted from file `%s`')"
+                           , if (full.path) file else basename(file))
     cat( .tests.head.lines, context.line, content, file=file.out, sep='\n', append=FALSE )
 
     #! testing blocks can be placed inside the same files as the source
@@ -270,4 +272,22 @@ if(FALSE){#@TESTING
 
     unlink(tmp.dir, recursive=TRUE)
 }
+
+test <- function(pkg = ".", filter=NULL, extract=TRUE, ...){
+    tests <- extract_tests()
+    message(length(unlist(tests)), ' tests extracted.')
+    if (requireNamespace('devtools'))
+        devtools::test(pkg=pkg, filter=filter, ...)
+    else
+        stop('devtools is required to run the tests.')
+}
+
+addin_test <- function(){
+    stopifnot(requireNamespace("rstudioapi"))
+    project <- rstudioapi::getActiveProject()
+    if(is.null(project))
+        project <- getwd()
+    test(project)
+}
+
 
