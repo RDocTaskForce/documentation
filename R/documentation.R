@@ -1,9 +1,8 @@
 #' @include Class-Documentation.R
 
-#TODO 
-
-#' Retrieve documentation
+#' @title Retrieve documentation
 #' 
+#' @description
 #' Generic function for retrieving documentation for an object.
 #' Inspects the type of object that is given to it and retrieves 
 #' documentation from the appropriate place.
@@ -16,13 +15,34 @@
 setGeneric( 'documentation'
           , valueClass = 'Documentation'
           , simpleInheritanceOnly = TRUE
-          , function(object, ...){
-        if(!is.null(docs <- attr(object, 'documentation')))
+          , function(object, ..., name=deparse(substitute(object))){
+        if(!is.null(docs <- attr(object, 'documentation'))){
+            if (!is(docs, 'Documentation'))
+                doc_invalid(name)
             return(docs)
+        }
         if(isS4(object))
             return(documentation(getClass(class(object)), ...))
-        message('Documentation not found!.')
-    })
+        doc_dnf_error(name)
+    }, signature =c('object'))
+if(FALSE){#! @testing
+    test_function <- function(x){
+        return(x)
+    }
+    expect_error( documentation(test_function)
+                , class='documentation-error-dnf'
+                )
+
+    attr(test_function, "documentation") <- "An invalid documentation"
+    expect_error( documentation(test_function)
+                , class = 'documentation-error-invalid'
+                )
+    attr(test_function, "documentation") <-
+        function_documentation('test_function'
+                              , title="A test function"
+                              )
+    expect_is(documentation(test_function), 'Documentation')
+}
 
 #' Replace documentation
 #' 
@@ -61,6 +81,7 @@ if(FALSE){#! @testing
                 )
     
 }
+
 #' Create a cannonical name for independent documentation objects
 documentationMetaName <- 
 function( object.name   #< [character] name of the object that is being documented such as class
@@ -74,7 +95,7 @@ function( object.name   #< [character] name of the object that is being document
 #' The `pkg` argument should be specified if and only if the 
 #' documentation exists outside the package that defines the class.
 #' this does 
-#' @seealso <methodsPackageMetaName>
+#' @seealso methodsPackageMetaName
 
     if(is.null(pkg)) pkg <- ''
     stopifnot(is.character(object.name))
@@ -83,3 +104,5 @@ function( object.name   #< [character] name of the object that is being document
         prefix <- paste0(prefix, '/', subsystem)
     methodsPackageMetaName(prefix, object.name, pkg)
 }
+
+
