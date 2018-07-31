@@ -142,9 +142,9 @@ expect_true (file.exists(tmp.out))
 expect_equal( lines[-(1:2)]
             , c( sprintf("context('tests extracted from file `%s`')", tmp.in)
                , sprintf("#line 3 \"%s\"", tmp.in)
-               , "test_that(\"setClass('Test-Class', ...)\", {#!@test"                  
-               , "    expect_true(TRUE)"                                                    
-               , "    expect_is(getClass(\"Test-Class\"), \"classRepresentation\")"            
+               , "test_that(\"setClass('Test-Class', ...)\", {#!@test"
+               , "    expect_true(TRUE)"
+               , "    expect_is(getClass(\"Test-Class\"), \"classRepresentation\")"
                , "})"
                )
             )
@@ -171,7 +171,7 @@ expect_true (file.exists(tmp.out))
 expect_equal( lines[-(1:2)]
             , c( sprintf("context('tests extracted from file `%s`')", tmp.in)
                , sprintf("#line 3 \"%s\"", tmp.in)
-               , "test_that('show.Test-Class', {#!@test"                  
+               , "test_that('show.Test-Class', {#!@test"
                , "    expect_true(TRUE)"
                , "})"
                )
@@ -180,7 +180,7 @@ expect_equal(x, "show.Test-Class")
 
 unlink(tmp.in)
 unlink(tmp.out)
-}            
+}
 {# setGeneric
 '
 setGeneric("yolo", yolo::yolo)
@@ -223,7 +223,7 @@ function( pkg = '.'     #< package to extract tests for.
         requireNamespace('devtools')
         pkg <- devtools::as.package(pkg)
     }
-    if (.Platform$OS.type == "windows") 
+    if (.Platform$OS.type == "windows")
         pkg$path <- gsub("\\\\", "/", pkg$path)
     for(e in intersect(c('imports', 'suggests', 'depends', 'collate'), names(pkg)))
         pkg[[e]] <- trimws(strsplit(pkg[[e]], "\\s*,\\s*")[[1]], 'both')
@@ -248,7 +248,7 @@ function( pkg = '.'     #< package to extract tests for.
     files <- list.files( file.path(pkg, "R"), pattern="\\.r$", ignore.case=T, full.names=T)
     structure( lapply(files, extract_tests_to_file_, test.dir=test.dir, verbose=verbose)
              , names = files)
-    
+
 }
 if(FALSE){#@TESTING
     tmp.dir <- tempdir()
@@ -258,14 +258,15 @@ if(FALSE){#@TESTING
                     )
     pkg <- file.path(tmp.dir, "testExtractionTest")
     expect_warning(result <- extract_tests(pkg), "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
-    expect_equal( result
-                , structure( list( c( "setClass('Test-Class', ...)"
-                                    , "show.Test-Class"
-                                    , "setGeneric('yolo', ...)"
-                                    ) 
-                                 , "hello_world"
-                                 ), names = file.path(pkg, 'R', c('Class.R', 'function.R')) )
-                )
+    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
+                                  , "show,Test-Class-method"
+                                  , "setGeneric(\"yolo\", ...)"
+                                  )
+                               , "hello_world"
+                               )
+                         , names = file.path(pkg, 'R', c('Class.R', 'function.R')) )
+
+    expect_equal( result, expected)
     expect_true(dir.exists(file.path(pkg, "tests", "testthat")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-Class.R")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-function.R")))

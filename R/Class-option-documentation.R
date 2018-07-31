@@ -20,10 +20,11 @@ setMethod('initialize', 'option-Documentation',
         .Object@constraints <- constraints
         return(.Object)
     })
-
 if(FALSE){#! @testing
     docs <- option_documentation('anOption', 'a description')
-    
+    expect_identical(docs@key, 'anOption')
+    expect_identical(docs@description, FormattedText('a description'))
+    expect_identical(docs@constraints, list())
 }
 
 set_option_documentation <- 

@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:22
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/util-interleave.R`')
-#line 15 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/util-interleave.R"
+context('tests extracted from file `util-interleave.R`')
+#line 15 "/rdtf/documentation/R/util-interleave.R"
 test_that('interleave', {#! @testing
     expect_equal(interleave( 1:3, 4:6 ), c(1,4,2,5,3,6) )
     expect_is(interleave( 1:3, 4:6 ), 'integer' )

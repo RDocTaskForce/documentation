@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:21
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R`')
-#line 38 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
+context('tests extracted from file `Fun-toRd.R`')
+#line 38 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('test', NULL), "Rd tag name must be a single character")
     expect_error(Rd_tag('test', c('a', 'b')), "Rd tag name must be a single character")
@@ -19,7 +19,7 @@ test_that('Rd_tag', {#! @testing
     expect_length(as.tag, 7)
     expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
 })
-#line 66 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
+#line 66 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     expect_equal(toRd(object), 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}')
@@ -41,7 +41,7 @@ test_that('toRd.person', {#! @testing
         
 
 })
-#line 89 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
+#line 89 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('documentation bibstyle', {#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     default.style <- toRd(object, style='JSS')
@@ -49,13 +49,13 @@ test_that('documentation bibstyle', {#!@testing documentation bibstyle
     
     expect_true(default.style != doc.style)
 })
-#line 99 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
-test_that('toRd.Documentation-Keyword', {#! @testing
+#line 99 "/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     expect_equal(toRd(obj), c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 117 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
-test_that('toRd.FormattedText', {#! @testing
+#line 117 "/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd,FormattedText-method', {#! @testing
     obj <- FormattedText()
     expect_identical(toRd(obj), character(0))
     
@@ -68,7 +68,7 @@ test_that('toRd.FormattedText', {#! @testing
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'character')
 })
-#line 138 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd.R"
+#line 138 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd.vector', {#@testing
     obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
     expect_is(obj, 'vector')

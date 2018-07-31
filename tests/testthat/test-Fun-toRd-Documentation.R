@@ -1,8 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-Documentation.R`')
-#line 23 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-Documentation.R"
-test_that('toRd.Documentation', {#! @testing
+context('tests extracted from file `Fun-toRd-Documentation.R`')
+#line 23 "/rdtf/documentation/R/Fun-toRd-Documentation.R"
+test_that('toRd,Documentation-method', {#! @testing
     null.object <- new('Documentation')
     
     object <- new( "Documentation"
@@ -16,11 +16,11 @@ test_that('toRd.Documentation', {#! @testing
                  , aliases     = 'test-alias'
                  , concepts    = 'test concept'
                  , references  = citation()
-                 )
+    )
     as.rd <- toRd(object)
     expected.names <- c( 'author', 'title', 'description', 'seealso', 'keywords'
-                       , 'aliases', 'references', 'concepts'
-                       )
+                         , 'aliases', 'references', 'concepts'
+    )
     expect_true(all(names(as.rd) %in% expected.names))
     expect_true(all(expected.names %in% names(as.rd)))
     

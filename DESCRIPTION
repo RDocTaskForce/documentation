@@ -12,12 +12,16 @@ License: GPL-2
 Imports:
     methods,
     utils, 
-    tools
+    tools,
+    roxygen2(>= 6.0.1.9000),
+    parsetools,
+    stringr
 Suggests:
     htmltools,
     testthat,
     covr,
-    rstudioapi
+    rstudioapi,
+    devtools
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
@@ -37,11 +41,22 @@ Collate:
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'
     'Class-data.frame-Documentation.R'
+    'Conversion-roxy_block.R'
+    'Fun-check_documented.R'
     'Fun-toRd-Documentation.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'
+    'errors.R'
+    'extract_documentation.R'
     'extract_tests.R'
+    'util-aliases.R'
     'util-comma_list.R'
     'util-interleave.R'
-RoxygenNote: 6.0.1
+    'util-undefined.R'
+RoxygenNote: 6.0.1.9000
 Enhances: devtools
+Remotes:
+    RDocTaskForce/parsetools,
+    klutometis/roxygen,
+    r-lib/pkgload
+KeepSource: TRUE

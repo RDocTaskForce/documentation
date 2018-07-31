@@ -1,8 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-function.R`')
-#line 15 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-function.R"
-test_that('toRd.function-Documentation', {#! @testing
+context('tests extracted from file `Fun-toRd-function.R`')
+#line 15 "/rdtf/documentation/R/Fun-toRd-function.R"
+test_that('toRd,function-Documentation-method', {#! @testing
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')
               , title = 'Create function documentation'

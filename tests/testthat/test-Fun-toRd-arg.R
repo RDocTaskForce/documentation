@@ -1,13 +1,13 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-arg.R`')
-#line 10 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-arg.R"
-test_that('toRd.arg-Documentation', {#! @testing
+context('tests extracted from file `Fun-toRd-arg.R`')
+#line 10 "/rdtf/documentation/R/Fun-toRd-arg.R"
+test_that('toRd,arg-Documentation-method', {#! @testing
     a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
     expect_identical(toRd(a), "\\item{testing}{a testing argument}")
 })
-#line 33 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Fun-toRd-arg.R"
-test_that('toRd.ArgumentList', {#! @testing
+#line 33 "/rdtf/documentation/R/Fun-toRd-arg.R"
+test_that('toRd,ArgumentList-method', {#! @testing
     a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
     b <- arg_('testing', 'a testing argument')
     

@@ -11,6 +11,7 @@ setClass('function-Documentation', contains = 'Documentation'
                    , value      = 'FormattedText'
                    )
         )
+functionDocumentation <- getClass('function-Documentation')
 setMethod('initialize', 'function-Documentation',
     function( .Object
             , name
@@ -23,7 +24,7 @@ setMethod('initialize', 'function-Documentation',
         if(!missing(name))
             .Object@name <- as.name(name)
         else
-            .Object@name <- as.name("<UNDEFINED>")
+            .Object@name <- .undefined
         if(inherits(arguments, 'ArgumentList'))
             .Object@arguments <- arguments
         else if(  inherits(arguments, 'arg-Documentation'))

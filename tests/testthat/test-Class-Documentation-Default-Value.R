@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:19
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation-Default-Value.R`')
-#line 41 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation-Default-Value.R"
+context('tests extracted from file `Class-Documentation-Default-Value.R`')
+#line 41 "/rdtf/documentation/R/Class-Documentation-Default-Value.R"
 test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )

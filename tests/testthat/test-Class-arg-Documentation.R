@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:19
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-arg-Documentation.R`')
-#line 52 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-arg-Documentation.R"
+context('tests extracted from file `Class-arg-Documentation.R`')
+#line 54 "/rdtf/documentation/R/Class-arg-Documentation.R"
 test_that('arg', {#! @testing arg
     a <- new( "arg-Documentation"
             , name= 'testing'

@@ -1,8 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:20
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R`')
-#line 41 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R"
-test_that('initialize.function-Documentation', {#! @testing
+context('tests extracted from file `Class-function-Documentation.R`')
+#line 42 "/rdtf/documentation/R/Class-function-Documentation.R"
+test_that('initialize,function-Documentation-method', {#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
     
@@ -30,11 +30,11 @@ test_that('initialize.function-Documentation', {#! @testing
     object <- function_documentation()
     expect_equal(deparse(object@name), "<UNDEFINED>")
 })
-#line 83 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-function-Documentation.R"
-test_that('documentation<-.,(,,,,,)', {#@testing
-    trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
+#line 84 "/rdtf/documentation/R/Class-function-Documentation.R"
+test_that('documentation<-,function,function-Documentation-method', {#@testing
+    # trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
-
-
+    
+    
 })

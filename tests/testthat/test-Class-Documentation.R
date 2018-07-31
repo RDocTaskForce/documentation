@@ -1,8 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-04-30 17:06:19
+#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
 #! changes will be overwritten.
-context('tests extracted from file `C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation.R`')
-#line 72 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation.R"
-test_that('initialize.Documentation', {#!@testing
+context('tests extracted from file `Class-Documentation.R`')
+#line 72 "/rdtf/documentation/R/Class-Documentation.R"
+test_that('initialize,Documentation-method', {#!@testing
     x <- new('Documentation')
     expect_identical(x@author, person())
     expect_identical(x@title, character(0))
@@ -13,7 +13,7 @@ test_that('initialize.Documentation', {#!@testing
             )
     expect_equal(x@author, person('Andrew', 'Redd'))
 })
-#line 94 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation.R"
+#line 94 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -22,8 +22,8 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
     
 })
-#line 109 "C:/Users/aredd/Box Sync/Projects/rdtf/documentation/R/Class-Documentation.R"
-test_that('as.list.Documentation', {#! @testing
+#line 109 "/rdtf/documentation/R/Class-Documentation.R"
+test_that('as.list,Documentation-method', {#! @testing
     x <- 
     object <- new( "Documentation"
              , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')

@@ -33,8 +33,8 @@ function( Class  #< A [classRepresentation] or a string representing a class.
         stop('`Class` argument must be either classRepresentation,'  %<<%
              'obtained from getClass, or a character specifying the' %<<%
              'name of a class.')
-    
-    dname <- documentationMetaName(Class@className, packageSlot(Class))
+    cname <- Class@className
+    dname <- documentationMetaName(cname, packageSlot(Class))
     value <- get0(dname, envir=env, mode='S4', inherits=TRUE)
     if(!is.null(value)) return(value)
 
@@ -58,16 +58,15 @@ function( object    #< the classRepresentation object
     #' 
     #' 
     cname <- object@className
-    dname <- documentationMetaName(cname, package)
+    dname <- documentationMetaName(cname, pkg=attr(object, 'package'))
     value <- get0(dname, mode='S4', inherits=TRUE)
     if(!is.null(value)) return(value)
 
     dname <- documentationMetaName(cname,'')
-    env   <- .classEnv(Class, topenv(parent.frame()), TRUE)
+    env   <- .classEnv(object, topenv(parent.frame()), TRUE)
     value <- get0(dname, envir=env, mode='S4', inherits = FALSE)
     if(!is.null(value)) return(value)
-
-    message('Documentation not found!.')
+    stop("Documentation for class ", cname, " not found.")
 })
 if(F){
     object <- getClass('S4-Documentation')
