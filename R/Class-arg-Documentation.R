@@ -46,6 +46,8 @@ function( name                   #< name of the argument
 setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
          )
+c.ArgumentList <- function(...)as(NextMethod(), "ArgumentList")
+
 ArgumentList <- function(...){new('ArgumentList', list(...))}
 
 
