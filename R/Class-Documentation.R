@@ -30,6 +30,7 @@ setClass( "Documentation"
                    , aliases     = "character"
                    , concepts    = "character"
                    , sections    = "SectionList"
+                   , export      = "logical"     #< NA means defer decision.
                    )
         , prototype = list( author     = person()
                           , references = bibentry()
@@ -51,7 +52,7 @@ setMethod("initialize", 'Documentation',
         if (!is.null(keywords   ))  .Object@keywords    <- new("Documentation-Keyword", keywords   )
         if (!is.null(description))  .Object@description <- new("FormattedText"        , description)
         if (!is.null(seealso    ))  .Object@seealso     <- new("FormattedText"        , seealso    )
-        if (!is.null(author     ))  .Object@author      <- as.person(author)
+        if (!is.null(author     ))  .Object@author      <- utils::as.person(author)
         if (!is.null(examples   )){ .Object@examples  <- 
             if(inherits(examples, 'list')){
                 new('Prose', examples)

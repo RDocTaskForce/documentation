@@ -111,7 +111,7 @@ function( obj
     #! \\note{ Assumes that each element of the text is a paragraph.)
     if( length(obj) == 0) return(character(0))
     else if( length(obj) == 1) return(obj@.Data)
-    else return( head(interleave(obj, rep('', length(obj))),-1) )
+    else return( utils::head(interleave(obj, rep('', length(obj))),-1) )
 
 })
 if(FALSE){#! @testing
