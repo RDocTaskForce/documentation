@@ -44,6 +44,9 @@ setAs('roxy_block', 'function-Documentation', function(from){
               }
             )
     }
+    alias <- attr(from, 'object')$alias
+    if (!is.null(alias))
+        docs@name <- as.name(alias)
     return(docs)
 })
 if(FALSE){#@testing setAs,roxy_block,function-Documentation
@@ -51,13 +54,13 @@ if(FALSE){#@testing setAs,roxy_block,function-Documentation
 
     rd_blocks <- roxygen2::parse_file(test.file)
     from <- rd_blocks[[1]]
-    
+
     expect_is(from, 'roxy_block')
-    
+
     docs <- as(from, 'Documentation')
     expect_is(docs, 'Documentation')
     expect_is(docs, 'function-Documentation')
-    expect_equal(docs@name, as.name("<UNDEFINED>"))
+    expect_equal(docs@name, as.name("example_function1"))
     expect_equal(docs@title, "This is the title")
     expect_equal(docs@description, FormattedText("This is the description block.\nIt takes multiple lines."))
     expect_length(docs@arguments,1)

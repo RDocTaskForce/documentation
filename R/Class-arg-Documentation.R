@@ -24,7 +24,7 @@ setMethod('initialize', 'arg-Documentation',
         .Object@constraints <- constraints
         return(.Object)
     })
-arg <- 
+arg <-
 function( name                   #< name of the argument
         , description            #< [character] description of the argument
         , default                #< default value
@@ -33,7 +33,7 @@ function( name                   #< name of the argument
     #! Create documenation for a function argument, lazy version
     default <- if(missing(default))
         new('Documentation-No-Default-Value')
-    else 
+    else
         as(substitute(default), 'Documentation-Default-Value')
     arg_( name        = as.name(substitute(name))
         , description = description
@@ -47,7 +47,7 @@ setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
          )
 c.ArgumentList <- function(...)as(NextMethod(), "ArgumentList")
-
+`[.ArgumentList` <- function(...)as(NextMethod(), "ArgumentList")
 ArgumentList <- function(...){new('ArgumentList', list(...))}
 
 
@@ -60,32 +60,32 @@ if(FALSE){#! @testing arg
     expect_identical(a@name       , as.name('testing'))
     expect_identical(a@description, 'a testing argument')
     expect_identical(a@default    , new('Documentation-No-Default-Value'))
-    
+
     b <- arg_('testing', 'a testing argument')
     expect_identical(a,b)
-    
+
     c <- arg(testing, 'a testing argument')
     expect_identical(a,c)
-    
-    
+
+
     d <- arg(testing, NA_character_, NULL)
     expect_identical(d@default, new('Documentation-Default-Value:NULL'))
     expect_identical(d@description, NA_character_)
-    
+
     e <- arg(testing, NA, NULL)
     expect_identical(e@description, NA_character_)
-    
+
     testing <- "SAY MY NAME!"
     b <- arg(name= testing, description='a testing argument')
     expect_identical(a,b)
-    
+
     L <- new("ArgumentList")
     L[[1]] <- a
     L[[2]] <- b
-    
+
     expect_is(L, 'ArgumentList')
     expect_equal(length(L), 2)
-    
+
     M <- ArgumentList(a, b)
     expect_identical(L, M)
 }
