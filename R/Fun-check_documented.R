@@ -20,10 +20,8 @@ is_documented <-
                 if (complete && !is_complete(doc)) doc_incomplete()
                 return(TRUE)
              }
-            # , 'documentation-error-dnf' = function(e)
-
     , error = function(e) structure(FALSE, msg = e$message, reason=class(e)[[1]])
-    , warning = function(w) structure(FALSE, msg = w$msg, reason=class(e)[[1]])
+    , warning = function(w) structure(FALSE, msg = w$msg, reason=class(w)[[1]])
     )
 }
 if(FALSE){#@testing
@@ -57,7 +55,7 @@ function( pkg='.'   #< package name to check.
         , ...
         ){
     pkg <- devtools::as.package(pkg, create=FALSE)
-    env <- pkg_env(pkg)
+    env <- devtools::pkg_env(pkg)
     if (is.null(env))
         devtools::load_all(pkg)
     ns <- asNamespace(pkg$package)
@@ -80,7 +78,7 @@ function( pkg='.'   #< package name to check.
                          )
              , names = ._(c('Name', 'Documented', 'Reason', 'Message'))
              , class = c("Documentation Check Results", "data.frame")
-             , package = packageName(ns)
+             , package = utils::packageName(ns)
              )
 }
 if(FALSE){

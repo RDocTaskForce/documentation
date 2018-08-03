@@ -54,7 +54,7 @@ function( envir = parent.frame() #< environment with objects to documents.
         if (isNamespace(envir) && only.exports){
             getNamespaceExports(envir)
         } else
-            objects(envir=envir, all=TRUE)
+            objects(envir=envir, all.names=TRUE)
     if (isNamespace(envir) && !include.imports)
         object.names <- setdiff(object.names, unlist(getNamespaceImports(envir)))
     if (is.character(exclude)) {
@@ -82,9 +82,9 @@ function( envir = parent.frame() #< environment with objects to documents.
                           "of the `exclude` argument to document_env()" %<<%
                           "are not character vectors.", comma_list(names(which(.)))
                         ))
-        if (is.null(exclude$objects )) exclude$objects  <- .document.default.exclude.objects
-        if (is.null(exclude$patterns)) exclude$patterns <- .document.default.exclude.patterns
-        if (is.null(exclude$classes )) exclude$classes  <- .document.default.exclude.classes
+        if (is.null(exclude$objects )) exclude$objects  <- .documentation.default.exclude.objects
+        if (is.null(exclude$patterns)) exclude$patterns <- .documentation.default.exclude.patterns
+        if (is.null(exclude$classes )) exclude$classes  <- .documentation.default.exclude.classes
         .exclude <- exclude
     } else if (is.null(exclude)) {
         #'

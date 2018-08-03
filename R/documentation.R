@@ -60,11 +60,6 @@ setGeneric( 'documentation<-', signature=c('object', 'value')
                 standardGeneric('documentation<-')
             })
 
-# setMethod('documentation<-', c('ANY', 'ANY'), function(object, value){
-#         stop('Documentation can only be set with objects ' %<<%
-#              'of, or inheriting from, the `Documentation` class.')
-#     })
-
 setMethod('documentation<-', c('ANY', 'Documentation'),
 function( object, value
         , complete  = getOption("documentation::complete" , NULL)
