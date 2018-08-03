@@ -1,5 +1,5 @@
-#' @include options.R 
-#' @include util-str_rep.R 
+#' @include options.R
+#' @include util-str_rep.R
 
 #' @export
 #' @importFrom tools toRd
@@ -32,7 +32,7 @@ Rd_tag  <- function(content, name=deparse(substitute(content))){
     if(length(content)==0) return(character(0))
     if(length(content) == 1)
         return( sprintf("\\%s{%s}", name, content) )
-    else 
+    else
         return( c(sprintf("\\%s{", name), content, "}") )
 }
 if(FALSE){#! @testing
@@ -45,7 +45,7 @@ if(FALSE){#! @testing
                 )
     name <- 'testing'
     expect_equal(Rd_tag(name), '\\name{testing}')
-    
+
     obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
     as.tag <- Rd_tag(obj)
     expect_is(as.tag, 'character')
@@ -54,7 +54,7 @@ if(FALSE){#! @testing
 }
 
 #' @export
-toRd.person <- 
+setMethod('toRd', 'person',
 function( obj
         , ...
         , include = c('given', 'family', 'email')
@@ -62,13 +62,13 @@ function( obj
     format( obj, include = include
           , braces  = list(email = c('\\email{', '}'))
           )
-}
+})
 if(FALSE){#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     expect_equal(toRd(object), 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}')
-    
+
     object <-c( person('First' , 'Author', email='me1@email.com')
-              , person('Second', 'Author', email='me2@email.com') 
+              , person('Second', 'Author', email='me2@email.com')
               )
     expect_equal(toRd(object), c('First Author \\email{me1@email.com}'
                                 , 'Second Author \\email{me2@email.com}'
@@ -78,10 +78,10 @@ if(FALSE){#! @testing
                         ) )
                 , c( 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}'
                    , 'Drew Blue'
-                   ) 
+                   )
                 )
-               
-        
+
+
 
 }
 
@@ -90,7 +90,7 @@ if(FALSE){#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     default.style <- toRd(object, style='JSS')
     doc.style     <- toRd(object, style='documentation')
-    
+
     expect_true(default.style != doc.style)
 }
 
@@ -101,13 +101,13 @@ if(FALSE){#! @testing
     expect_equal(toRd(obj), c('\\keyword{utilities}', '\\keyword{character}'))
 }
 
-setMethod('toRd', 'FormattedText', 
+setMethod('toRd', 'FormattedText',
 function( obj
         , ...
         , add.blank.lines = TRUE
         ){
     #! Convert formatted text into Rd lines.
-    #! 
+    #!
     #! \\note{ Assumes that each element of the text is a paragraph.)
     if( length(obj) == 0) return(character(0))
     else if( length(obj) == 1) return(obj@.Data)
@@ -117,11 +117,11 @@ function( obj
 if(FALSE){#! @testing
     obj <- FormattedText()
     expect_identical(toRd(obj), character(0))
-    
+
     obj <- FormattedText('Hello world!')
     expect_identical(toRd(obj), 'Hello world!')
     expect_false(identical(toRd(obj), obj))
-    
+
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
@@ -130,15 +130,16 @@ if(FALSE){#! @testing
 
 
 #' @export
-toRd.vector <- function(obj, name=deparse(substitute(obj)), ...){
+setMethod('toRd', 'vector',
+function(obj, name=deparse(substitute(obj)), ...){
     if (length(obj) == 0) return(character(0))
     if(is.atomic(obj)) Rd_tag(as.character(obj), name=name)
     Rd_tag(sapply(obj, toRd), name=name)
-}
+})
 if(FALSE){#@testing
     obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
     expect_is(obj, 'vector')
     as.rd <- toRd(obj, 'description')
-    
+
 }
 
