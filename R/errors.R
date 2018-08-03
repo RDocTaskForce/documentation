@@ -59,11 +59,23 @@ doc_message <- function(msg, ..., type=NULL, call=sys.call(1)){
     message(cond)
 }
 
+doc_condition <- function(msg, cond, ..., type=NULL, call = sys.call(1)){
+    cond <- match.arg(cond, choices = c('message', 'warning', 'error'))
+    switch( cond
+          , error   = doc_error  (msg, ..., type=type, call=call)
+          , warning = doc_warning(msg, ..., type=type, call=call)
+          , message = doc_message(msg, ..., type=type, call=call)
+          )
+}
+
+
 doc_dnf_error <-
-function(name=NULL, call=sys.call(1))
+function(name=NULL, call=sys.call(1)){
     doc_error( if (is.null(name)) ._("Documentation not found.")
                else ._("Documentation not found for '%s'.", name)
+             , name=name
              , type='dnf', call=call)
+}
 if(FALSE){#@testing
     expect_error(doc_dnf_error(), "Documentation not found.")
     expect_error(doc_dnf_error("throw me"), "Documentation not found for 'throw me'.")
@@ -81,10 +93,13 @@ if(FALSE){#@testing
                  )
     expect_identical(x, "Documentation not found!")
 }
-doc_invalid <- function(name=NULL, call=sys.call(1))
-    doc_error( if (is.null(name)) ._("Documentation is not valid.")
-               else ._("Documentation for '%s' is not valid.", name)
-             , type='invalid', call=call)
+doc_invalid <- function(name=NULL, call=sys.call(1)){
+    doc_condition( if (is.null(name)) ._("Documentation is not valid.")
+                   else ._("Documentation for '%s' is not valid.", name)
+                 , cond='error'
+                 , name=name
+                 , type='invalid', call=call)
+}
 if(FALSE){#@testing
     expect_error(doc_invalid(), "Documentation is not valid.")
     expect_error(doc_invalid("throw me"), "Documentation for 'throw me' is not valid.")
@@ -103,10 +118,11 @@ if(FALSE){#@testing
     expect_identical(x, "Documentation is invalid!")
 }
 
-doc_incomplete <- function(name=NULL, call=sys.call(1))
-    doc_warning( if (is.null(name)) ._("Documentation is incomplete.")
-                 else ._("Documentation is incomplete for '%s'.", name)
-               , type='incomplete', call=call)
+doc_incomplete <- function(name=NULL, cond='warn', call=sys.call(1)){
+    msg <- if (is.null(name)) ._("Documentation is incomplete.")
+           else ._("Documentation is incomplete for '%s'.", name)
+    doc_condition( msg, cond, name=name, type='incomplete', call=call)
+}
 if(FALSE){#@testing
     expect_warning(doc_incomplete(), "Documentation is incomplete.")
     expect_warning(doc_incomplete("hello"), "Documentation is incomplete for 'hello'.")
@@ -126,25 +142,13 @@ if(FALSE){#@testing
 }
 
 doc_no_src <-
-function( name = NULL #< name of the object
-        , cond = c('error', 'warning', 'message') #< type of condition to raise.
+function( name = NULL     #< name of the object
+        , cond = 'error'  #< type of condition to raise.
         , call = sys.call(1) #< call that produced error.
         ){
-    cond <- match.arg(cond)
-    switch(cond
-          , error =
-            doc_error(if (is.null(name)) ._("Object has no srcref.")
-                      else ._("'%s' has no srcref.", name)
-                     , type='no_src', call=call )
-          , warning =
-            doc_warning(if (is.null(name)) ._("Object has no srcref.")
-                        else ._("'%s' has no srcref.", name)
-                       , type='no_src', call=call )
-          , message =
-            doc_message(if (is.null(name)) ._("Object has no srcref.")
-                        else ._("'%s' has no srcref.", name)
-                       , type='no_src', call=call )
-          )
+    msg <- if (is.null(name)) ._("Object has no srcref.")
+           else ._("'%s' has no srcref.", name)
+    doc_condition(msg, cond, name=name, type='no_src', call=call)
 }
 if(FALSE){#@testing
     expect_error(doc_no_src(), class='documentation-error-no_src')
@@ -152,18 +156,12 @@ if(FALSE){#@testing
 
 no_doc_comments <-
 function( name = NULL #< name of the object
-        , cond = c('message', 'error', 'warning') #< type of condition to raise.
+        , cond = 'message' #< type of condition to raise.
         , call = sys.call(1) #< call that produced error.
         ){
-    cond <- match.arg(cond)
     msg <- if (is.null(name)) ._("No documentation comments found.")
            else ._("No documentatino comments found for '%s'.", name)
-    type <- no_comments
-    switch( cond
-          , error   = doc_error  (msg, type=type, call=call )
-          , warning = doc_warning(msg, type=type, call=call)
-          , message = doc_message(msg, type=type, call=call)
-          )
+    doc_condition(msg, cond, name=name, type = "no_comments", call=call)
 }
 
 
