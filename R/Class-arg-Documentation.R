@@ -17,7 +17,7 @@ setMethod('initialize', 'arg-Documentation',
                  new('Documentation-No-Default-Value')
             , constraints = list()   #< list of constraints
             ){
-        #! Create documenation for a function argument.
+        #! Create documentation for a function argument.
         .Object@name        <- as.name(name)
         .Object@description <- as.character(description)
         .Object@default     <- as(default, 'Documentation-Default-Value')
@@ -30,7 +30,7 @@ function( name                   #< name of the argument
         , default                #< default value
         , ...                    #< named constraints
         ){
-    #! Create documenation for a function argument, lazy version
+    #! Create documentation for a function argument, lazy version
     default <- if(missing(default))
         new('Documentation-No-Default-Value')
     else

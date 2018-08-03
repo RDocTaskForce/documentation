@@ -1,7 +1,7 @@
 #' @include Class-Documentation.R
 #' @include Class-Documentation-Default-Value.R
 
-option_documentation <- 
+option_documentation <-
 setClass('option-Documentation', contains = 'Documentation'
         , slots = c( key         = 'character'
                    , default     = 'Documentation-Default-Value'
@@ -14,7 +14,7 @@ setMethod('initialize', 'option-Documentation',
             , description               #< [character] description of the argument
             , constraints = list()      #< list of constraints
             ){
-        #! Create documenation for a function argument.
+        #! Create documentation for a function argument.
         .Object@key         <- as.character(key)
         .Object@description <- FormattedText(as.character(description))
         .Object@constraints <- constraints
@@ -27,7 +27,7 @@ if(FALSE){#! @testing
     expect_identical(docs@constraints, list())
 }
 
-set_option_documentation <- 
+set_option_documentation <-
 function( key #< [character] Option name.
         , ... #< passed on to `<option_documentation>` to create the documentation object.
         , where   = topenv(parent.frame())  #< where to store the documentation
@@ -44,7 +44,7 @@ function( key #< [character] Option name.
 }
 
 
-#TODO: Arguments should automatically inherit description from option 
+#TODO: Arguments should automatically inherit description from option
 #       when argument defaults to a getOption.
 
 if(FALSE){
@@ -53,12 +53,12 @@ if(FALSE){
     expect_is(o, 'Documentation')
     expect_identical(o@key, 'anOption')
     expect_identical(o@description, FormattedText('a description'))
-    
+
     o <- option_documentation('anOption', 'a description')
     expect_is(o, 'option-Documentation')
     expect_is(o, 'Documentation')
     expect_identical(o@key, 'anOption')
     expect_identical(o@description, FormattedText('a description'))
-    
+
 }
 

@@ -2,53 +2,114 @@
 .document.allways.exclude <-
     c( '.__DEVTOOLS__'
      , '.__NAMESPACE__.'
-     , '.__S3MethodsTable__'
+     , '.__S3MethodsTable__.'
      , '.packageName'
      , '.requireCachedGenerics'
      , '.S3MethodsClasses'
-     , '.documentation.exclude.patterns'
      , '.documentation.exclude'
-     , ''
+     , '.documentation.exclude.patterns'
+     , '.documentation.exclude.classes'
      )
+
 .document.allways.exclude.patterns <-
     c( "^\\.__C__"     #< Class Details
      , "^\\.__T__"     #< S4 Methods
      , "^\\.__Documentation" #< Documentation objects.
      )
+.document.default.exclude.objects  <- character(0)
+.document.default.exclude.patterns <- character(0)
+.document.default.exclude.classes <-
+    c( 'logical', 'integer', 'numeric', 'complex', 'character', 'raw', 'factor'
+     )
 
+.document.default.excludes <- list( objects = .document.default.exclude.objects
+                                  , patterns= .document.default.exclude.patterns
+                                  , classes = .document.default.exclude.classes
+                                  )
 
 #' Document all objects in an environment
 #'
-#' Itterate through all objects in an environment and extract documentation.
+#' Iterate through all objects in an environment and extract documentation.
 #'
+#'
+#' @export
+#' @aliases .documentation.exclude .documentation.exclude.patterns
+#'          .documentation.exclude.classes
 document_env <-
 function( envir = parent.frame() #< environment with objects to documents.
-        , exclude = NULL #< pattern(s) indicating objects to not document.
-        , ...
+        , exclude = NULL         #< Objects to not document, see details.
+        , ...                    #< passed to extract_documentation.
+        , only.exports = FALSE   #< if envir is a \link[asNamespace]{namespace}
+                                 #< only document the exports?
         ){
-    object.names <- objects(envir=envir, all=TRUE)
-    if (is.null(exclude)) {
+    #' @details
+    #'
+    #' if `document_env` will attempt to
+    object.names <-
+        if (isNamespace(envir) && only.exports)
+            getNamespaceExports(envir)
+        else
+            objects(envir=envir, all=TRUE)
+    if(is.character(exclude)){
+        #' The `exclude` parameter is assumed to be a vector of patterns to
+        #' to identify objects to exclude if given a character vector.
+        .exclude <- list( objects  = .document.default.exclude.objects
+                        , patterns = exclude
+                        , classes  = .document.default.exclude.classes
+                        )
+    } else if (is(exclude, 'list')) {
+        #' It can also be passed a vector with elements
+        #' objects, patterns, and classes to identify
+        #' specific objects, patterns as above, and classes of objects
+        #' to exclude from documentation extraction, respectively.
+        #' If classes is missing it will be assumed to be the default of
+        #' excluding atmic vectors plus factors, however if provided
+        #' those classes may be included.
+        if (!all(names(exclude) %in% c('objects', 'patterns', 'classes')))
+            doc_error(._( "Argument `exclude` to document_env() " %<<%
+                          "has incorrect names.  If provided as a list" %<<%
+                          "exclude is expected to have named elements" %<<%
+                          "objects, patterns,and classes"))
+        if (any(. <- !sapply(exclude, is.character)))
+            doc_error(._( ifelse(sum(.)==1, "Element %s", "Elements %s") %<<%
+                          "of the `exclude` argument to document_env()" %<<%
+                          "are not character vectors.", comma_list(names(which(.)))
+                        ))
+        if (is.null(exclude$objects )) exclude$objects  <- .document.default.exclude.objects
+        if (is.null(exclude$patterns)) exclude$patterns <- .document.default.exclude.patterns
+        if (is.null(exclude$classes )) exclude$classes  <- .document.default.exclude.classes
+        .exclude <- exclude
+    } else if (is.null(exclude)) {
+        #'
         #' If the `exclude` parameter is missing or `NULL`, the default,
-        #' document_env will search for two objects that can be defined in the
+        #' document_env will search for objects that can be defined in the
         #' package namespace:
         #'
-        #' * `.documentation.exclude` which gives a list of exact names to
+        #' * `.documentation.exclude` which gives the list of exact names to
         #'   exclude from extracting and checking documentation, and
-        #' * `.documentation.exclude.patterns` which gives a list of patterns
+        #' * `.documentation.exclude.patterns` which gives the list of patterns
         #'   which exclude objects from documentation extraction and checking.
-        .exclude <- mget( c('.documentation.exclude', '.documentation.exclude.patterns')
+        #' * `.documentation.exclude.classes` which lists classes that will be
+        #'   excluded from attempting to extract documentation for.
+        #'   By default all \link[base:vector]{atmic} types, plus factor.
+        .exclude <- mget( c( '.documentation.exclude'
+                           , '.documentation.exclude.patterns'
+                           , '.documentation.exclude.classes'
+                           )
                         , envir=envir, mode='character'
-                        , ifnotfound=list(character(0), character(0))
+                        , ifnotfound = .document.default.excludes
                         )
-        if (!is.character(.exclude$.documentation.exclude))
+        names(.exclude) <- c('objects', 'patterns', 'classes')
+        if (!is.character(.exclude$objects))
             doc_error(".documentation.exclude must be a character vector.")
-        if (!is.character(.exclude$.documentation.exclude.patterns))
+        if (!is.character(.exclude$patterns))
+            doc_error(".documentation.exclude.patterns must be a character vector.")
+        if (!is.character(.exclude$classes))
             doc_error(".documentation.exclude.patterns must be a character vector.")
     } else {
-        .exclude <- list( .documentation.exclude          = character(0)
-                        , .documentation.exclude.patterns = character(0)
-                        )
+        doc_error("Bad argument `exclude` to document_env().")
     }
+
     all.excludes <- c( .document.allways.exclude
                      , .exclude$.documentation.exclude
                      )
@@ -58,9 +119,10 @@ function( envir = parent.frame() #< environment with objects to documents.
     object.names <- setdiff(object.names, all.excludes)
     for (pat in all.patterns)
         object.names <- grep(pat, object.names, value = TRUE, invert = TRUE)
-    for (on in object.names)
-        documentation(envir[[on]]) <-
-            extract_documentation(envir[[on]], ..., name = as.name(on))
+    for (on in object.names) if (!is_documented(on, envir, complete=FALSE))
+        if (!inherits(envir[[on]], what=.exclude$classes))
+            documentation(envir[[on]]) <-
+                extract_documentation(envir[[on]], ..., name = as.name(on))
     invisible(envir)
 }
 if(F){# development
@@ -75,6 +137,7 @@ if(F){# development
     expect_true(is_documented('example_function1', env, complete=FALSE))
     expect_true(is_documented('example_generic', env, complete=FALSE))
 }
+
 
 #' Document an object
 #'
@@ -94,7 +157,7 @@ function( object #< object to document
         ){
     if (is.null(envir)) envir <- parent.frame()
     while (!identical(envir, emptyenv())){
-        if (exists(name, envir)) break
+        if (exists(name, envir) && identical(get(name, envir = envir), object)) break
         else envir <- parent.frame()
     }
     if (identical(envir, emptyenv()))
@@ -151,3 +214,19 @@ if(FALSE){#@testing
                     , as.name("example_function1"))
 }
 
+#' @describeIn document  Document a package documentation style.
+#'
+#' When document is provided a character string it is assumed
+#' to be the path to a package.
+#'
+#' @note character vectors do not carry any class information
+#' and thus documentation cannot be extracted
+setMethod('document', 'character',
+function( object = '.'  #< the package to document.
+        , ...           #< passed on to document_env
+        ){
+    pkg <- devtools::as.package(object)
+    devtools::load_all(pkg, export_all=FALSE)
+    ns <- asNamespace(pkg$package)
+    document_env(ns, ...)
+})

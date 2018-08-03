@@ -70,7 +70,7 @@ function( file              #< file to extract tests from
     #! `if(FALSE)` before the opening brace, to denote that the code
     #! should not be run when sourced, such as when building a package.
     #! The `FALSE` may be abbreviated as `F`, but those are the only
-    #! two acceptable options.  Also required is a documenation comment with a
+    #! two acceptable options.  Also required is a documentation comment with a
     #! tag denoting that the block is for testing,
     #! either `@@testthat`, `@@testing`, or simply `@@test` are acceptable.
     #! The comment must be a documentation comment, regular comments are

@@ -6,7 +6,7 @@ setMethod('toRd', 'function-Documentation',
 function( obj
         , ...
         ){
-    #' format the function documenation obj to markdown/CommonMark
+    #' format the function documentation obj to markdown/CommonMark
     Rd <- callNextMethod()
     Rd[['arguments']] <- collapse(toRd(obj@arguments), '\n')
     Rd[['usage']]     <- Rd_tag(deparse(obj@usage), 'usage')
