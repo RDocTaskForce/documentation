@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:02
 #! changes will be overwritten.
 context('tests extracted from file `Fun-document.R`')
-#line 192 "/rdtf/documentation/R/Fun-document.R"
+#line 250 "/rdtf/documentation/R/Fun-document.R"
 test_that('setGeneric("document", ...)', {#@testing
     env <- environment()
     sys.source( system.file("examples", "example_function1.R", package='documentation')

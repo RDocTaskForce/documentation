@@ -1,5 +1,5 @@
 
-.document.allways.exclude <-
+.documentation.allways.exclude <-
     c( '.__DEVTOOLS__'
      , '.__NAMESPACE__.'
      , '.__S3MethodsTable__.'
@@ -11,21 +11,23 @@
      , '.documentation.exclude.classes'
      )
 
-.document.allways.exclude.patterns <-
+.documentation.allways.exclude.patterns <-
     c( "^\\.__C__"     #< Class Details
      , "^\\.__T__"     #< S4 Methods
      , "^\\.__Documentation" #< Documentation objects.
      )
-.document.default.exclude.objects  <- character(0)
-.document.default.exclude.patterns <- character(0)
-.document.default.exclude.classes <-
+
+.documentation.default.exclude.objects  <- character(0)
+.documentation.default.exclude.patterns <- character(0)
+.documentation.default.exclude.classes <-
     c( 'logical', 'integer', 'numeric', 'complex', 'character', 'raw', 'factor'
      )
 
-.document.default.excludes <- list( objects = .document.default.exclude.objects
-                                  , patterns= .document.default.exclude.patterns
-                                  , classes = .document.default.exclude.classes
-                                  )
+.documentation.default.excludes <-
+    list( objects = .documentation.default.exclude.objects
+        , patterns= .documentation.default.exclude.patterns
+        , classes = .documentation.default.exclude.classes
+        )
 
 #' Document all objects in an environment
 #'
@@ -41,21 +43,26 @@ function( envir = parent.frame() #< environment with objects to documents.
         , ...                    #< passed to extract_documentation.
         , only.exports = FALSE   #< if envir is a \link[asNamespace]{namespace}
                                  #< only document the exports?
+        , include.imports = FALSE #< If objects are imported then again exported,
+                                  #< should those be included if not excluded
+                                  #< elsewhere?
         ){
     #' @details
     #'
     #' if `document_env` will attempt to
     object.names <-
-        if (isNamespace(envir) && only.exports)
+        if (isNamespace(envir) && only.exports){
             getNamespaceExports(envir)
-        else
+        } else
             objects(envir=envir, all=TRUE)
-    if(is.character(exclude)){
+    if (isNamespace(envir) && !include.imports)
+        object.names <- setdiff(object.names, unlist(getNamespaceImports(envir)))
+    if (is.character(exclude)) {
         #' The `exclude` parameter is assumed to be a vector of patterns to
         #' to identify objects to exclude if given a character vector.
-        .exclude <- list( objects  = .document.default.exclude.objects
+        .exclude <- list( objects  = .documentation.default.exclude.objects
                         , patterns = exclude
-                        , classes  = .document.default.exclude.classes
+                        , classes  = .documentation.default.exclude.classes
                         )
     } else if (is(exclude, 'list')) {
         #' It can also be passed a vector with elements
@@ -85,19 +92,19 @@ function( envir = parent.frame() #< environment with objects to documents.
         #' document_env will search for objects that can be defined in the
         #' package namespace:
         #'
-        #' * `.documentation.exclude` which gives the list of exact names to
+        #' * `.documentation.exclude.objects` which gives the list of exact names to
         #'   exclude from extracting and checking documentation, and
         #' * `.documentation.exclude.patterns` which gives the list of patterns
         #'   which exclude objects from documentation extraction and checking.
         #' * `.documentation.exclude.classes` which lists classes that will be
         #'   excluded from attempting to extract documentation for.
         #'   By default all \link[base:vector]{atmic} types, plus factor.
-        .exclude <- mget( c( '.documentation.exclude'
+        .exclude <- mget( c( '.documentation.exclude.objects'
                            , '.documentation.exclude.patterns'
                            , '.documentation.exclude.classes'
                            )
                         , envir=envir, mode='character'
-                        , ifnotfound = .document.default.excludes
+                        , ifnotfound = .documentation.default.excludes
                         )
         names(.exclude) <- c('objects', 'patterns', 'classes')
         if (!is.character(.exclude$objects))
@@ -110,22 +117,72 @@ function( envir = parent.frame() #< environment with objects to documents.
         doc_error("Bad argument `exclude` to document_env().")
     }
 
-    all.excludes <- c( .document.allways.exclude
-                     , .exclude$.documentation.exclude
+    all.excludes <- c( .documentation.allways.exclude
+                     , .exclude$objects
                      )
-    all.patterns <- c( .document.allways.exclude.patterns
-                     , .exclude$.documentation.exclude.patterns
+    all.patterns <- c( .documentation.allways.exclude.patterns
+                     , .exclude$patterns
                      )
     object.names <- setdiff(object.names, all.excludes)
     for (pat in all.patterns)
         object.names <- grep(pat, object.names, value = TRUE, invert = TRUE)
-    for (on in object.names) if (!is_documented(on, envir, complete=FALSE))
-        if (!inherits(envir[[on]], what=.exclude$classes))
-            documentation(envir[[on]]) <-
-                extract_documentation(envir[[on]], ..., name = as.name(on))
-    invisible(envir)
+    # for (on in object.names)
+    results <- purrr::map_dfr(object.names, .f=function(on){
+        tryCatch({
+            if (is_documented(on, envir, complete=TRUE)) doc_overwrite()
+            if (inherits(envir[[on]], what=.exclude$classes))
+                doc_message(.("%s is of excluded class %s.", on, class(envir[[on]]))
+                           , name = on, type="excluded_class")
+            docs <- extract_documentation(envir[[on]], ..., name = as.name(on))
+            documentation(envir[[on]]) <- docs
+            data.frame( Name       = on
+                      , Documented = TRUE
+                      , Reason     = ''
+                      , Message    = ''
+                      , stringsAsFactors = FALSE
+                      )
+        }
+        , "documentation-error" = function(e){
+            data.frame( Name=on
+                      , Documented=!inherits(e, 'documentation-error-overwrite')
+                      , Reason = class(e)[[1]]
+                      , Message = e$message
+                      , stringsAsFactors = FALSE
+                      )}
+        , "documentation-warning" = function(w){
+            data.frame( Name=on
+                      , Documented = NA
+                      , Reason = class(w)[[1]]
+                      , Message = w$message
+                      , stringsAsFactors = FALSE
+                      )}
+        , "documentation-message" = function(m){
+            data.frame( Name=on
+                      , Documented=is_documented(on, envir, complete=FALSE)
+                      , Reason = class(m)[[1]]
+                      , Message = m$message
+                      , stringsAsFactors = FALSE
+                      )}
+        , "condition" = function(c){
+            data.frame( Name = on
+                      , Documented = FALSE
+                      , Reason = 'Non-documentation' %<<% class(c)[[1]]
+                      , Message = c$message
+                      , stringsAsFactors = FALSE
+                      )}
+        )
+    })
+    class(results) <- c("Documentation Check Results", "data.frame")
+    if(isNamespace(envir))
+        attr(results, 'package') <- getNamespaceName(envir)
+    results
 }
 if(F){# development
+    trace('document_env', browser, at = list(c(9,4,3,3), 9))
+    debug(document_package)
+    envir <- ns <- asNamespace('documentation')
+    results <- document_env(ns, exclude="^\\..+")
+
     env <- new.env()
     env$.packageName <- "documentation-testing"
     sys.source( system.file("examples", "example_function1.R", package='documentation')
@@ -137,6 +194,7 @@ if(F){# development
     expect_true(is_documented('example_function1', env, complete=FALSE))
     expect_true(is_documented('example_generic', env, complete=FALSE))
 }
+
 
 
 #' Document an object
@@ -185,7 +243,7 @@ function( object #< object to document
             slot(docs, element) <- overrides[[i]]
     }
     documentation(object) <- docs
-    if (isS4(object))
+    if (!isS4(object))
         class(object) <- c('documented-' %<<<% class(object)[[1]], class(object))
     assign(name, object, envir = envir)
 })
@@ -214,19 +272,33 @@ if(FALSE){#@testing
                     , as.name("example_function1"))
 }
 
+setOldClass("package")
+
 #' @describeIn document  Document a package documentation style.
-#'
-#' When document is provided a character string it is assumed
-#' to be the path to a package.
-#'
-#' @note character vectors do not carry any class information
-#' and thus documentation cannot be extracted
-setMethod('document', 'character',
-function( object = '.'  #< the package to document.
-        , ...           #< passed on to document_env
-        ){
-    pkg <- devtools::as.package(object)
+#' #'
+#' #' When document is provided a character string it is assumed
+#' #' to be the path to a package.
+#' #'
+#' #' @note character vectors do not carry any class information
+#' #' and thus documentation cannot be extracted
+#' setMethod('document', 'package',
+#' function( object  #< the package to document.
+#'         , only.exports = TRUE
+#'         , ...     #< passed on to document_env
+#'         ){
+#'     pkg <- devtools::as.package(object)
+#'     devtools::load_all(pkg, export_all=FALSE)
+#'     ns <- asNamespace(pkg$package)
+#'     document_env(ns, ..., only.exports=only.exports)
+#' })
+
+document_package <-
+function(pkg = '.', ..., only.exports = TRUE){
+    pkg <- devtools::as.package(pkg)
     devtools::load_all(pkg, export_all=FALSE)
     ns <- asNamespace(pkg$package)
-    document_env(ns, ...)
-})
+    document_env(ns, only.exports=only.exports, ...)
+}
+
+
+

@@ -1,4 +1,4 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
 #! changes will be overwritten.
 context('tests extracted from file `documentation.R`')
 #line 28 "/rdtf/documentation/R/documentation.R"
@@ -20,7 +20,7 @@ test_that('setGeneric("documentation", ...)', {#! @testing
                               )
     expect_is(documentation(test_function), 'Documentation')
 })
-#line 70 "/rdtf/documentation/R/documentation.R"
+#line 81 "/rdtf/documentation/R/documentation.R"
 test_that('documentation<-,ANY,Documentation-method', {#! @testing
     x <- 1
     y <- new('Documentation', title='testing')
@@ -30,8 +30,9 @@ test_that('documentation<-,ANY,Documentation-method', {#! @testing
     expect_identical(documentation(x), y)
 
     expect_error( documentation(x) <- 'this should not work'
-                , 'Documentation can only be set with objects ' %<<%
-                  'of, or inheriting from, the `Documentation` class.'
+                , class = 'documentation-error-invalid'
                 )
-
+    expect_message( documentation(x) <- y
+                  , class = 'documentation-message-overwrite'
+                  )
 })

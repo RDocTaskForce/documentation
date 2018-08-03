@@ -3,9 +3,9 @@
 
 #' @export function_documentation
 #' @export
-function_documentation <- 
+function_documentation <-
 setClass('function-Documentation', contains = 'Documentation'
-        , slots = c( name       = 'name' 
+        , slots = c( name       = 'name'
                    , usage      = 'call'
                    , arguments  = 'ArgumentList'
                    , value      = 'FormattedText'
@@ -31,7 +31,7 @@ setMethod('initialize', 'function-Documentation',
             .Object@arguments <- ArgumentList(arguments)
         else if(inherits(arguments, 'list'))
             .Object@arguments <- new('ArgumentList', arguments)
-        else 
+        else
             .Object@arguments <- as(arguments, 'ArgumentList')
         .Object@value     <- as(value, 'FormattedText')
         if(missing(usage))
@@ -42,14 +42,14 @@ setMethod('initialize', 'function-Documentation',
 if(FALSE){#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
-    
+
     named.object <- new("function-Documentation", name = "Heisenburg")
     expect_is(named.object,"function-Documentation")
     expect_equal(deparse(getElement(named.object, 'name')), "Heisenburg")
-    
+
     named.object <- new("function-Documentation", name = as.name("Heisenburg"))
-    
-    
+
+
     object <- new( "function-Documentation"
                  , name = as.name('function_documentation')
                  , title = 'Create function documentation'
@@ -68,23 +68,13 @@ if(FALSE){#! @testing
     expect_equal(deparse(object@name), "<UNDEFINED>")
 }
 
-setMethod('documentation<-', c('function', 'function-Documentation'), 
-function(object, value){
-    if (getOption("documentation::verbose", FALSE) && !is.null(attr(object, 'documentation')))
-        message("documentation already exists, replacing documentation")
-    #TODO 
-    # this evaluates to `*tmp*` not to the name of the object.
-    # How do we fix this?
-    if (deparse(value@name) == "<UNDEFINED>")
-        value@name <- substitute(object)
-        
-    attr(object, 'documentation') <- value
-    object
-})
-if(FALSE){#@testing
-    # trace("documentation<-", signature = c('function', 'function-Documentation'), browser)
+if(FALSE){#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
-    
-    
+
+    docs <- documentation(hw)
+    expect_is(docs, 'function-Documentation')
+    expect_identical(docs, function_documentation(title = "the standard Hello world"))
+    expect_true(.is_undefined(docs@name))
+    expect_identical(docs@title, "the standard Hello world")
 }

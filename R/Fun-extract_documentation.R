@@ -83,6 +83,7 @@ function( object
         , roxy.block            #< roxy_block for object
         , pd                    #< parse.data for object
         , doc.class = 'function-Documentation'
+        , name = deparse(substitute(object))
         ){
     if (is.null(pd))
         pd <- get_parse_data(object)
@@ -147,8 +148,28 @@ if(FALSE){#@testing
 extract_documentation <-
 function( object   #< Object for which to extract documentation.
         , ...      #< passed on to methods.
-        , name = substitute(object) #< explicit naming for indirect calling.
-        )UseMethod('extract_documentation')
+        , envir              #< Environment of object.
+        , pd         = NULL  #< parse data for object.
+        , roxy.block = NULL  #< Roxygen2 block for object.
+        , name = substitute(object) #< Name of object in envir.
+        ){
+    if (!is.null(pd)){
+        if (!inherits(pd, 'parse-data'))
+            doc_error( ._("Bad parse data (incorrect class)"), type ="bad_pd")
+        if (length(pd_all_root_ids(pd)) > 1L)
+            doc_error( ._("Bad parse data (multiple root ids found)."), type = "bad_pd")
+    }
+    if (!is.null(roxy.block)){
+        if(!inherits(roxy.block, "roxy_block"))
+            doc_error( ._("Bad roxy.block (incorrect class)"), type ="bad_roxy")
+        if ( !is.null(alias <- attr(roxy.block, 'object')$alias)
+          && !(as.character(name) %in% alias)
+           )
+            doc_error( ._("Bad roxy.block (%s not in alias)", as.character(name))
+                     , type ="bad_roxy")
+    }
+    UseMethod('extract_documentation')
+}
 
 extract_documentation.function <-
 function( object   #< function to document.
@@ -260,6 +281,7 @@ function( object
         , ...
         , srcfile = NULL
         , pd = NULL
+        , roxy.block = NULL
         , markdown=FALSE
         , name = substitute(object)
         ){
@@ -276,9 +298,10 @@ function( object
         srcfile <- utils::getSrcFilename(srcref, full.names = TRUE, unique = TRUE)
     }
 
-    roxy.block <- .get_roxy_block(object, srcfile=srcfile, ...)
+    if (is.null(roxy.block))
+        roxy.block <- .get_roxy_block(object, srcfile=srcfile, ...)
 
-    docs <- .construct_documentation.function(object, roxy.block, pd)
+    docs <- .construct_documentation.function(object, roxy.block, pd, name=name)
     if (.is_undefined(docs@name)) docs@name <- as.name(name)
     if (length(object@valueClass) & is.na(docs@value))
         docs@value <- FormattedText(
@@ -288,9 +311,12 @@ function( object
     return(docs)
 }
 if (FALSE) {#@testing with example_generic
-    sys.source( system.file("examples", "standardGeneric.R", package = "documentation")
-              , environment() , keep.source = TRUE)
-    docs <- extract_documentation(example_generic)
+    env <- new.env()
+    env$.packageName <- "documentation-testing-environment"
+
+    test.file <- system.file("examples", "standardGeneric.R", package = "documentation")
+    sys.source( test.file, envir = env , keep.source = TRUE)
+    docs <- with(env, extract_documentation(example_generic))
 
     expect_identical(docs@name, as.name("example_generic"))
     expect_identical(docs@title, "Example Generic Function")

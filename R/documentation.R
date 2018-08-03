@@ -53,17 +53,28 @@ if(FALSE){#! @testing
 #' instances or objects, but must operate on the class definition for
 #' S4 objects.
 #' @export
-setGeneric( 'documentation<-'
-          , simpleInheritanceOnly = TRUE
-          , function(object, value){
-        stop('Documentation can only be set with objects ' %<<%
-             'of, or inheriting from, the `Documentation` class.')
-    })
+setGeneric( 'documentation<-', signature=c('object', 'value')
+          , simpleInheritanceOnly = FALSE
+          , function(object, value, ...){
+                if (!is(value, 'Documentation')) doc_invalid()
+                standardGeneric('documentation<-')
+            })
+
+# setMethod('documentation<-', c('ANY', 'ANY'), function(object, value){
+#         stop('Documentation can only be set with objects ' %<<%
+#              'of, or inheriting from, the `Documentation` class.')
+#     })
 
 setMethod('documentation<-', c('ANY', 'Documentation'),
-function(object, value){
-    if (getOption("documentation::verbose", FALSE) && !is.null(attr(object, 'documentation')))
-        message("documentation already exists, replacing documentation")
+function( object, value
+        , complete  = getOption("documentation::complete" , NULL)
+        , overwrite = getOption("documentation::overwrite", 'message')
+        ){
+    if (!is.null(overwrite) && !is.null(attr(object, 'documentation')))
+        doc_overwrite(NULL, overwrite)
+    if (!is.null(complete) && !is_complete(value))
+        doc_incomplete(NULL, complete)
+
     attr(object, 'documentation') <- value
     object
 })
@@ -76,11 +87,15 @@ if(FALSE){#! @testing
     expect_identical(documentation(x), y)
 
     expect_error( documentation(x) <- 'this should not work'
-                , 'Documentation can only be set with objects ' %<<%
-                  'of, or inheriting from, the `Documentation` class.'
+                , class = 'documentation-error-invalid'
                 )
-
+    expect_message( documentation(x) <- y
+                  , class = 'documentation-message-overwrite'
+                  )
 }
+
+
+
 
 #' Create a cannonical name for independent documentation objects
 documentationMetaName <-

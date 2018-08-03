@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:02
 #! changes will be overwritten.
-context('tests extracted from file `extract_documentation.R`')
-#line 61 "/rdtf/documentation/R/extract_documentation.R"
+context('tests extracted from file `Fun-extract_documentation.R`')
+#line 61 "/rdtf/documentation/R/Fun-extract_documentation.R"
 test_that('.get_roxy_block', {#@testing
     test.file <- system.file("examples", "example_character.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -13,7 +13,7 @@ test_that('.get_roxy_block', {#@testing
     expect_equal(block$title, "An example character vector")
     expect_equal(attr(block, 'object')$alias, 'example_character')
 })
-#line 135 "/rdtf/documentation/R/extract_documentation.R"
+#line 136 "/rdtf/documentation/R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -25,7 +25,7 @@ test_that('.construct_documentation.function', {#@testing
     docs <- .construct_documentation.function(example_function1, roxy.block, pd)
     expect_is(docs, 'function-Documentation')
 })
-#line 223 "/rdtf/documentation/R/extract_documentation.R"
+#line 244 "/rdtf/documentation/R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function1', {#@testing extract_documentation.function with example_function1
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -47,7 +47,7 @@ test_that('extract_documentation.function with example_function1', {#@testing ex
     expect_error( documentation(example_function1)
                 , class = 'documentation-error-dnf')
 })
-#line 244 "/rdtf/documentation/R/extract_documentation.R"
+#line 265 "/rdtf/documentation/R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function2', {#@testing extract_documentation.function with example_function2
     test.file <- system.file("examples", "example_function2.R", package='documentation')
     sys.source( test.file, environment(), keep.source=TRUE)
@@ -62,11 +62,14 @@ test_that('extract_documentation.function with example_function2', {#@testing ex
     expect_identical(docs@arguments$y@description, "The y argument description takes 2 lines.")
     expect_identical(docs@name, as.name("example_function2"))
 })
-#line 290 "/rdtf/documentation/R/extract_documentation.R"
+#line 313 "/rdtf/documentation/R/Fun-extract_documentation.R"
 test_that('with example_generic', {#@testing with example_generic
-    sys.source( system.file("examples", "standardGeneric.R", package = "documentation")
-              , environment() , keep.source = TRUE)
-    docs <- extract_documentation(example_generic)
+    env <- new.env()
+    env$.packageName <- "documentation-testing-environment"
+
+    test.file <- system.file("examples", "standardGeneric.R", package = "documentation")
+    sys.source( test.file, envir = env , keep.source = TRUE)
+    docs <- with(env, extract_documentation(example_generic))
 
     expect_identical(docs@name, as.name("example_generic"))
     expect_identical(docs@title, "Example Generic Function")

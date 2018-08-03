@@ -1,4 +1,5 @@
 
+.conditions <- c('message', 'warning', 'error')
 
 doc_error <- function(msg, ..., type=NULL, call=sys.call(1)){
     class <- c( if (!is.null(type)) 'documentation-error-' %<<<% type
@@ -60,7 +61,13 @@ doc_message <- function(msg, ..., type=NULL, call=sys.call(1)){
 }
 
 doc_condition <- function(msg, cond, ..., type=NULL, call = sys.call(1)){
-    cond <- match.arg(cond, choices = c('message', 'warning', 'error'))
+    if (is.null(cond)) return()
+    if (is.logical(cond))
+        cond <- if (is.na(cond)) 'warning'
+                else if (cond) 'error'
+                else 'message'
+
+    cond <- match.arg(cond, choices = .conditions)
     switch( cond
           , error   = doc_error  (msg, ..., type=type, call=call)
           , warning = doc_warning(msg, ..., type=type, call=call)
@@ -72,7 +79,7 @@ doc_condition <- function(msg, cond, ..., type=NULL, call = sys.call(1)){
 doc_dnf_error <-
 function(name=NULL, call=sys.call(1)){
     doc_error( if (is.null(name)) ._("Documentation not found.")
-               else ._("Documentation not found for '%s'.", name)
+               else ._("Documentation not found for '%s'.", as.character(name))
              , name=name
              , type='dnf', call=call)
 }
@@ -95,7 +102,7 @@ if(FALSE){#@testing
 }
 doc_invalid <- function(name=NULL, call=sys.call(1)){
     doc_condition( if (is.null(name)) ._("Documentation is not valid.")
-                   else ._("Documentation for '%s' is not valid.", name)
+                   else ._("Documentation for '%s' is not valid.", as.character(name))
                  , cond='error'
                  , name=name
                  , type='invalid', call=call)
@@ -120,7 +127,7 @@ if(FALSE){#@testing
 
 doc_incomplete <- function(name=NULL, cond='warn', call=sys.call(1)){
     msg <- if (is.null(name)) ._("Documentation is incomplete.")
-           else ._("Documentation is incomplete for '%s'.", name)
+           else ._("Documentation is incomplete for '%s'.", as.character(name))
     doc_condition( msg, cond, name=name, type='incomplete', call=call)
 }
 if(FALSE){#@testing
@@ -147,7 +154,7 @@ function( name = NULL     #< name of the object
         , call = sys.call(1) #< call that produced error.
         ){
     msg <- if (is.null(name)) ._("Object has no srcref.")
-           else ._("'%s' has no srcref.", name)
+           else ._("'%s' has no srcref.", as.character(name))
     doc_condition(msg, cond, name=name, type='no_src', call=call)
 }
 if(FALSE){#@testing
@@ -160,8 +167,15 @@ function( name = NULL #< name of the object
         , call = sys.call(1) #< call that produced error.
         ){
     msg <- if (is.null(name)) ._("No documentation comments found.")
-           else ._("No documentatino comments found for '%s'.", name)
+           else ._("No documentation comments found for '%s'.", as.character(name))
     doc_condition(msg, cond, name=name, type = "no_comments", call=call)
+}
+
+doc_overwrite <- function(name = NULL, cond = 'message', call=sys.call(1)){
+    doc_condition( if (is.null(name)) ._("Object alreay has documentation.")
+                   else ._("Object %s already has documentation", as.character(name))
+                 , cond=cond, type='overwrite', call=call
+                 , name=name)
 }
 
 

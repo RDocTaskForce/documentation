@@ -48,7 +48,6 @@ if(FALSE){#@testing
 }
 
 
-
 #' Check all exports are documented
 #'
 #' Check that all exports for a given package are documented.
@@ -96,63 +95,30 @@ if(FALSE){
 
 #' @export
 `print.Documentation Check Results` <-
-function(object,...){
-    if (!is.null(pkg <- attr(object, 'package')))
+function(x,...){
+    if (!is.null(pkg <- attr(x, 'package')))
         cat("Documentation check summary for package" %<<% pkg %<<<% "\n\n")
 
-    undocumented  <- object$Reason == "documentation-error-dnf"
-    incomplete    <- object$Reason == "documentation-warning-incomplete"
-    invalid       <- object$Reason == "documentation-error-invalid"
-    other.error   <- object$Reason == "documentation-error"
-    other.warning <- object$Reason == "documentation-warning"
+    reasons <- setdiff(unique(x[[3L]]), c('', NA))
+    reason.counts <- sapply(reasons, function(r)sum(x[[3L]] == r))
 
-    cat(c( ._("* Total elements: %d", nrow(object))
-         , ._("* Documented: %d"    , sum(object$Documented))
-         , if (any(undocumented)) ._("* Undocumented: %d"      , sum(undocumented))
-         , if (any(incomplete))   ._("* Incomplete: %d"        , sum(incomplete))
-         , if (any(invalid))      ._("* Invalid: %d"           , sum(invalid))
-         , if (any(other.error))  ._("* Has other errors: %d"  , sum(other.error))
-         , if (any(other.warning))._("* Has other warnings: %d", sum(other.warning))
+    cat(c( ._("* Total elements: %d", nrow(x))
+         , ._("* Documented: %d"    , sum(x[[2L]]))
+         , paste0("* ", names(reason.counts), ": ", reason.counts)
          ) %\%
         "" %\%
-        ._("Percent complete: %2.1f%%", mean(object$Documented)*100) %\%
-        "" %\%
-        c(  if (all(object$Documented)){
-                ._("Congratulations! You are a documentation rock star.")
-            }
-         ,  if (any(undocumented)){
-                ._("Undocumented Objects:|") %\%
-                collapse_nl(
-                    strwrap( comma_list(object[object$Reason == 'documentation-error-dnf', 1L])
-                           , width = 0.8 * getOption("width")
-                           , indent = 2, exdent = 2
-                           )
-                )
-            }
-         ,  if (any(incomplete)){
-                "Objects with incomplete documentation:|" %\%
-                collapse_nl(
-                    strwrap( comma_list(object[object$Reason == 'documentation-warning-incomplete', 1L])
-                           , width = 0.8 * getOption("width")
-                           , indent = 2, exdent = 2
-                           )
-                )
-            }
-         ,  if (any(invalid)){
-                "Objects with invalid documentation:|" %\%
-                collapse_nl(
-                    strwrap( comma_list(object[object$Reason == 'documentation-error-invalid', 1L])
-                           , width = 0.8 * getOption("width")
-                           , indent = 2, exdent = 2
-                           )
-                )
-            }
-         )
-        )
-}
-if(FALSE){#@testing
-    is_documented('documentation', asNamespace("documentation"), complete =FALSE)
-    is_documented('documentation<-', asNamespace("documentation"), complete =FALSE)
-
-
+        ._("Percent complete: %2.1f%%", mean(x$Documented)*100)
+    )
+    if (length(reasons)==0)
+        cat("\n", ._("Congratulations! You are a documentation rock star."))
+    else for (r in reasons){
+        cat( "" %\% r %<<<% ":" %\%
+             collapse_nl(
+                strwrap( comma_list(x[x[[3L]] == r, 1L])
+                       , width = 0.8 * getOption("width")
+                       , indent = 2, exdent = 2
+                       )
+             )
+           )
+    }
 }
