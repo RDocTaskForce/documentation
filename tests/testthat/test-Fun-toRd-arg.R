@@ -1,4 +1,4 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
 #! changes will be overwritten.
 context('tests extracted from file `Fun-toRd-arg.R`')
 #line 10 "/rdtf/documentation/R/Fun-toRd-arg.R"

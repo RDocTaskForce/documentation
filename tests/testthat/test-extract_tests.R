@@ -1,4 +1,4 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
 #! changes will be overwritten.
 context('tests extracted from file `extract_tests.R`')
 #line 253 "/rdtf/documentation/R/extract_tests.R"
@@ -13,11 +13,11 @@ test_that('#', {#@TESTING
     expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
                                   , "show,Test-Class-method"
                                   , "setGeneric(\"yolo\", ...)"
-                                  ) 
+                                  )
                                , "hello_world"
                                )
                          , names = file.path(pkg, 'R', c('Class.R', 'function.R')) )
-    
+
     expect_equal( result, expected)
     expect_true(dir.exists(file.path(pkg, "tests", "testthat")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-Class.R")))

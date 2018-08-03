@@ -1,7 +1,7 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-05-23 19:03:27
+#! This file was automatically produced by documentation::extract_tests on  2018-08-03 01:24:28
 #! changes will be overwritten.
 context('tests extracted from file `Class-Documentation.R`')
-#line 72 "/rdtf/documentation/R/Class-Documentation.R"
+#line 73 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('initialize,Documentation-method', {#!@testing
     x <- new('Documentation')
     expect_identical(x@author, person())
@@ -13,7 +13,7 @@ test_that('initialize,Documentation-method', {#!@testing
             )
     expect_equal(x@author, person('Andrew', 'Redd'))
 })
-#line 94 "/rdtf/documentation/R/Class-Documentation.R"
+#line 95 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -22,7 +22,7 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
     
 })
-#line 109 "/rdtf/documentation/R/Class-Documentation.R"
+#line 110 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('as.list,Documentation-method', {#! @testing
     x <- 
     object <- new( "Documentation"

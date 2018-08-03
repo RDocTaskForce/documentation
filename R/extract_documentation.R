@@ -78,8 +78,9 @@ get_parse_data.roxy_block <- function(x,...){
 }
 
 
-.construct_documentation_function <-
-function( roxy.block            #< roxy_block for object
+.construct_documentation.function <-
+function( object
+        , roxy.block            #< roxy_block for object
         , pd                    #< parse.data for object
         , doc.class = 'function-Documentation'
         ){
@@ -127,9 +128,6 @@ function( roxy.block            #< roxy_block for object
     }
     if (length(docs@arguments) > 1L){
         o <- order(match(names(docs@arguments), names(formals(object))))
-        #TODO Should I add checking here to see if the arguments are
-        #     actually in the function formals?
-        #TODO Should I add options for the sorting of the arguments alphabetically?
         docs@arguments <- docs@arguments[o]
     }
     docs
@@ -142,38 +140,9 @@ if(FALSE){#@testing
 
     roxy.block <- .get_roxy_block(example_function1, srcfile=test.file)
 
-    docs <- .construct_documentation_function(roxy.block, pd)
+    docs <- .construct_documentation.function(example_function1, roxy.block, pd)
     expect_is(docs, 'function-Documentation')
-
-
 }
-if(FALSE){#@testing
-
-
-
-    test.file <- system.file("examples", "example_character.R", package='documentation')
-    sys.source( test.file, keep.source=TRUE)
-    object <- example_character
-
-    expect_error(.get_roxy_block(example_character), class='documentation-error-no_src')
-    roxy.block <- .get_roxy_block(example_character, srcfile=test.file)
-    loc <- attr(roxy.block, 'location')
-
-
-    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
-    pd_identify(pd, object)
-    pd_identify(pd, srcref(srcfile(test.file), loc))
-
-
-    pd[ pd$line1 == loc[1]
-      & pd$col1  == loc[5]
-      & pd$line2 == loc[3]
-      & pd$col2  == loc[6]
-      , 'id']
-
-    pd2 <- srcref(srcfile(test.file), attr(block, 'location')) %>% get_parse_data()
-}
-
 
 extract_documentation <-
 function( object   #< Object for which to extract documentation.
@@ -206,7 +175,7 @@ function( object   #< function to document.
     if (!(has.roxy || length(rel.comments)))
         no_doc_comments(name)
     roxy.block <- .get_roxy_block(object, ..., options=list(markdown=markdown))
-    return(.construct_documentation_function(roxy.block, pd))
+    return(.construct_documentation.function(object, roxy.block, pd))
 
     docs <- if (has.roxy){
         as(roxy.block, 'function-Documentation')
@@ -309,7 +278,7 @@ function( object
 
     roxy.block <- .get_roxy_block(object, srcfile=srcfile, ...)
 
-    docs <- .construct_documentation_function(roxy.block, pd)
+    docs <- .construct_documentation.function(object, roxy.block, pd)
     if (.is_undefined(docs@name)) docs@name <- as.name(name)
     if (length(object@valueClass) & is.na(docs@value))
         docs@value <- FormattedText(
