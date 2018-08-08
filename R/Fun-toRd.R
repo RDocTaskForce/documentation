@@ -2,6 +2,7 @@
 #' @include Fun-default.R
 
 .valid_Rd <- function(object){
+    if (inherits(object, 'Rd')) return(TRUE)
     if (is.character(object)) return(TRUE)
     else if (is.list(object)){
         if (all( sapply(object, is.character)
@@ -19,11 +20,26 @@
 setGeneric('toRd', valueClass=c('Rd', 'character', 'list'), def =
 function(obj, ...){
     ans <- standardGeneric("toRd")
-    if (isTRUE(v <- .valid_Rd(ans))) return (ans)
+    if (is.list(ans)){
+        if (any(null <- sapply(ans, is.null)))
+            ans <- ans[!null]
+        if (!all( sapply(ans, is.character)))
+            doc_error(._( "Method of generic function %1$s for class %2$s"%<<%
+                          "returned a list, but not of character vectors." %<<%
+                          "Methods of %1$s are expected to retun a %3$s vector."
+                        , sQuote("toRd"), dQuote(class(obj)), 'character')
+                     , type="toRd-invalid_result" )
+        ans <- sapply(ans, collapse_nl)
+    }
+    if (is.character(ans))
+        return (structure(ans, class='Rd'))
     else
-        doc_error(._( "generic function %s, class %s" %<<%
-                      "did not return a valid Rd object:"
-                    , sQuote(fname), dQuote(class(object))) %<<% v)
+        doc_error(._( "Method of generic function %1$s for class %2$s" %<<%
+                      "returned a %4$s." %<<%
+                      "Methods of %1$s are expected to retun a %3$s vector."
+                    , sQuote("toRd"), dQuote(class(obj))
+                    , 'character', dQuote(class(ans))
+                    ) %<<% v)
 })
 
 set_option_documentation( "documentation::toRd::indent"
@@ -49,7 +65,8 @@ set_option_documentation("documentation::toRd::collapse.with"
 
 Rd_tag  <- function(content, name=deparse(substitute(content))){
     if(length(name) != 1 || !is(name, 'character')) stop("Rd tag name must be a single character.")
-    if(!identical(class(content), 'character')) content <- toRd(content)
+    if(!identical(class(content), 'character'))
+        content <- as.character(toRd(content))
     if(length(content)==0) return(character(0))
     if(length(content) == 1)
         return( sprintf("\\%s{%s}", name, content) )

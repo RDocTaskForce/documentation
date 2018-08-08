@@ -11,6 +11,10 @@ function( obj
     Rd[['arguments']] <- collapse(toRd(obj@arguments), '\n')
     Rd[['usage']]     <- Rd_tag(deparse(obj@usage), 'usage')
 
+    c(
+
+     )
+
     if (is.na(obj@value))
         Rd[['value']] <- ''
     Rd <- Rd[nchar(Rd)>0]

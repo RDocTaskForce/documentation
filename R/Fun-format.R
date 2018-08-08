@@ -131,6 +131,6 @@ function( x  #< Documentation object
             #< options passed to formatter.
         ){
     formatter <- get_formatter(fmt)
-    formatter(x, ...)
+    as.character(formatter(x, ...))
 }
 
