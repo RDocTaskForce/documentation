@@ -1,4 +1,5 @@
-#' @include Vector.R
+#' @include utils.R
+#' @include Class-Vector.R
 #' @include Class-Documentation-Keyword.R
 #' @include Class-FormattedText.R
 #' @importFrom utils person
@@ -8,7 +9,7 @@
 #TODO
 #' @title contains formatted text and code chunks
 setClass( "Prose", contains = 'list')
-#TODO: expand prose with validator and possibly initializer to check for 
+#TODO: expand prose with validator and possibly initializer to check for
 #^ valid code.
 
 setVector( element = "Prose"
@@ -19,6 +20,7 @@ setVector( element = "Prose"
 setOldClass('bibentry')
 setOldClass('person')
 
+#TODO add srcref to Documentation when created.
 setClass( "Documentation"
         , slots = c( author      = "person"
                    , title       = "character"
@@ -37,7 +39,7 @@ setClass( "Documentation"
                           )
         )
 
-setMethod("initialize", 'Documentation', 
+setMethod("initialize", 'Documentation',
     function( .Object
             , ...
             , author      = NULL
@@ -53,7 +55,7 @@ setMethod("initialize", 'Documentation',
         if (!is.null(description))  .Object@description <- new("FormattedText"        , description)
         if (!is.null(seealso    ))  .Object@seealso     <- new("FormattedText"        , seealso    )
         if (!is.null(author     ))  .Object@author      <- utils::as.person(author)
-        if (!is.null(examples   )){ .Object@examples  <- 
+        if (!is.null(examples   )){ .Object@examples  <-
             if(inherits(examples, 'list')){
                 new('Prose', examples)
             } else {
@@ -74,7 +76,7 @@ if(FALSE){#!@testing
     x <- new('Documentation')
     expect_identical(x@author, person())
     expect_identical(x@title, character(0))
-    
+
     x <- new('Documentation'
             , author     = person('Andrew', 'Redd')
             , references = citation()
@@ -83,22 +85,22 @@ if(FALSE){#!@testing
 }
 
 #' @export
-setGeneric("documented", 
+setGeneric("documented",
 function(object, ...){
-    return( 
+    return(
         structure( object
                  , documentation = new(paste0(class(object)[[1]], '-Documentation') , ...)
                  )
           )
-    
+
 })
 if(FALSE){#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
-    
+
     expect_false(is.null(attr(dobj, 'documentation')))
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
-    
+
 }
 
 setMethod("as.list", 'Documentation',
@@ -108,7 +110,7 @@ function(x, ...){
              )
 })
 if(FALSE){#! @testing
-    x <- 
+    x <-
     object <- new( "Documentation"
              , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                               , person('Drew'  , 'Blue')
@@ -123,7 +125,5 @@ if(FALSE){#! @testing
     object.as.list <- as.list(object)
     expect_is(object.as.list, 'list')
     expect_equal(names(object.as.list), slotNames(object))
-    
-    
 }
 

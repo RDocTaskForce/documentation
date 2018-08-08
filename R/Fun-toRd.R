@@ -1,9 +1,30 @@
-#' @include options.R
-#' @include util-str_rep.R
+#' @include Classes.R
+#' @include Fun-default.R
+
+.valid_Rd <- function(object){
+    if (is.character(object)) return(TRUE)
+    else if (is.list(object)){
+        if (all( sapply(object, is.character)
+               | sapply(object, is.null)
+               )) return(TRUE)
+        else deparse(substitute(object)) %<<%
+            ._("is a list but not all elements are characters.")
+    } else deparse(substitute(x)) %<<%
+        ._("is neither character nor a list of characters.")
+}
 
 #' @export
 #' @importFrom tools toRd
-setGeneric('toRd', tools::toRd)
+# setGeneric('toRd', tools::toRd, valueClass=c('Rd', 'character', 'list'))
+setGeneric('toRd', valueClass=c('Rd', 'character', 'list'), def =
+function(obj, ...){
+    ans <- standardGeneric("toRd")
+    if (isTRUE(v <- .valid_Rd(ans))) return (ans)
+    else
+        doc_error(._( "generic function %s, class %s" %<<%
+                      "did not return a valid Rd object:"
+                    , sQuote(fname), dQuote(class(object))) %<<% v)
+})
 
 set_option_documentation( "documentation::toRd::indent"
    , description = "Determines if code should be indented when formatted.  Should default to FALSE when unset."

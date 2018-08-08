@@ -1,3 +1,4 @@
+#' @include Classes.R
 
 .documentation.allways.exclude <-
     c( '.__DEVTOOLS__'

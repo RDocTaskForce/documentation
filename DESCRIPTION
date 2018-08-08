@@ -15,7 +15,9 @@ Imports:
     tools,
     roxygen2(>= 6.0.1.9000),
     parsetools,
-    stringr
+    stringr,
+    purrr,
+    assertthat
 Suggests:
     htmltools,
     testthat,
@@ -26,35 +28,49 @@ Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
+    'util-comma_list.R'
+    'util-interleave.R'
+    'util-str_rep.R'
+    'util-undefined.R'
+    'util-documentationMetaName.R'
+    'util-aliases.R'
+    'util-errors.R'
+    'util-infix.R'
+    'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
     'Class-FormattedText.R'
-    'Vector.R'
+    'Class-Vector.R'
     'Class-Documentation.R'
-    'documentation.R'
-    'util-infix.R'
-    'util-str_rep.R'
-    'Class-option-documentation.R'
-    'options.R'
-    'Fun-toRd.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'
     'Class-data.frame-Documentation.R'
+    'Class-option-Documentation.R'
+    'Classes.R'
     'Conversion-roxy_block.R'
-    'Fun-check_documented.R'
-    'Fun-toRd-Documentation.R'
-    'Fun-toRd-arg.R'
+    'Fun-document.R'
+    'zzz-document.R'
+    'Fun-documentation.R'
+    'Fun-accessors.R'
+    'Fun-default.R'
+    'Fun-toRd.R'
+    'Fun-toRd-option.R'
     'Fun-toRd-function.R'
-    'errors.R'
-    'extract_documentation.R'
-    'extract_tests.R'
-    'util-aliases.R'
-    'util-comma_list.R'
-    'util-interleave.R'
-    'util-undefined.R'
+    'Fun-toRd-arg.R'
+    'Fun-toRd-Documentation.R'
+    'Fun-format.R'
+    'Fun-extract_documentation.R'
+    'Fun-extract_documentation-classGeneratorFunction.R'
+    'Fun-documentation-S4.R'
+    'Fun-check_documented.R'
+    'Funs.R'
+    'Doc-document.R'
+    'Fun-extract_tests.R'
+    'Fun-write_documentation.R'
 RoxygenNote: 6.0.1.9000
 Enhances: devtools
+Encoding: UTF-8
 Remotes:
     RDocTaskForce/parsetools,
     klutometis/roxygen,

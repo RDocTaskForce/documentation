@@ -1,3 +1,4 @@
+#' @include utils.R
 #' @include Class-arg-Documentation.R
 #' @include Class-FormattedText.R
 

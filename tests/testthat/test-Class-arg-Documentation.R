@@ -1,5 +1,6 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Class-arg-Documentation.R`')
 #line 54 "/rdtf/documentation/R/Class-arg-Documentation.R"
 test_that('arg', {#! @testing arg

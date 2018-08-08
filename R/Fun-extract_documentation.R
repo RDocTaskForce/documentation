@@ -1,3 +1,4 @@
+#' @include Classes.R
 #' @import parsetools
 
 .roxy.namespace <- roxygen2::roclet_tags( roxygen2::roclet('namespace'))
@@ -109,7 +110,7 @@ function( object
                 if (arg.name %in% names(docs@arguments))
                     doc_error(._( "documentation for %s already contains" %<<%
                                   "documentation for argument %s"
-                                , docs@name, arg.name))
+                                , doc_get_name(docs), arg.name))
                 comments <- rel.comments[!is.na(associated) & associated==a]
                 text <- strip_doc_comment_leads(pd_text(comments, pd))
                 docs@arguments[[arg.name]] <-
@@ -209,7 +210,7 @@ function( object   #< function to document.
                 if (arg.name %in% names(docs@arguments))
                     doc_error(._( "documentation for %s already contains" %<<%
                                   "documentation for argument %s"
-                                , docs@name, arg.name))
+                                , doc_get_name(docs), arg.name))
                 comments <- rel.comments[!is.na(associated) & associated==a]
                 text <- strip_doc_comment_leads(pd_text(comments, pd))
                 docs@arguments[[arg.name]] <-
@@ -234,7 +235,7 @@ function( object   #< function to document.
         #TODO Should I add options for the sorting of the arguments alphabetically?
         docs@arguments <- docs@arguments[o]
     }
-    if (.is_undefined(docs@name))
+    if (.is_undefined(doc_get_name(docs)))
         docs@name <- as.name(name)
     else if (!missing(name) && deparse(docs@name) != deparse(name))
         doc_error( "Name provided does not match source."

@@ -1,5 +1,6 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Conversion-roxy_block.R`')
 #line 52 "/rdtf/documentation/R/Conversion-roxy_block.R"
 test_that('setAs,roxy_block,function-Documentation', {#@testing setAs,roxy_block,function-Documentation

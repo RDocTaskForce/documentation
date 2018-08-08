@@ -1,3 +1,4 @@
+#' @include Classes.R
 
 setGeneric("is_complete", valueClass="logical", function(doc){
     stop("is_complete is intended to be used with documentation objects only.")

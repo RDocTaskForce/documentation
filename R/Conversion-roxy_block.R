@@ -1,4 +1,4 @@
-#' @include Class-function-Documentation.R
+#' @include Classes.R
 
 .roxy.namespace <- roxygen2::roclet_tags( roxygen2::roclet('namespace'))
 .roxy.namespace.tags <- names(.roxy.namespace)

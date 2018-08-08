@@ -1,10 +1,11 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:02
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Fun-toRd-Documentation.R`')
-#line 23 "/rdtf/documentation/R/Fun-toRd-Documentation.R"
+#line 28 "/rdtf/documentation/R/Fun-toRd-Documentation.R"
 test_that('toRd,Documentation-method', {#! @testing
     null.object <- new('Documentation')
-    
+
     object <- new( "Documentation"
                  , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                                   , person('Drew'  , 'Blue')
@@ -23,7 +24,7 @@ test_that('toRd,Documentation-method', {#! @testing
     )
     expect_true(all(names(as.rd) %in% expected.names))
     expect_true(all(expected.names %in% names(as.rd)))
-    
+
     expect_equal(as.rd[['author']], "\\author{Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue}")
     expect_equal(as.rd[['title']], "\\title{Create function documentation}")
     expect_equal(as.rd[['keywords']], "\\keyword{internal}")

@@ -1,4 +1,4 @@
-#' @include Class-function-Documentation.R
+#' @include Classes.R
 #' @include Fun-toRd.R
 
 
@@ -10,6 +10,11 @@ function( obj
     Rd <- callNextMethod()
     Rd[['arguments']] <- collapse(toRd(obj@arguments), '\n')
     Rd[['usage']]     <- Rd_tag(deparse(obj@usage), 'usage')
+
+    if (is.na(obj@value))
+        Rd[['value']] <- ''
+    Rd <- Rd[nchar(Rd)>0]
+
     return(Rd)
 })
 if(FALSE){#! @testing
@@ -27,10 +32,21 @@ if(FALSE){#! @testing
               , value = "A function-Documentation obj."
               )
     Rd <- toRd(obj)
-    expect_is(Rd, 'character')
+    expect_true(.valid_Rd(Rd))
     expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
     expect_equal(Rd[['name']], '\\name{function_documentation}')
     expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
     expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
     expect_equal(length(Rd[['arguments']]), 1)
+
+    expect_false(any(nchar(Rd) == 0))
+
+
+    doc <- function_documentation( name = 'test'
+                                 , title = "test title"
+                                 , description = "A description for my test function"
+                                 , arguments = ArgumentList( arg_('x', 'the x argument'))
+                                 )
+    Rd <- toRd(doc)
+    expect_false(any(nchar(Rd) == 0))
 }

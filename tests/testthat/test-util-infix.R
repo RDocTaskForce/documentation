@@ -1,5 +1,6 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:02
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `util-infix.R`')
 #line 22 "/rdtf/documentation/R/util-infix.R"
 test_that('%<<%', {#! @testing %<<%

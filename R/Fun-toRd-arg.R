@@ -1,8 +1,8 @@
-#' @include Class-arg-Documentation.R
+#' @include Classes.R
 #' @include Fun-toRd.R
 
 
-setMethod('toRd', 'arg-Documentation', 
+setMethod('toRd', 'arg-Documentation',
 function(obj, ...){
     #Question: does thise need to include more details like default value?
     sprintf("\\item{%s}{%s}", as.character(obj@name), obj@description)
@@ -14,7 +14,7 @@ if(FALSE){#! @testing
 
 
 
-setMethod('toRd', 'ArgumentList', 
+setMethod('toRd', 'ArgumentList',
 function( obj
         , ...
         , indent          = default(indent        , FALSE )
@@ -33,8 +33,8 @@ function( obj
 if(FALSE){#! @testing
     a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
     b <- arg_('testing', 'a testing argument')
-    
-    obj <- 
+
+    obj <-
         ArgumentList( arg_('x', 'an argument')
                     , arg_('y', 'another argument')
                     )

@@ -1,0 +1,14 @@
+#' @include  Fun-document.R
+#' @include  Fun-extract_documentation.R
+#' @include  Fun-documentation.R
+#' @include  Fun-accessors.R
+#' @include  Fun-check_documented.R
+#' @include  Fun-default.R
+#' @include  Fun-documentation-S4.R
+#' @include  Fun-extract_documentation-classGeneratorFunction.R
+#' @include  Fun-toRd.R
+#' @include  Fun-format.R
+#' @include  Fun-toRd-Documentation.R
+#' @include  Fun-toRd-arg.R
+#' @include  Fun-toRd-function.R
+#' @include  Fun-toRd-option.R

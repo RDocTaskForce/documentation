@@ -1,7 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Class-Documentation-Default-Value.R`')
-#line 41 "/rdtf/documentation/R/Class-Documentation-Default-Value.R"
+#line 43 "/rdtf/documentation/R/Class-Documentation-Default-Value.R"
 test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )
@@ -12,7 +13,11 @@ test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:name'      , as.name('test')  ), 'Documentation-Default-Value:name'      )
     expect_is(new('Documentation-Default-Value:NULL'                         ), 'Documentation-Default-Value:NULL'      )
     expect_is(new('Documentation-Default-Value:NULL'      , NULL             ), 'Documentation-Default-Value:NULL'      )
-    
+
     expect_is( as(as.name('hello'), 'Documentation-Default-Value'), 'Documentation-Default-Value')
     expect_is( as(substitute(x+y) , 'Documentation-Default-Value'), 'Documentation-Default-Value')
+
+    expect_error( dv <- new('Documentation-Default-Value')
+                , "trying to generate an object from a virtual class"
+                )
 })

@@ -1,7 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Fun-check_documented.R`')
-#line 29 "/rdtf/documentation/R/Fun-check_documented.R"
+#line 28 "/rdtf/documentation/R/Fun-check_documented.R"
 test_that('is_documented', {#@testing
     test_function <- function(x){}
 

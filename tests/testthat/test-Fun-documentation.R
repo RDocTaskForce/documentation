@@ -1,7 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
-context('tests extracted from file `documentation.R`')
-#line 28 "/rdtf/documentation/R/documentation.R"
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
+context('tests extracted from file `Fun-documentation.R`')
+#line 28 "/rdtf/documentation/R/Fun-documentation.R"
 test_that('setGeneric("documentation", ...)', {#! @testing
     test_function <- function(x){
         return(x)
@@ -20,7 +21,7 @@ test_that('setGeneric("documentation", ...)', {#! @testing
                               )
     expect_is(documentation(test_function), 'Documentation')
 })
-#line 81 "/rdtf/documentation/R/documentation.R"
+#line 76 "/rdtf/documentation/R/Fun-documentation.R"
 test_that('documentation<-,ANY,Documentation-method', {#! @testing
     x <- 1
     y <- new('Documentation', title='testing')

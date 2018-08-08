@@ -1,5 +1,6 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:02
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `util-comma_list.R`')
 #line 15 "/rdtf/documentation/R/util-comma_list.R"
 test_that('comma_list', {#! @testing

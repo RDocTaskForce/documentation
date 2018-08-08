@@ -25,13 +25,14 @@
 # this program. If not, see http://www.gnu.org/licenses/.
 #
 }###############################################################################
-
+#' @include Classes.R
 
 makeActiveBinding( '.tests.head.lines', function(){
-    c( paste("#! This file was automatically produced by documentation::extract_tests on "
-            , Sys.time()
-            )
-     , "#! changes will be overwritten."
+    include.time <- getOption("documentation::include_extraction_time", FALSE)
+    c( ._("#! This file was automatically produced by the documentation package.")
+     , if(include.time) ._("#! Extracted on %s", Sys.time())
+     , ._("#! Changes will be overwritten.")
+     , ''
      )
 }, topenv())
 

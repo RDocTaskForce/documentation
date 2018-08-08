@@ -1,5 +1,4 @@
-
-
+#' @include utils.R
 
 setClass('Documentation-Default-Value'           , contains="VIRTUAL")
 setClass('Documentation-Default-Value:logical'   , contains=c('Documentation-Default-Value', 'logical'   ))
@@ -14,6 +13,8 @@ setClass('Documentation-Default-Value:name'      , contains=c('Documentation-Def
 setClass('Documentation-Default-Value:NULL'      , contains=c('Documentation-Default-Value', 'NULL', prototype=NULL))
 setClass('Documentation-No-Default-Value'        , contains='Documentation-Default-Value' )
 .no.default <- new('Documentation-No-Default-Value')
+#' @export
+`as.character.Documentation-No-Default-Value` <- function(x)''
 
 setAs('logical'   , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:logical'   , from)})
 setAs('numeric'   , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:numeric'   , from)})
@@ -27,7 +28,7 @@ setAs('NULL'      , 'Documentation-Default-Value', function(from){new('Documenta
 setClass( 'Documentation-Default-Value:language'
         , contains  = c('Documentation-Default-Value', 'language')
         )
-setMethod('initialize', 'Documentation-Default-Value:language', 
+setMethod('initialize', 'Documentation-Default-Value:language',
     function(.Object, value, ...){
         stopifnot(is(value, 'language'))
         attr(value, ".S3Class") <- class(value)
@@ -37,6 +38,7 @@ setMethod('initialize', 'Documentation-Default-Value:language',
 
 
 setAs('language', 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:language'      , from)})
+
 
 if(FALSE){#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
@@ -48,7 +50,11 @@ if(FALSE){#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:name'      , as.name('test')  ), 'Documentation-Default-Value:name'      )
     expect_is(new('Documentation-Default-Value:NULL'                         ), 'Documentation-Default-Value:NULL'      )
     expect_is(new('Documentation-Default-Value:NULL'      , NULL             ), 'Documentation-Default-Value:NULL'      )
-    
+
     expect_is( as(as.name('hello'), 'Documentation-Default-Value'), 'Documentation-Default-Value')
     expect_is( as(substitute(x+y) , 'Documentation-Default-Value'), 'Documentation-Default-Value')
+
+    expect_error( dv <- new('Documentation-Default-Value')
+                , "trying to generate an object from a virtual class"
+                )
 }

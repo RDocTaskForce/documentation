@@ -1,5 +1,5 @@
-#' @include Vector.R
-#' @include Fun-toRd.R
+#' @include utils.R
+#' @include Class-Vector.R
 
 arg_ <-
 setClass( "arg-Documentation"

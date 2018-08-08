@@ -1,7 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
 context('tests extracted from file `Class-function-Documentation.R`')
-#line 42 "/rdtf/documentation/R/Class-function-Documentation.R"
+#line 43 "/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('initialize,function-Documentation-method', {#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
@@ -30,7 +31,7 @@ test_that('initialize,function-Documentation-method', {#! @testing
     object <- function_documentation()
     expect_equal(deparse(object@name), "<UNDEFINED>")
 })
-#line 71 "/rdtf/documentation/R/Class-function-Documentation.R"
+#line 72 "/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")

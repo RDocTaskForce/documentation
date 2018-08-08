@@ -1,6 +1,7 @@
+#' @include utils.R
 
 #' A Vector with only one type of object
-setVector <- 
+setVector <-
 function( element                                   #< name of the class that elements of the vector must inherit from.
         , Class   = paste0("Vector(", element, ")") #< Name of the class
         , ...                                       #< passed onto SetClass, excluding contains, validity
@@ -25,6 +26,6 @@ if(FALSE){#! @testing
     expect_true(validObject(name.vector))
     name.vector[[3]] <- 'c'
     expect_error(validObject(name.vector), "Element of Vector at position 3 is not a name")
-    
+
 }
 

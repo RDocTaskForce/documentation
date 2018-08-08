@@ -1,5 +1,6 @@
 #' @include Class-Documentation.R
 #' @include Class-Documentation-Default-Value.R
+#' @include utils.R
 
 option_documentation <-
 setClass('option-Documentation', contains = 'Documentation'
@@ -59,6 +60,12 @@ if(FALSE){
     expect_is(o, 'Documentation')
     expect_identical(o@key, 'anOption')
     expect_identical(o@description, FormattedText('a description'))
-
 }
 
+# setMethod("doc_get_name", 'option-Documentation', function(doc){
+#     "option-" %<<<% doc@key
+# })
+# if(FALSE){
+#     doc <- o <- new('option-Documentation', 'anOption', 'a description')
+#     expect_identical(doc_get_name(o), "option-anOption")
+# }

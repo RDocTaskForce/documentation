@@ -1,0 +1,10 @@
+#' @include  Class-Documentation-Default-Value.R
+#' @include  Class-Documentation-Keyword.R
+#' @include  Class-FormattedText.R
+#' @include  Class-Vector.R
+#' @include  Class-Documentation.R
+#' @include  Class-arg-Documentation.R
+#' @include  Class-function-Documentation.R
+#' @include  Class-S4-Documentation.R
+#' @include  Class-data.frame-Documentation.R
+#' @include  Class-option-Documentation.R

@@ -1,7 +1,8 @@
-#! This file was automatically produced by documentation::extract_tests on  2018-08-03 22:20:01
-#! changes will be overwritten.
-context('tests extracted from file `extract_tests.R`')
-#line 253 "/rdtf/documentation/R/extract_tests.R"
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
+
+context('tests extracted from file `Fun-extract_tests.R`')
+#line 254 "/rdtf/documentation/R/Fun-extract_tests.R"
 test_that('#', {#@TESTING
     tmp.dir <- tempdir()
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
