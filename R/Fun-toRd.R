@@ -14,6 +14,13 @@
         ._("is neither character nor a list of characters.")
 }
 
+Rd <- function(x){
+    assert_that(.valid_Rd(x))
+    if(is.list(x)) x <- purrr:map_chr(x, collapse_nl)    
+    s(x, class='Rd')
+}
+
+
 #' @export
 #' @importFrom tools toRd
 # setGeneric('toRd', tools::toRd, valueClass=c('Rd', 'character', 'list'))
@@ -103,20 +110,20 @@ function( obj
 })
 if(FALSE){#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-    expect_equal(toRd(object), 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}')
+    expect_equal(toRd(object), structure('Andrew Redd \\email{andrew.redd@hsc.utah.edu}', class='Rd'))
 
     object <-c( person('First' , 'Author', email='me1@email.com')
               , person('Second', 'Author', email='me2@email.com')
               )
-    expect_equal(toRd(object), c('First Author \\email{me1@email.com}'
+    expect_equal(toRd(object), structure(c('First Author \\email{me1@email.com}'
                                 , 'Second Author \\email{me2@email.com}'
-                                ) )
+                                ), class='Rd') )
     expect_equal(toRd( c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                         , person('Drew'  , 'Blue')
                         ) )
-                , c( 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}'
-                   , 'Drew Blue'
-                   )
+                , structure(c( 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}'
+                             , 'Drew Blue'
+                             ), class='Rd')
                 )
 
 
@@ -136,7 +143,7 @@ if(FALSE){#!@testing documentation bibstyle
 setMethod('toRd', 'Documentation-Keyword', function( obj, ...)sprintf("\\keyword{%s}", obj@.Data))
 if(FALSE){#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
-    expect_equal(toRd(obj), c('\\keyword{utilities}', '\\keyword{character}'))
+    expect_equal(toRd(obj), Rd(c('\\keyword{utilities}', '\\keyword{character}')))
 }
 
 setMethod('toRd', 'FormattedText',
@@ -154,16 +161,17 @@ function( obj
 })
 if(FALSE){#! @testing
     obj <- FormattedText()
-    expect_identical(toRd(obj), character(0))
+    expect_identical(toRd(obj), Rd(character(0)))
 
     obj <- FormattedText('Hello world!')
-    expect_identical(toRd(obj), 'Hello world!')
+    expect_identical(toRd(obj), Rd('Hello world!'))
     expect_false(identical(toRd(obj), obj))
 
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
-    expect_is(as.rd, 'character')
+    expect_is(as.rd, 'Rd')
+    expect_identical(mode(as.rd), 'character')
 }
 
 

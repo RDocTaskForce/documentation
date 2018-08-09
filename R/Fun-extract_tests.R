@@ -265,7 +265,8 @@ if(FALSE){#@TESTING
                                   )
                                , "hello_world"
                                )
-                         , names = file.path(pkg, 'R', c('Class.R', 'function.R')) )
+                         , names = normalizePath(file.path(pkg, 'R', c('Class.R', 'function.R')), '/')
+                         )
 
     expect_equal( result, expected)
     expect_true(dir.exists(file.path(pkg, "tests", "testthat")))
