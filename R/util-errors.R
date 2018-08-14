@@ -1,6 +1,6 @@
 #' @include util-aliases.R
 
-.conditions <- c('message', 'warning', 'error')
+.conditions <- c('message', 'warning', 'error', 'none')
 
 doc_error <- function(msg, ..., type=NULL, call=sys.call(1)){
     class <- c( if (!is.null(type)) 'documentation-error-' %<<<% type

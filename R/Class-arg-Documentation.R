@@ -49,6 +49,7 @@ setVector( element = "arg-Documentation"
 c.ArgumentList <- function(...)as(NextMethod(), "ArgumentList")
 `[.ArgumentList` <- function(...)as(NextMethod(), "ArgumentList")
 ArgumentList <- function(...){new('ArgumentList', list(...))}
+AL <- ArgumentList
 
 
 if(FALSE){#! @testing arg

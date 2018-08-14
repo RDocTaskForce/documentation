@@ -24,7 +24,7 @@ function( x
         ){
     if (inherits(x, 'Rd')) return(x)
     assert_that(.valid_Rd(x))
-    if (is.list(x)) return(s(purrr::map_chr(x, Rd), class='Rd'))
+    if (is.list(x)) return(s(unlist(lapply(x, Rd)), class='Rd'))
 
     if (collapse.lines && wrap.lines)
         doc_warning(._("Options 'collapse.lines' and 'wrap.lines'" %<<%
@@ -93,8 +93,6 @@ if(FALSE){
     val <- toRd('character')
     expect_identical(val, Rd("character"))
 }
-
-setMethod('toRd', 'Rd', function(obj, ...)obj)
 
 set_option_documentation( "documentation::Rd::indent"
    , description = "Determines if code should be indented when formatted.  Should default to FALSE when unset."
@@ -245,12 +243,15 @@ if(FALSE){#@testing
 Rd_tag  <-
 function( content
         , name=deparse(substitute(content))
+        , opt=character(0)
         , ...
         ){
     assert_that( is.string(name))
     if (length(content)==0) return(character(0))
     if (!inherits(content, 'Rd'))
         content <- toRd(content, ...)
+    if (length(opt)>0L)
+        name <- name %<<<% '[' %<<<% comma_list(opt) %<<<% ']' 
     if (length(content) == 1)
         s( sprintf("\\%s{%s}", name, content), class=c('Rd_tag', 'Rd'))
     else
@@ -276,6 +277,10 @@ if(FALSE){#! @testing
     expect_is(as.tag, 'Rd_tag')
     expect_length(as.tag, 7)
     expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
+    
+    val <- Rd_tag('dest', 'link', opt='pkg')
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val), "\\link[pkg]{dest}")
 }
 
 #' @export
