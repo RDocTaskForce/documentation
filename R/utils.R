@@ -6,3 +6,4 @@
 #' @include  util-str_rep.R
 #' @include  util-interleave.R
 #' @include  util-comma_list.R
+#' @include  util-postlogic.R
