@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Conversion-roxy_block.R`')
-#line 52 "/rdtf/documentation/R/Conversion-roxy_block.R"
+#line 55 "/rdtf/documentation/R/Conversion-roxy_block.R"
 test_that('setAs,roxy_block,function-Documentation', {#@testing setAs,roxy_block,function-Documentation
     test.file <- system.file("examples", "example_function1.R", package='documentation')
 

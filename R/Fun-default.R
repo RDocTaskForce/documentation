@@ -3,50 +3,56 @@
 default_ <-
 function( name
         , default.value = NULL
-        , which = -1
-        , fun   = as.character(sys.call(which))[[1L]]
-        , where = topenv(environment(sys.function(which)))
-        , pkg   = getPackageName(where)
-        , pkg.name = name
-        , search.global = TRUE
-        , global.name = pkg.name
+        , n = 1L
+        , fun
+        , where
+        , pkg
         ){
     #' Find the defaults that might be specified for the package.
-    if(!is.null(pkg) && pkg =='.GlobalEnv') pkg <- NULL
-    if(!is.null(pkg) && pkg == '') pkg <- NULL
-    if(!is.null(fun) && fun == '') fun <- NULL
-    value <- NULL
-    if(is.null(value) && !is.null(pkg) && !is.null(fun))
-        value <- getOption( paste('defaults', pkg,  fun,        name, sep='::'), NULL)
-    if(is.null(value) && search.global && !is.null(fun))
-        value <- getOption( paste('defaults',       fun, global.name, sep='::'), NULL)
-    if(is.null(value) && !is.null(pkg))
-        value <- getOption( paste('defaults', pkg,          pkg.name, sep='::'), NULL)
-    if(is.null(value) && search.global)
-        value <- getOption( paste('defaults',            global.name, sep='::'), NULL)
-    if(is.null(value))
-        value <- default.value
-    return(value)
+    if (missing(fun) || missing(pkg)){
+        call.no <- min(which(sapply(sys.frames(), identical, parent.frame(n))))
+        if (missing(fun)) fun <- as.character(sys.call(call.no))[[1L]]
+        if (missing(where)) where <- topenv(parent.frame(n))
+        pkg   = getPackageName(where)
+    }
+
+
+    if (!is.null(pkg))
+        if(pkg =='.GlobalEnv' || pkg == "base" || pkg == '') pkg <- NULL
+    if (!is.null(fun))
+        if(fun == '') fun <- NULL
+
+    if (!is.null(pkg) && !is.null(fun)
+      &&!is.null(value <- getOption(paste(pkg, fun, name, sep='::'))))
+        return(value)
+    if (!is.null(pkg)
+      &&!is.null(value <- getOption(paste(pkg, name, sep='::'))))
+        return(value)
+    if (!is.null(fun)
+      &&!is.null(value <- getOption(paste(fun, name, sep='::'))))
+        return(value)
+    if (!is.null(value <- getOption(name)))
+        return(value)
+    return(default.value)
 }
 if(FALSE){#! @testing
-    opar <- options()
+    o <-list( 'documentation::default_test_function::test.arg' = 1
+            , 'documentation::inherited.arg' = 2
+            , 'default_test_function::fun.global.arg' = 3
+            , 'global.arg' = "abc"
+            )
 
-    options( 'defaults::documentation::default_test_function::test.arg' = 1
-           , 'defaults::documentation::inherited.arg' = 2
-           , 'defaults::default_test_function::fun.global.arg' = 3
-           , 'defaults::global.arg' = "abc"
-           )
+    withr::with_options(o, {
+        expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1    )
+        expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2    )
+        expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3    )
+        expect_equal(default_('global.arg'    , TRUE, fun='default_test_function', pkg='documentation'), 'abc')
+        expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation')       )
+    })
 
-    expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1    )
-    expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2    )
-    expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3    )
-    expect_equal(default_('global.arg'    , TRUE, fun='default_test_function', pkg='documentation'), 'abc')
-    expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation')       )
-
-    options( 'defaults::default_test_function::test.arg' = 1
-           , 'defaults::inherited.arg' = 2
-           )
-
+    withr::with_options(list( 'default_test_function::test.arg' = 1
+                            , 'inherited.arg' = 2
+                            ), {
     default_test_function <-
     function( which = c('test', 'inherited', 'no')
             , test.arg      = default_('test.arg'      , FALSE, pkg=NULL)
@@ -64,35 +70,28 @@ if(FALSE){#! @testing
     expect_equal(default_test_function('test'), 1)
     expect_equal(default_test_function('inherited'), 2)
     expect_equal(default_test_function('no'), FALSE)
+    })
 
-    options(opar)
 }
 
 default <-
 function( arg
         , default.value = NULL
+        , n = 1
         , ...
-        , which = -1
-        , fun   = as.character(sys.call(which))[[1L]]
-        , where = topenv(environment(sys.function(which)))
-        , pkg   = getPackageName(where)
-        , search.global = FALSE
         ){
     name <- deparse(substitute(arg))
-
-    force(fun)
-    force(pkg)
     default_( name=name, default.value=default.value
-            , fun=fun, pkg=pkg
+            , n=n+1L
             , ...
             )
 }
 if(FALSE){#! @testing
     opar <- options()
-    options( 'defaults::documentation::default_test_function::test.arg' = 1
-           , 'defaults::documentation::inherited.arg'                   = 2
-           , 'defaults::default_test_function::fun.global.arg'          = 3
-           , 'defaults::global.arg' = "abc"
+    options( 'documentation::default_test_function::test.arg' = 1
+           , 'documentation::inherited.arg'                   = 2
+           , 'default_test_function::fun.global.arg'          = 3
+           , 'global.arg' = "abc"
            )
     expect_equal(default(test.arg      , TRUE, fun='default_test_function', pkg='documentation'), 1)
     expect_equal(default(inherited.arg , TRUE, fun='default_test_function', pkg='documentation'), 2)
@@ -101,9 +100,9 @@ if(FALSE){#! @testing
     expect_true (default(no.arg        , TRUE, fun='default_test_function', pkg='documentation'))
 
 
-    options( 'defaults::default_test_function::test.arg' = 1
-           , 'defaults::inherited.arg' = 2
-           , 'defaults::global.arg' = "abc"
+    options( 'default_test_function::test.arg' = 1
+           , 'inherited.arg' = 2
+           , 'global.arg' = "abc"
            )
 
     default_test_function <-
@@ -120,7 +119,6 @@ if(FALSE){#! @testing
               , no        = no.arg
               )
     }
-    default_test_function('global')
 
     expect_equal(default_test_function('test'), 1)
     expect_equal(default_test_function('inherited'), 2)

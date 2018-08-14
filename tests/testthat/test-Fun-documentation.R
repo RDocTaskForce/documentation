@@ -21,7 +21,7 @@ test_that('setGeneric("documentation", ...)', {#! @testing
                               )
     expect_is(documentation(test_function), 'Documentation')
 })
-#line 76 "/rdtf/documentation/R/Fun-documentation.R"
+#line 77 "/rdtf/documentation/R/Fun-documentation.R"
 test_that('documentation<-,ANY,Documentation-method', {#! @testing
     x <- 1
     y <- new('Documentation', title='testing')

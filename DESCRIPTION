@@ -10,32 +10,32 @@ Authors@R: c(
 Maintainer: Andrew Redd <andrew.redd@hsc.utah.edu>
 License: GPL-2
 Imports:
+    assertthat, 
     methods,
-    utils, 
-    tools,
-    roxygen2(>= 6.0.1.9000),
     parsetools,
-    stringr,
     purrr,
-    assertthat
+    rlang,
+    roxygen2(>= 6.0.1.9000),
+    stringi,
+    tools,
+    utils 
 Suggests:
-    htmltools,
-    testthat,
     covr,
+    htmltools,
     rstudioapi,
-    devtools
+    testthat
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
-    'util-infix.R'
+    'util-comma_list.R'
+    'util-interleave.R'
+    'util-str_rep.R'
+    'util-undefined.R'
+    'util-documentationMetaName.R'
     'util-aliases.R'
     'util-errors.R'
-    'util-documentationMetaName.R'
-    'util-undefined.R'
-    'util-str_rep.R'
-    'util-interleave.R'
-    'util-comma_list.R'
+    'util-infix.R'
     'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
@@ -64,6 +64,7 @@ Collate:
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'
     'Fun-toRd-option.R'
+    'Fun-toRd-shiny.R'
     'Fun-write_documentation.R'
     'Funs.R'
 RoxygenNote: 6.0.1.9000

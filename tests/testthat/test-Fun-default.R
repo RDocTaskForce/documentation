@@ -2,26 +2,25 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-default.R`')
-#line 31 "/rdtf/documentation/R/Fun-default.R"
+#line 38 "/rdtf/documentation/R/Fun-default.R"
 test_that('default_', {#! @testing
-    opar <- options()
+    o <-list( 'documentation::default_test_function::test.arg' = 1
+            , 'documentation::inherited.arg' = 2
+            , 'default_test_function::fun.global.arg' = 3
+            , 'global.arg' = "abc"
+            )
 
-    options( 'defaults::documentation::default_test_function::test.arg' = 1
-           , 'defaults::documentation::inherited.arg' = 2
-           , 'defaults::default_test_function::fun.global.arg' = 3
-           , 'defaults::global.arg' = "abc"
-           )
+    withr::with_options(o, {
+        expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1    )
+        expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2    )
+        expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3    )
+        expect_equal(default_('global.arg'    , TRUE, fun='default_test_function', pkg='documentation'), 'abc')
+        expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation')       )
+    })
 
-    expect_equal(default_('test.arg'      , TRUE, fun='default_test_function', pkg='documentation'), 1    )
-    expect_equal(default_('inherited.arg' , TRUE, fun='default_test_function', pkg='documentation'), 2    )
-    expect_equal(default_('fun.global.arg', TRUE, fun='default_test_function', pkg='documentation'), 3    )
-    expect_equal(default_('global.arg'    , TRUE, fun='default_test_function', pkg='documentation'), 'abc')
-    expect_true (default_('no.arg'        , TRUE, fun='default_test_function', pkg='documentation')       )
-
-    options( 'defaults::default_test_function::test.arg' = 1
-           , 'defaults::inherited.arg' = 2
-           )
-
+    withr::with_options(list( 'default_test_function::test.arg' = 1
+                            , 'inherited.arg' = 2
+                            ), {
     default_test_function <-
     function( which = c('test', 'inherited', 'no')
             , test.arg      = default_('test.arg'      , FALSE, pkg=NULL)
@@ -39,16 +38,16 @@ test_that('default_', {#! @testing
     expect_equal(default_test_function('test'), 1)
     expect_equal(default_test_function('inherited'), 2)
     expect_equal(default_test_function('no'), FALSE)
+    })
 
-    options(opar)
 })
-#line 90 "/rdtf/documentation/R/Fun-default.R"
+#line 89 "/rdtf/documentation/R/Fun-default.R"
 test_that('default', {#! @testing
     opar <- options()
-    options( 'defaults::documentation::default_test_function::test.arg' = 1
-           , 'defaults::documentation::inherited.arg'                   = 2
-           , 'defaults::default_test_function::fun.global.arg'          = 3
-           , 'defaults::global.arg' = "abc"
+    options( 'documentation::default_test_function::test.arg' = 1
+           , 'documentation::inherited.arg'                   = 2
+           , 'default_test_function::fun.global.arg'          = 3
+           , 'global.arg' = "abc"
            )
     expect_equal(default(test.arg      , TRUE, fun='default_test_function', pkg='documentation'), 1)
     expect_equal(default(inherited.arg , TRUE, fun='default_test_function', pkg='documentation'), 2)
@@ -57,9 +56,9 @@ test_that('default', {#! @testing
     expect_true (default(no.arg        , TRUE, fun='default_test_function', pkg='documentation'))
 
 
-    options( 'defaults::default_test_function::test.arg' = 1
-           , 'defaults::inherited.arg' = 2
-           , 'defaults::global.arg' = "abc"
+    options( 'default_test_function::test.arg' = 1
+           , 'inherited.arg' = 2
+           , 'global.arg' = "abc"
            )
 
     default_test_function <-
@@ -76,7 +75,6 @@ test_that('default', {#! @testing
               , no        = no.arg
               )
     }
-    default_test_function('global')
 
     expect_equal(default_test_function('test'), 1)
     expect_equal(default_test_function('inherited'), 2)

@@ -25,7 +25,7 @@ function( pkg = '.'      #< Base path of package to document.
     doc.objects <- collect_documentation_objects(env)
     for (doc in doc.objects)
         write_documentation(doc)
-    invisible(lapply(doc.objects, slot, aliases))
+    invisible(lapply(doc.objects, doc_get_aliases))
     # nocov end
 }
 if(FALSE){#@development
@@ -171,7 +171,7 @@ function( str, ext='', space = '_', invalid=''){
     str <- gsub(' ', space, str)
     str <- gsub("[^A-Za-z0-9._!#&+@^]", invalid, str)
     if (grepl("[^A-Za-z0-9._!#&+@^]", ext))
-        doc_error(.("ext contains invalid characters"))
+        doc_error(._("ext contains invalid characters"))
     return(paste0(str, ext))
 }
 if(FALSE){

@@ -62,9 +62,10 @@ setGeneric( 'documentation<-', signature=c('object', 'value')
 
 setMethod('documentation<-', c('ANY', 'Documentation'),
 function( object, value
-        , complete  = getOption("documentation::complete" , NULL)
-        , overwrite = getOption("documentation::overwrite", 'message')
         ){
+    complete  = getOption("documentation::complete" , NULL)
+    overwrite = getOption("documentation::overwrite", 'message')
+
     if (!is.null(overwrite) && !is.null(attr(object, 'documentation')))
         doc_overwrite(NULL, overwrite)
     if (!is.null(complete) && !is_complete(value))

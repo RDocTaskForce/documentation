@@ -181,8 +181,13 @@ function( envir = parent.frame() #< environment with objects to documents.
 if(F){# development
     trace('document_env', browser, at = list(c(9,4,3,3), 9))
     debug(document_package)
+
     envir <- ns <- asNamespace('documentation')
     results <- document_env(ns, exclude="^\\..+")
+
+    library(dplyr)
+    results %>% filter(Name == "%<<%")
+    results %>% filter(Name == "as.filename")
 
     env <- new.env()
     env$.packageName <- "documentation-testing"

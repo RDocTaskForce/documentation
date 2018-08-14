@@ -14,7 +14,7 @@ setClass('Documentation-Default-Value:NULL'      , contains=c('Documentation-Def
 setClass('Documentation-No-Default-Value'        , contains='Documentation-Default-Value' )
 .no.default <- new('Documentation-No-Default-Value')
 #' @export
-`as.character.Documentation-No-Default-Value` <- function(x)''
+`as.character.Documentation-No-Default-Value` <- function(x,...)''
 
 setAs('logical'   , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:logical'   , from)})
 setAs('numeric'   , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:numeric'   , from)})

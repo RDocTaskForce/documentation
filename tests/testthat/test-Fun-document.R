@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-document.R`')
-#line 251 "/rdtf/documentation/R/Fun-document.R"
+#line 256 "/rdtf/documentation/R/Fun-document.R"
 test_that('setGeneric("document", ...)', {#@testing
     env <- environment()
     sys.source( system.file("examples", "example_function1.R", package='documentation')

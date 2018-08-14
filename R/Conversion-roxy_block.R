@@ -29,6 +29,9 @@ setAs('roxy_block', 'function-Documentation', function(from){
               , 'keywords' = {
                     docs@keywords <- as(from[[i]], 'Documentation-Keyword')
               }
+              , 'details' = {
+                    docs@sections[['details']] <- as(from[[i]], 'Prose')
+              }
               , {
                     name <- names(from)[[i]]
                     if (name %in% .roxy.namespace.tags) next

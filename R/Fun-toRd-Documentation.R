@@ -15,7 +15,7 @@ function( obj
     Rd <- structure(lapply(slots, to_tag), names = slots)
     Rd <- Filter(length, Rd)
     if (length(obj@author))
-        Rd[['author']]   <- Rd_tag(comma_list(toRd(obj@author)), 'author')
+        Rd[['author']]   <- Rd_tag(toRd(obj@author), 'author')
     if (!rlang::is_empty(obj@keywords) && !('keywords' %in% exclude))
         Rd[['keywords']] <- toRd(doc_get_keywords(obj))
     if (!rlang::is_empty(obj@aliases) && !('aliases' %in% exclude))
@@ -42,8 +42,8 @@ if(FALSE){#! @testing
     )
     as.rd <- toRd(object)
     expected.names <- c( 'author', 'title', 'description', 'seealso', 'keywords'
-                         , 'aliases', 'references', 'concepts'
-    )
+                       , 'aliases', 'references', 'concepts'
+                       )
     expect_true(all(names(as.rd) %in% expected.names))
     expect_true(all(expected.names %in% names(as.rd)))
 

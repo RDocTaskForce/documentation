@@ -12,3 +12,4 @@
 #' @include  Fun-toRd-arg.R
 #' @include  Fun-toRd-function.R
 #' @include  Fun-toRd-option.R
+#' @include  Fun-toRd-shiny.R
