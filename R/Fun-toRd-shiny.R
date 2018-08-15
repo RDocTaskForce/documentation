@@ -24,7 +24,7 @@
       , ol
       , p, pre, q
       , samp, section, span, strong
-      , table, tbody, td, tfoot, th, thead, title, tr
+      , table, tbody, td, tfoot, th, thead, tr
       , ul
       )
 .html5.tags.disallowed <-
@@ -45,7 +45,7 @@
       , rp, rt, ruby
       , s      #< Used for no text that is longer correct.
       , script, select, source, style, summary
-      , textarea, time, track, tt
+      , textarea, time, title, track, tt
       , var, video, wbr
       )
 
@@ -60,7 +60,7 @@ doc_error_html5_malformed <- function(tag, msg=NULL){
              , type = c("html_to_Rd", "html_to_Rd-malformed_html"))
 }
 html_conversion_information_loss <- function(tag, cond='warning'){
-    doc_condition( type = c('html_to_Rd', 'html_to_Rd-html_extraction')
+    doc_condition( type = c('html_to_Rd', 'html_to_Rd-info_loss')
                  , cond = cond
                  , ._('Extracting text from HTML tag %s, information will be lost'
                      , sQuote(tag))
@@ -134,16 +134,16 @@ if(FALSE){#@testing
 
 html_simple_extractor <-
 function( html
-        , extraction.condition = default(extraction.condition, 'warning', fun='Rd')
+        , warn.info.loss = default(warn.info.loss, 'warning', fun='Rd')
         , ...
         ){
-    html_conversion_information_loss(html$name, extraction.condition)
+    html_conversion_information_loss(html$name, warn.info.loss)
     html_to_Rd(html$children)
 }
 if(FALSE){#@testing
     html <- htmltools::tag('htmltag', varArgs = list('content'))
-    expect_warning( val <- html_simple_extractor(html, extraction.condition='warn')
-                  , class =  "documentation-warning-html_to_Rd-html_extraction")
+    expect_warning( val <- html_simple_extractor(html, warn.info.loss='warn')
+                  , class =  "documentation-warning-html_to_Rd-info_loss")
     expect_is(val, 'Rd')
     expect_equal(unclass(val), "content")
 }
@@ -323,7 +323,7 @@ html_to_Rd.div <- function(html, sub.section=FALSE, ...){
     if (!is.null(html$attribs$title))
         title <- html$attribs$title else
     if (is_header(children[[1]])){
-        title <- html_to_Rd(children[[1]], extraction.condition='none')
+        title <- html_to_Rd(children[[1]], warn.info.loss='none')
         children <- children[-1]
     } else
         doc_error_html5_malformed('div', "cannot determine title of section.")
@@ -386,7 +386,7 @@ html_to_Rd.dl <- function(html, ...){
                 , sQuote('dt'), sQuote('dd')))
         items[[i]] <- s("\\item{" %<<<%
                             html_to_Rd(dt) %<<<% "}{" %<<<%
-                            html_to_Rd(dd, extraction.condition='none') %<<<%
+                            html_to_Rd(dd, warn.info.loss='none') %<<<%
                             "}"
                        , class = 'Rd')
     }
@@ -495,12 +495,59 @@ html_to_Rd.section <- html_to_Rd.div
 html_to_Rd.span <- html_simple_extractor
 
 
-html_to_Rd.strong <- make_simple_html_converter('em','emph')
+
+html_to_Rd.small <-
+function( html
+        , size = default_("Rd.small.size", "\\small")
+        , ...){
+    doc_warning_html5_discouraged('small')
+    match.arg(size, c("\\small", "\\footnotesize", "\\scriptsize", "\\tiny"))
+    content <- Rd(lapply(html$children, html_to_Rd))
+
+    if (length(content)==0)
+        Rd(character(0))
+    else if (length(content)==1)
+        s( sprintf("{%s %s}", size, content), class='Rd')
+    else
+        s(c("{" %<<<% size
+           , content
+           , "}"), class='Rd')
+}
+if(FALSE){#@testing
+    html <- htmltools::tags$small("something small")
+    expect_warning( val <- html_to_Rd(html)
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val), "{\\small something small}")
+
+    expect_warning( val <- html_to_Rd(html, size="\\tiny")
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_identical(unclass(val), "{\\tiny something small}")
+
+    expect_error(suppressWarnings(val <- html_to_Rd(html, size="\\miniscule")))
+
+    html <- htmltools::tags$small(c("something small", "and another thing"))
+    withr::with_options( list("Rd.small.size" = '\\scriptsize'),{
+        expect_warning( val <- html_to_Rd(html)
+                      , class = "documentation-warning-html_to_Rd-discouraged")
+        expect_equal(unclass(val)
+                    , c("{\\scriptsize"
+                       , "something small"
+                       , "and another thing"
+                       , "}"
+                       ) )
+    })
+
+}
+
+html_to_Rd.strong <- make_simple_html_converter('strong','strong')
 
 html_to_Rd.table <-
 function( html
+        , ...
         , col.align = default(col.align, 'l') #< default column alignment.
-        , ...){
+        , collapse.lines = default(collapse.lines, FALSE)
+        ){
     allowed.chilren <- c('thead', 'tbody', 'tfoot')
     ctypes <- html_get_type(html$children)
     assert_that( all(ctypes %in% allowed.chilren)
@@ -509,29 +556,48 @@ function( html
     if (!any(ctypes == 'tbody'))
         doc_error_html5_malformed(._("HTML table element must contain a tbody."))
 
+    body <- html_to_Rd(html$children[[which(ctypes == 'tbody')]], ...)
+    head <- if(any(. <- ctypes == 'thead'))
+        html_to_Rd(html$children[[which(.)]], ...)
+    foot <- if(any(. <- ctypes == 'tfoot'))
+        html_to_Rd(html$children[[which(.)]], ...)
 
-    thead <- html$children[[which(ctypes == 'thead')]]
-    tbody <- html$children[[which(ctypes == 'tbody')]]
-    tfoot <- html$children[[which(ctypes == 'tfoot')]]
+    if (!is.null(head))
+        assert_that( attr(body, 'ncols') == attr(head, 'ncols')
+                   , msg = "HTML tbody and thead do not have the same number of columns")
+    if (!is.null(foot))
+        assert_that( attr(body, 'ncols') == attr(foot, 'ncols')
+                   , msg = "HTML tbody and thead do not have the same number of columns")
 
-    ncols <- attr(thead, 'ncols')
+    nrows <- attr(body, 'nrows') +
+            (attr(head, 'nrows') %||% 0) +
+            (attr(foot, 'nrows') %||% 0)
+    ncols <- attr(body, 'ncols')
+    align <- str_rep(col.align, ncols)
 
-    align <- rep_len(col.align, length.out=)
 
-    if (!is.null(tfoot))
-        html_conversion_information_loss('tfoot')
-    s( c( "\\tabular{"
-        , Rd(lapply(thead, html_to_Rd, ...))  %if% (!is.null(thead))
-        , Rd(lapply( html_to_Rd(tbody, ...)))
-        , Rd(lapply(tfoot, html_to_Rd(tfoot, ...))) %if% (!is.null(tfoot))
-        ), class='Rd')
+    content <- if (collapse.lines)
+        .Rd_collapse( list(head, body, foot), collapse.lines = collapse.lines
+                    , collapse.with = "\\cr" %<<<% collapse.with)
+    else if (nrows > 1L)
+        stringi::stri_split( collapse( c( collapse(head, "\xE1")
+                                        , collapse(body, "\xE1")
+                                        , collapse(foot, "\xE1")
+                                        )
+                                     , with = "\\cr\xE1")
+                           , fixed="\xE1")[[1]]
+    else c(head, body, foot)
+
+    s( c( "\\tabular{" %<<<% align %<<<% '}{'
+        , content
+        ), class='Rd', nrows = nrows, ncols = ncols)
 }
 html_to_Rd.th <-
 function( html
-        , extraction.condition = default(extraction.condition, 'warning', fun='Rd')
+        , warn.info.loss = default(warn.info.loss, 'warning', fun='Rd')
         , ...) {
     html_simple_extractor( html=html
-                         , extraction.condition=extraction.condition
+                         , warn.info.loss=warn.info.loss
                          , ...)
 }
 html_to_Rd.td <- html_simple_extractor
@@ -545,41 +611,51 @@ html_to_Rd.tr <- function(html, head=FALSE, ...){
      , class = 'Rd'
      )
 }
-html_to_Rd.thead <-
-function( html
-        , collapse.lines  = default(collapse.lines, FALSE, fun='Rd')
-        , collapse.with   = default(collapse.with , "\n" , fun='Rd')
-        , ...){
-    assert_that( all(html_get_type(html$children) %in% c('tr')) )
-    rows <- lapply(html$children, html_to_Rd, head=TRUE)
-    if (length(rows)==0) return(Rd(character(0)))
-
-    ncols <- max(purrr::map_int(rows, attr, 'ncols'))
-
-    if (collapse.lines)
-        s(.Rd_collapse( rows, collapse.lines = collapse.lines
-                      , collapse.with = " \\cr " %<<<% collapse.with)
-         , ncols = ncols, nrows = length(rows))
-    else if(length(rows) > 1L)
-        s( stringi::stri_split(collapse(rows, with = " \\cr\xE1"), fixed="\xE1")[[1]]
-         , ncols = ncols, nrows = length(rows))
-    else s( rows[[1]]
-          , ncols = ncols, nrows = length(rows))
-}
 html_to_Rd.tbody <-
-function( html
-        , collapse.lines  = default(collapse.lines, FALSE, fun='Rd')
-        , collapse.with   = default(collapse.with , "\n" , fun='Rd')
-        , ...){
+function( html, ...
+        , collapse.lines  = default(collapse.lines, FALSE)
+        , collapse.with   = default(collapse.with , "\n")
+        , warn.info.loss  = default(warn.info.loss, 'none')
+        ){
     assert_that( all(html_get_type(html$children) %in% c('tr')) )
-    rows <- lapply(html$children, html_to_Rd, head=FALSE)
+    rows <- lapply(html$children, html_to_Rd, head=FALSE
+                  , warn.info.loss=warn.info.loss )
     if (length(rows)==0) return(Rd(character(0)))
 
     ncols <- max(purrr::map_int(rows, attr, 'ncols'))
 
     if (collapse.lines)
         s(.Rd_collapse( rows, collapse.lines = collapse.lines
-                      , collapse.with = " \\cr " %<<<% collapse.with)
+                      , collapse.with = "\\cr" %<<<% collapse.with)
+         , ncols = ncols, nrows = length(rows))
+    else if(length(rows) > 1L)
+        s( stringi::stri_split(collapse(rows, with = "\\cr\xE1"), fixed="\xE1")[[1]]
+         , ncols = ncols, nrows = length(rows))
+    else s( rows[[1]]
+          , ncols = ncols, nrows = length(rows))
+}
+html_to_Rd.tfoot <-
+function(html, ..., warn.info.loss  = default(warn.info.loss, 'message')){
+    html_conversion_information_loss('tfoot', cond = warn.info.loss)
+    html_to_Rd.tbody(html, warn.info.loss = warn.info.loss, ...)
+}
+html_to_Rd.thead <-
+function( html, ...
+        , collapse.lines  = default(collapse.lines, FALSE)
+        , collapse.with   = default(collapse.with , "\n")
+        , warn.info.loss  = default(warn.info.loss, 'warn')
+        ){
+    assert_that( all(html_get_type(html$children) %in% c('tr')) )
+    rows <- lapply( html$children, html_to_Rd, head=TRUE
+                  , warn.info.loss=warn.info.loss )
+    if (length(rows)==0) return(Rd(character(0)))
+
+    ncols <- max(purrr::map_int(rows, attr, 'ncols'))
+
+    if (collapse.lines)
+        s(.Rd_collapse( rows
+                      , collapse.lines = collapse.lines
+                      , collapse.with = " \\cr" %<<<% collapse.with)
          , ncols = ncols, nrows = length(rows))
     else if(length(rows) > 1L)
         s( stringi::stri_split(collapse(rows, with = " \\cr\xE1"), fixed="\xE1")[[1]]
@@ -587,12 +663,7 @@ function( html
     else s( rows[[1]]
           , ncols = ncols, nrows = length(rows))
 }
-
-if(FALSE){#@testing
-    x <- htmlTable::htmlTable(head(iris, 10))
-
-    matrix(sample(c(rep('X', 5), rep('O', 4))), 3,3)
-
+if(FALSE){#@testing html_to_Rd.* table functions
     html <-
         with(htmltools::tags, {
             table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
@@ -605,13 +676,40 @@ if(FALSE){#@testing
                  )
         })
     thead <- html$children[[1]]
-    tbody <- html$children[[1]]
-    tfoot <- html$children[[1]]
+    tbody <- html$children[[2]]
+    tfoot <- html$children[[3]]
 
-    html <- thead$children[[1]]
+    expect_warning( head <- html_to_Rd(thead)
+                  , class =  "documentation-warning-html_to_Rd-info_loss")
+    expect_equal(unclass(head), s(" \\tab C1 \\tab C2 \\tab C3", ncols=4L, nrows=1L))
 
-    html <- thead
+    body <- html_to_Rd(tbody)
+    expect_equal( unclass(body)
+                , s(c( "R1 \\tab O \\tab X \\tab O\\cr"
+                     , "R2 \\tab X \\tab X \\tab O\\cr"
+                     , "R3 \\tab O \\tab X \\tab X"
+                     )
+                   , ncols=4L, nrows=3L))
 
+    expect_message( foot <- html_to_Rd(tfoot)
+                  , class =  "documentation-message-html_to_Rd-info_loss")
+
+    expect_equal( unclass(foot)
+                , s("Count \\tab 1 \\tab 3 \\tab 1", ncols=4L, nrows=1L)
+                )
+
+    val <- html_to_Rd(html, warn.info.loss='none')
+    expect_is(val, 'Rd')
+    expect_equal(unclass(val)
+                , s(c( "\\tabular{llll}{"
+                     , " \\tab C1 \\tab C2 \\tab C3\\cr"
+                     , "R1 \\tab O \\tab X \\tab O\\cr"
+                     , "R2 \\tab X \\tab X \\tab O\\cr"
+                     , "R3 \\tab O \\tab X \\tab X\\cr"
+                     , "Count \\tab 1 \\tab 3 \\tab 1"
+                     )
+                   , nrows = 5, ncols = 4)
+                )
 
 }
 

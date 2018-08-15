@@ -37,7 +37,7 @@ test_that('default_', {#! @testing
                   )
         }
         default_test_function('test')
-    
+
         expect_equal(default_test_function('test'), 1)
         expect_equal(default_test_function('inherited'), 2)
         expect_equal(default_test_function('global'), 3)
@@ -49,14 +49,14 @@ test_that('default_', {#! @testing
                               , test.arg      = default_('test.arg'      , FALSE
                                                         , prefix="DEFAULTS"
                                                         , pkg='test-documentation'
-                                                        , suffix="OVERRIDE" 
+                                                        , suffix="OVERRIDE"
                                                         )
                               ){
         cat( "test.arg=" %<<<% test.arg %<<<% "\n")
         invisible(x)
     }
 
-    trace(default_, exit = 
+    trace(default_, exit =
               substitute(doc_error("Documentation debugging\n"
                                     , domains=domains
                                     , type = "trace_test")))
@@ -79,7 +79,7 @@ test_that('default', {#! @testing
     test_default2 <- function(x=default(inherited.arg , TRUE, fun='default_test_function', pkg='documentation'))x
     test_default3 <- function(x=default(global.arg    , TRUE, fun='default_test_function', pkg='documentation'))x
     test_default4 <- function(x=default(no.arg        , TRUE, fun='default_test_function', pkg='documentation'))x
-    
+
     expect_equal(test_default1(), 1)
     expect_equal(test_default2(), 2)
     expect_equal(test_default3(), 'abc')

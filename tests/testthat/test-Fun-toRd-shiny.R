@@ -21,8 +21,8 @@ test_that('make_simple_html_converter', {#@testing
 #line 143 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_simple_extractor', {#@testing
     html <- htmltools::tag('htmltag', varArgs = list('content'))
-    expect_warning( val <- html_simple_extractor(html, extraction.condition='warn')
-                  , class =  "documentation-warning-html_to_Rd-html_extraction")
+    expect_warning( val <- html_simple_extractor(html, warn.info.loss='warn')
+                  , class =  "documentation-warning-html_to_Rd-info_loss")
     expect_is(val, 'Rd')
     expect_equal(unclass(val), "content")
 })
@@ -162,12 +162,35 @@ test_that('html_to_Rd.p', {#@testing
     expect_is(html_to_Rd(htmltools::p("text")), 'Rd')
     expect_equal(unclass(html_to_Rd(htmltools::p("text"))), c("text", ""))
 })
-#line 591 "/rdtf/documentation/R/Fun-toRd-shiny.R"
-test_that('html_to_Rd.tbody', {#@testing
-    x <- htmlTable::htmlTable(head(iris, 10))
+#line 516 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_to_Rd.small', {#@testing
+    html <- htmltools::tags$small("something small")
+    expect_warning( val <- html_to_Rd(html)
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val), "{\\small something small}")
 
-    matrix(sample(c(rep('X', 5), rep('O', 4))), 3,3)
+    expect_warning( val <- html_to_Rd(html, size="\\tiny")
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_identical(unclass(val), "{\\tiny something small}")
 
+    expect_error(suppressWarnings(val <- html_to_Rd(html, size="\\miniscule")))
+
+    html <- htmltools::tags$small(c("something small", "and another thing"))
+    withr::with_options( list("Rd.small.size" = '\\scriptsize'),{
+        expect_warning( val <- html_to_Rd(html)
+                      , class = "documentation-warning-html_to_Rd-discouraged")
+        expect_equal(unclass(val)
+                    , c("{\\scriptsize"
+                       , "something small"
+                       , "and another thing"
+                       , "}"
+                       ) )
+    })
+
+})
+#line 670 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_to_Rd.thead', {#@testing
     html <-
         with(htmltools::tags, {
             table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
@@ -180,12 +203,29 @@ test_that('html_to_Rd.tbody', {#@testing
                  )
         })
     thead <- html$children[[1]]
-    tbody <- html$children[[1]]
-    tfoot <- html$children[[1]]
+    tbody <- html$children[[2]]
+    tfoot <- html$children[[3]]
 
-    html <- thead$children[[1]]
+    expect_warning( head <- html_to_Rd(thead)
+                  , class =  "documentation-warning-html_to_Rd-info_loss")
+    expect_equal(unclass(vhead), s(" \\tab C1 \\tab C2 \\tab C3", ncols=4L, nrows=1L))
 
-    html <- thead
+    body <- html_to_Rd(tbody)
+    expect_equal( unclass(body)
+                , s(c( "R1 \\tab O \\tab X \\tab O\\cr"
+                     , "R2 \\tab X \\tab X \\tab O\\cr"
+                     , "R3 \\tab O \\tab X \\tab X"
+                     )
+                   , ncols=4L, nrows=3L))
+
+    expect_message( foot <- html_to_Rd(tfoot)
+                  , class =  "documentation-message-html_to_Rd-info_loss")
+
+    expect_equal( unclass(foot)
+                , s("Count \\tab 1 \\tab 3 \\tab 1", ncols=4L, nrows=1L)
+                )
+
+    val <- html_to_Rd(html, warn.info.loss='none')
 
 
 })

@@ -28,6 +28,7 @@ Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
+    'util-postlogic.R'
     'util-comma_list.R'
     'util-interleave.R'
     'util-str_rep.R'
@@ -67,6 +68,7 @@ Collate:
     'Fun-toRd-shiny.R'
     'Fun-write_documentation.R'
     'Funs.R'
+    'util-generics.R'
 RoxygenNote: 6.0.1.9000
 Enhances: devtools
 Encoding: UTF-8
