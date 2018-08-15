@@ -5,6 +5,7 @@
     if (inherits(object, 'Rd')) return(TRUE)
     if (is.character(object)) return(TRUE)
     else if (is.list(object)){
+        if (length(object) == 0) return(TRUE)
         if (all( sapply(object, is.character)
                | sapply(object, is.null)
                )) return(TRUE)
@@ -251,7 +252,7 @@ function( content
     if (!inherits(content, 'Rd'))
         content <- toRd(content, ...)
     if (length(opt)>0L)
-        name <- name %<<<% '[' %<<<% comma_list(opt) %<<<% ']' 
+        name <- name %<<<% '[' %<<<% comma_list(opt) %<<<% ']'
     if (length(content) == 1)
         s( sprintf("\\%s{%s}", name, content), class=c('Rd_tag', 'Rd'))
     else
@@ -277,7 +278,7 @@ if(FALSE){#! @testing
     expect_is(as.tag, 'Rd_tag')
     expect_length(as.tag, 7)
     expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
-    
+
     val <- Rd_tag('dest', 'link', opt='pkg')
     expect_is(val, 'Rd')
     expect_identical(unclass(val), "\\link[pkg]{dest}")

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd.R`')
-#line 128 "/rdtf/documentation/R/Fun-toRd.R"
+#line 127 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('.Rd_indent', {#@testing
     x <- c("test strings", "second line")
 
@@ -40,7 +40,7 @@ test_that('.Rd_indent', {#@testing
     expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
                   , class = "documentation-warning" )
 })
-#line 212 "/rdtf/documentation/R/Fun-toRd.R"
+#line 211 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('.Rd_strwrap', {#@testing
     x <- stringi::stri_rand_lipsum(1)
 
@@ -73,7 +73,7 @@ test_that('.Rd_strwrap', {#@testing
                     , c("   hello", "", "   world")
                     )
 })
-#line 261 "/rdtf/documentation/R/Fun-toRd.R"
+#line 263 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('test', NULL), "name is not a string")
     expect_error(Rd_tag('test', c('a', 'b')), "name is not a string")
@@ -92,8 +92,12 @@ test_that('Rd_tag', {#! @testing
     expect_is(as.tag, 'Rd_tag')
     expect_length(as.tag, 7)
     expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
+
+    val <- Rd_tag('dest', 'link', opt='pkg')
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val), "\\link[pkg]{dest}")
 })
-#line 291 "/rdtf/documentation/R/Fun-toRd.R"
+#line 297 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,person-method', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     val <- toRd(object)
@@ -118,7 +122,7 @@ test_that('toRd,person-method', {#! @testing
                            , class='Rd')
                 )
 })
-#line 317 "/rdtf/documentation/R/Fun-toRd.R"
+#line 323 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('documentation bibstyle', {#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     default.style <- toRd(object, style='JSS')
@@ -126,7 +130,7 @@ test_that('documentation bibstyle', {#!@testing documentation bibstyle
 
     expect_true(default.style != doc.style)
 })
-#line 327 "/rdtf/documentation/R/Fun-toRd.R"
+#line 333 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     val <- toRd(obj)
@@ -134,7 +138,7 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( unclass(val)
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 348 "/rdtf/documentation/R/Fun-toRd.R"
+#line 354 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,FormattedText-method', {#! @testing
     obj <- FormattedText()
     expect_identical(toRd(obj), Rd(character(0)))
@@ -149,7 +153,7 @@ test_that('toRd,FormattedText-method', {#! @testing
     expect_is(as.rd, 'Rd')
     expect_identical(mode(as.rd), 'character')
 })
-#line 371 "/rdtf/documentation/R/Fun-toRd.R"
+#line 377 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,FormattedText-method', {#@testing
     obj <- new('FormattedText', txt <- stringi::stri_rand_lipsum(3))
     expect_is(obj, 'vector')
