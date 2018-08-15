@@ -153,10 +153,3 @@ test_that('toRd,FormattedText-method', {#! @testing
     expect_is(as.rd, 'Rd')
     expect_identical(mode(as.rd), 'character')
 })
-#line 377 "/rdtf/documentation/R/Fun-toRd.R"
-test_that('toRd,FormattedText-method', {#@testing
-    obj <- new('FormattedText', txt <- stringi::stri_rand_lipsum(3))
-    expect_is(obj, 'vector')
-    as.rd <- toRd(obj, 'description')
-    expect_equal(unclass(as.rd), Rd(txt))
-})

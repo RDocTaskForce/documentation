@@ -366,18 +366,3 @@ if(FALSE){#! @testing
     expect_identical(mode(as.rd), 'character')
 }
 
-
-#' @export
-# setMethod('toRd', 'vector',
-# function(obj, name=deparse(substitute(obj)), ...){
-#     if (length(obj) == 0) return(character(0))
-#     if(is.atomic(obj)) Rd_tag(NextMethod(toRd, obj), name=name)
-#     Rd_tag(sapply(obj, toRd), name=name)
-# })
-if(FALSE){#@testing
-    obj <- new('FormattedText', txt <- stringi::stri_rand_lipsum(3))
-    expect_is(obj, 'vector')
-    as.rd <- toRd(obj, 'description')
-    expect_equal(unclass(as.rd), Rd(txt))
-}
-
