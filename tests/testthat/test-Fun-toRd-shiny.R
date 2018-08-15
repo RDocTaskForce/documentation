@@ -72,17 +72,17 @@ test_that('html_to_Rd.a', {#@testing
     expect_error( html_to_Rd(htmltools::a("some text", href="somewhere over the rainbow"))
                 , class = "documentation-error-html_to_Rd" )
 })
-#line 239 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 240 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.abbr', {#@testing
     html <- htmltools::tags$abbr("GPL")
     val <- html_to_Rd(html)
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\acronym{GPL}")
 
-    expect_warning(html_to_Rd(htmltools::tags$abbr("not an acronym"))
-                   , class = 'documentation-warning-html_to_Rd')
+    expect_warning( html_to_Rd(htmltools::tags$abbr("not an acronym"))
+                  , class = 'documentation-warning-html_to_Rd')
 })
-#line 267 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 268 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.b', {#@testing
     html <- htmltools::tags$b("something to bold")
     expect_warning( val <- html_to_Rd(html)
@@ -90,14 +90,14 @@ test_that('html_to_Rd.b', {#@testing
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\b{something to bold}")
 })
-#line 279 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 280 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.br', {#@testing
     html <- htmltools::tags$br()
     val <- html_to_Rd(html)
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\cr")
 })
-#line 303 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 304 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.code', {#@testing
     html <- htmltools::code("plot(rnorm(100))")
     rd <- html_to_Rd(html)
@@ -111,7 +111,7 @@ test_that('html_to_Rd.code', {#@testing
     expect_is(rd, 'Rd')
     expect_identical(unclass(rd), "\\code{'a' \\%in\\% letters}")
 })
-#line 395 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 396 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.dl', {#@testing
     html <- htmltools::tags$dl( htmltools::tags$dt("term1")
                                 , htmltools::tags$dd("definition 1.")
@@ -132,7 +132,7 @@ test_that('html_to_Rd.dl', {#@testing
                    , "}"
                    ) )
 })
-#line 442 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 443 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.img', {#@testing
     html <- htmltools::tags$img(src='test.png', alt ='alternate text', height=100, width=100)
     val <- html_to_Rd(html)
@@ -140,14 +140,14 @@ test_that('html_to_Rd.img', {#@testing
     expect_equal( unclass(val)
                 , "\\figure{test.png}{options: alt=\"alternate text\" height=100 width=100}")
 })
-#line 451 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 452 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.kbd', {#@testing
     html <- htmltools::tags$kbd("abc")
     val <- html_to_Rd(html)
     expect_is(val, 'Rd')
     expect_equal( unclass(val), "\\kbd{abc}")
 })
-#line 462 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 463 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.li', {#@testing
     html <- htmltools::tags$li("some ", htmltools::tags$em('text'), '.')
     val <- html_to_Rd(html)
@@ -155,14 +155,14 @@ test_that('html_to_Rd.li', {#@testing
     expect_equal( unclass(val)
                 , "\\item some \\emph{text}.")
 })
-#line 483 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 484 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.p', {#@testing
     expect_is(html_to_Rd(htmltools::p()), 'Rd')
     expect_equal(unclass(html_to_Rd(htmltools::p())), character(0))
     expect_is(html_to_Rd(htmltools::p("text")), 'Rd')
     expect_equal(unclass(html_to_Rd(htmltools::p("text"))), c("text", ""))
 })
-#line 516 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 517 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.small', {#@testing
     html <- htmltools::tags$small("something small")
     expect_warning( val <- html_to_Rd(html)
@@ -189,8 +189,8 @@ test_that('html_to_Rd.small', {#@testing
     })
 
 })
-#line 670 "/rdtf/documentation/R/Fun-toRd-shiny.R"
-test_that('html_to_Rd.thead', {#@testing
+#line 667 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_to_Rd.* table functions', {#@testing html_to_Rd.* table functions
     html <-
         with(htmltools::tags, {
             table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
@@ -208,7 +208,7 @@ test_that('html_to_Rd.thead', {#@testing
 
     expect_warning( head <- html_to_Rd(thead)
                   , class =  "documentation-warning-html_to_Rd-info_loss")
-    expect_equal(unclass(vhead), s(" \\tab C1 \\tab C2 \\tab C3", ncols=4L, nrows=1L))
+    expect_equal(unclass(head), s(" \\tab C1 \\tab C2 \\tab C3", ncols=4L, nrows=1L))
 
     body <- html_to_Rd(tbody)
     expect_equal( unclass(body)
@@ -226,6 +226,16 @@ test_that('html_to_Rd.thead', {#@testing
                 )
 
     val <- html_to_Rd(html, warn.info.loss='none')
-
+    expect_is(val, 'Rd')
+    expect_equal(unclass(val)
+                , s(c( "\\tabular{llll}{"
+                     , " \\tab C1 \\tab C2 \\tab C3\\cr"
+                     , "R1 \\tab O \\tab X \\tab O\\cr"
+                     , "R2 \\tab X \\tab X \\tab O\\cr"
+                     , "R3 \\tab O \\tab X \\tab X\\cr"
+                     , "Count \\tab 1 \\tab 3 \\tab 1"
+                     )
+                   , nrows = 5, ncols = 4)
+                )
 
 })

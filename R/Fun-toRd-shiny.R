@@ -230,8 +230,9 @@ html_to_Rd.abbr <- function(html, ...){
     )
     content <- html$children[[1]]
     if (!grepl("^[A-Z]+$", content))
-        doc_warning(._("HTML tag %s maps to Rd tag acronym, " %<<%
-                           "It should consist of all capitol letters.", dQuote(format(html)) )
+        doc_warning(._( "HTML tag %s maps to Rd tag acronym, " %<<%
+                           "It should consist of all capitol letters."
+                      , dQuote(html$name))
                     , type = "html_to_Rd" )
     Rd_tag(Rd(content), 'acronym')
 
@@ -242,8 +243,8 @@ if(FALSE){#@testing
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\acronym{GPL}")
 
-    expect_warning(html_to_Rd(htmltools::tags$abbr("not an acronym"))
-                   , class = 'documentation-warning-html_to_Rd')
+    expect_warning( html_to_Rd(htmltools::tags$abbr("not an acronym"))
+                  , class = 'documentation-warning-html_to_Rd')
 }
 
 html_to_Rd.aside <- make_simple_html_converter('aside', 'note')
