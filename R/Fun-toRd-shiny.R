@@ -66,7 +66,75 @@ html_conversion_information_loss <- function(tag, cond='warning'){
                      , sQuote(tag))
                  )
 }
+html_get_type <- function(x){
+    if (identical(class(x), 'list')) return(sapply(x, html_get_type))
+    else if (identical(class(x), 'shiny.tag')) return(x$name)
+    else if (is.character(x)) return("")
+    else doc_error(._("Cannot get HTML type from type %s", dQuote(class(x))))
+}
+if(FALSE){#@testing
+    e <- htmltools::em('with some emphatic text.')
+    a <- htmltools::tags$p( "Some paragraph text", e)
+    b <- htmltools::code("plot(rnorm(100))")
+    x <- htmltools::tags$div( a, b)
+    
+    expect_identical(html_get_type(x), 'div')
+    expect_identical(html_get_type(x$children), c('p', 'code'))
+}
 
+html_is_type <- function(html, type){
+    assert_that(inherits(html, 'shiny.tag'))
+    html_get_type(html) == type
+}
+on_failure(html_is_type) <- function(call, env){
+    actual.class <- html_get_type(eval(call$html, envir = env))
+    expected.class <- eval(call$type, envir = env)
+    deparse(call$html)  %<<% 
+        "is of type" %<<% dQuote(actual.class) %<<<% 
+        ";" %<<% "expected a" %<<% dQuote(expected.class)
+}
+if(FALSE){#@testing html_is_type
+    a <- htmltools::a('link')
+    expect_true(html_is_type(a, 'a')) 
+    
+    withr::with_options(list(useFancyQuotes=FALSE), 
+                        expect_equal( see_if(html_is_type(a, 'li'))
+                                      , s(FALSE, msg = 'a is of type "a"; expected a "li"') 
+                        ))
+}
+
+html_has_valid_children <- 
+function(html, allowed){
+    ctypes <- html_get_type(html$children)
+    good <- ctypes %in% allowed
+    if (all(good)) return(TRUE)
+    bad.tags <- sort(unique(ctypes[!good]))
+    msg <- ._("HTML tag %s contains invalid child", html_get_type(html)) %<<%
+           ngettext( sum(!good), "tag", "tags") %<<% 
+           ngettext( length(bad.tags), "of type", "of types") %<<%
+           comma_list(bad.tags) %<<<% '.'
+    s(FALSE, msg=msg)
+}
+if(FALSE){#@testing
+    good.html <- with(htmltools::tags, ol(li('hello'), li("world") ))
+    expect_true(see_if(html_has_valid_children(good.html, 'li')))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition") ))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of types dd and dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition"), a("link") ))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of types a, dd, and dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term")))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tag of type dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dt("term")))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of type dt."))
+}
 
 html_to_Rd <- function(html, ...){
     if (inherits(html, 'Rd')) return(html)
@@ -90,11 +158,11 @@ html_to_Rd <- function(html, ...){
 }
 
 make_simple_html_converter <-
-function(html.tag, rd.tag){
+function(html.tag, rd.tag, allowed.children=NULL, envir = parent.frame()){
+    assert_that(is.string(html.tag), is.string(rd.tag))
     args <- AL( html = arg_('html', 'a shiny.tag object of type' %<<<% html.tag)
               , '...' =arg_('...' , 'Ignored.')
               )
-
     docs <- function_documentation(
         title = "Convert HTML tag" %<<% sQuote(html.tag) %<<%
                 "to Rd tag" %<<% sQuote(rd.tag),
@@ -106,12 +174,34 @@ function(html.tag, rd.tag){
         value = FormattedText("A vector of mode character correctly escaped" %<<%
                               "and classed as 'Rd_tag' and 'Rd'.")
         )
-
-    fun <- eval(substitute(
-        function(html, ...)
-            Rd_tag(html_to_Rd(html$children), rd.tag)
-    ), envir=parent.frame())
-
+    fun <- 
+    if (!is.null(allowed.children)) {
+        assert_that(is.character(allowed.children))
+        expr <- substitute( env=list( allowed.children = allowed.children
+                                    , html.tag=html.tag
+                                    , rd.tag=rd.tag
+                                    ),
+            function(html, ...){
+                assert_that( html_is_type(html, html.tag)
+                           , html_has_valid_children(html, allowed=allowed.children)
+                           )
+                Rd_tag(html_to_Rd(html$children), rd.tag)
+            }
+        )
+        s( eval(expr, envir=envir)
+         , allowed.children = allowed.children
+         , rd.tag = rd.tag
+         )
+    } else {
+        expr <- substitute(#env=list(rd.tag=rd.tag, html.tag=html.tag),
+            function(html, ...){
+                assert_that( inherits(html, 'shiny.tag')
+                           , html_get_type(html) == html.tag
+                           )
+                Rd_tag(html_to_Rd(html$children), rd.tag)
+            })
+        eval(expr, envir=parent.frame())
+    }
     documentation(fun) <- docs
     fun
 }
@@ -120,8 +210,12 @@ if(FALSE){#@testing
     expect_identical( formals(test_fun)
                     , as.pairlist(alist(html=, ...=))
                     )
-    expect_identical( deparse(body(test_fun))
-                    , "Rd_tag(html_to_Rd(html$children), \"rdtag\")"
+    expect_identical( trimws(deparse(body(test_fun), 500))
+                    , c( '{'
+                       , "assert_that(inherits(html, \"shiny.tag\"), html_get_type(html) == \"htmltag\")"
+                       , "Rd_tag(html_to_Rd(html$children), \"rdtag\")"
+                       , "}"
+                       )
                     )
     expect_true(is_documented('test_fun', environment(), complete=FALSE))
 
@@ -129,6 +223,12 @@ if(FALSE){#@testing
     val <- test_fun(html)
     expect_is(val, 'Rd_tag')
     expect_equal(unclass(val), "\\rdtag{content}")
+    
+    expect_error(test_fun(htmltools::tag('not the right tag', varArgs = list('content'))))
+    
+    test_children <- make_simple_html_converter('htmltag', 'rdtag', allowed.children = c('tag1', 'tag2'))
+    expect_is(test_children, 'function')
+    
 }
 
 
@@ -149,21 +249,6 @@ if(FALSE){#@testing
 }
 
 
-html_get_type <- function(x){
-    if (identical(class(x), 'list')) return(sapply(x, html_get_type))
-    else if (identical(class(x), 'shiny.tag')) return(x$name)
-    else if (is.character(x)) return("")
-    else doc_error(._("Cannot get HTML type from type %s", dQuote(class(x))))
-}
-if(FALSE){#@testing
-    e <- htmltools::em('with some emphatic text.')
-    a <- htmltools::tags$p( "Some paragraph text", e)
-    b <- htmltools::code("plot(rnorm(100))")
-    x <- htmltools::tags$div( a, b)
-
-    expect_identical(html_get_type(x), 'div')
-    expect_identical(html_get_type(x$children), c('p', 'code'))
-}
 
 .protocols <- .T(http, https, ftp, mailto, file, data, irc)
 url.pattern <- paste0('^(', collapse(.protocols, with='|'), ')://')
@@ -468,10 +553,24 @@ if(FALSE){#@testing
                 , "\\item some \\emph{text}.")
 }
 
-html_to_Rd.ol <- function(html, ...){
-    if (length(html$children == 0)) return(Rd(character(0)))
-    assert_that( all( sapply(html$children, `[[`, 'name') == 'li') )
-    Rd_tag(Rd(lapply(children, html_to_Rd)), 'enumerate')
+html_to_Rd.ol <- make_simple_html_converter('ol', 'itemize', 'li')
+if(FALSE){#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                  , c( "\\itemize{"
+                       , "\\item First" 
+                       , "\\item Second" 
+                       , "}" 
+                  )) 
+    
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                                 , htmltools::tags$dl("Second")
+    ))
+    )    
 }
 
 
@@ -714,6 +813,26 @@ if(FALSE){#@testing html_to_Rd.* table functions
 
 }
 
+
+html_to_Rd.ul <- make_simple_html_converter('ul', 'itemize', 'li')
+if(FALSE){#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                , c( "\\itemize{"
+                   , "\\item First" 
+                   , "\\item Second" 
+                   , "}" 
+                   )) 
+
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                               , htmltools::tags$dl("Second")
+                                               ))
+                )    
+}
 
 if(FALSE){#Development
     e <- htmltools::em('with some emphatic text.')
