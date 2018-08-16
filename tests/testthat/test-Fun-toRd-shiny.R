@@ -2,14 +2,59 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-shiny.R`')
+#line 75 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_get_type', {#@testing
+    e <- htmltools::em('with some emphatic text.')
+    a <- htmltools::tags$p( "Some paragraph text", e)
+    b <- htmltools::code("plot(rnorm(100))")
+    x <- htmltools::tags$div( a, b)
+    
+    expect_identical(html_get_type(x), 'div')
+    expect_identical(html_get_type(x$children), c('p', 'code'))
+})
+#line 96 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_is_type', {#@testing html_is_type
+    a <- htmltools::a('link')
+    expect_true(html_is_type(a, 'a')) 
+    
+    withr::with_options(list(useFancyQuotes=FALSE), 
+                        expect_equal( see_if(html_is_type(a, 'li'))
+                                      , s(FALSE, msg = 'a is of type "a"; expected a "li"') 
+                        ))
+})
 #line 118 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_has_valid_children', {#@testing
+    good.html <- with(htmltools::tags, ol(li('hello'), li("world") ))
+    expect_true(see_if(html_has_valid_children(good.html, 'li')))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition") ))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of types dd and dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition"), a("link") ))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of types a, dd, and dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term")))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tag of type dt."))
+    
+    bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dt("term")))
+    expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
+                , s(FALSE, msg="HTML tag ol contains invalid child tags of type dt."))
+})
+#line 208 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('make_simple_html_converter', {#@testing
     test_fun <- make_simple_html_converter('htmltag', 'rdtag')
     expect_identical( formals(test_fun)
                     , as.pairlist(alist(html=, ...=))
                     )
-    expect_identical( deparse(body(test_fun))
-                    , "Rd_tag(html_to_Rd(html$children), \"rdtag\")"
+    expect_identical( trimws(deparse(body(test_fun), 500))
+                    , c( '{'
+                       , "assert_that(inherits(html, \"shiny.tag\"), html_get_type(html) == \"htmltag\")"
+                       , "Rd_tag(html_to_Rd(html$children), \"rdtag\")"
+                       , "}"
+                       )
                     )
     expect_true(is_documented('test_fun', environment(), complete=FALSE))
 
@@ -17,8 +62,14 @@ test_that('make_simple_html_converter', {#@testing
     val <- test_fun(html)
     expect_is(val, 'Rd_tag')
     expect_equal(unclass(val), "\\rdtag{content}")
+    
+    expect_error(test_fun(htmltools::tag('not the right tag', varArgs = list('content'))))
+    
+    test_children <- make_simple_html_converter('htmltag', 'rdtag', allowed.children = c('tag1', 'tag2'))
+    expect_is(test_children, 'function')
+    
 })
-#line 143 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 243 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_simple_extractor', {#@testing
     html <- htmltools::tag('htmltag', varArgs = list('content'))
     expect_warning( val <- html_simple_extractor(html, warn.info.loss='warn')
@@ -26,17 +77,7 @@ test_that('html_simple_extractor', {#@testing
     expect_is(val, 'Rd')
     expect_equal(unclass(val), "content")
 })
-#line 158 "/rdtf/documentation/R/Fun-toRd-shiny.R"
-test_that('html_get_type', {#@testing
-    e <- htmltools::em('with some emphatic text.')
-    a <- htmltools::tags$p( "Some paragraph text", e)
-    b <- htmltools::code("plot(rnorm(100))")
-    x <- htmltools::tags$div( a, b)
-
-    expect_identical(html_get_type(x), 'div')
-    expect_identical(html_get_type(x$children), c('p', 'code'))
-})
-#line 179 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 264 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('is_rd_link', {#@testing
     expect_true(is_rd_link(''))
     expect_true(is_rd_link('=abc-class'))
@@ -44,7 +85,7 @@ test_that('is_rd_link', {#@testing
     expect_true(is_rd_link('base:abc'))
     expect_false(is_rd_link("http://r-project.org"))
 })
-#line 199 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 284 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.a', {#@testing
     a <- htmltools::a("some text", href="https://r-project.org")
 
@@ -72,7 +113,7 @@ test_that('html_to_Rd.a', {#@testing
     expect_error( html_to_Rd(htmltools::a("some text", href="somewhere over the rainbow"))
                 , class = "documentation-error-html_to_Rd" )
 })
-#line 240 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 325 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.abbr', {#@testing
     html <- htmltools::tags$abbr("GPL")
     val <- html_to_Rd(html)
@@ -82,7 +123,7 @@ test_that('html_to_Rd.abbr', {#@testing
     expect_warning( html_to_Rd(htmltools::tags$abbr("not an acronym"))
                   , class = 'documentation-warning-html_to_Rd')
 })
-#line 268 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 353 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.b', {#@testing
     html <- htmltools::tags$b("something to bold")
     expect_warning( val <- html_to_Rd(html)
@@ -90,14 +131,14 @@ test_that('html_to_Rd.b', {#@testing
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\b{something to bold}")
 })
-#line 280 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 365 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.br', {#@testing
     html <- htmltools::tags$br()
     val <- html_to_Rd(html)
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\cr")
 })
-#line 304 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 389 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.code', {#@testing
     html <- htmltools::code("plot(rnorm(100))")
     rd <- html_to_Rd(html)
@@ -111,7 +152,7 @@ test_that('html_to_Rd.code', {#@testing
     expect_is(rd, 'Rd')
     expect_identical(unclass(rd), "\\code{'a' \\%in\\% letters}")
 })
-#line 396 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 481 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.dl', {#@testing
     html <- htmltools::tags$dl( htmltools::tags$dt("term1")
                                 , htmltools::tags$dd("definition 1.")
@@ -132,7 +173,7 @@ test_that('html_to_Rd.dl', {#@testing
                    , "}"
                    ) )
 })
-#line 443 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 528 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.img', {#@testing
     html <- htmltools::tags$img(src='test.png', alt ='alternate text', height=100, width=100)
     val <- html_to_Rd(html)
@@ -140,14 +181,14 @@ test_that('html_to_Rd.img', {#@testing
     expect_equal( unclass(val)
                 , "\\figure{test.png}{options: alt=\"alternate text\" height=100 width=100}")
 })
-#line 452 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 537 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.kbd', {#@testing
     html <- htmltools::tags$kbd("abc")
     val <- html_to_Rd(html)
     expect_is(val, 'Rd')
     expect_equal( unclass(val), "\\kbd{abc}")
 })
-#line 463 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 548 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.li', {#@testing
     html <- htmltools::tags$li("some ", htmltools::tags$em('text'), '.')
     val <- html_to_Rd(html)
@@ -155,14 +196,33 @@ test_that('html_to_Rd.li', {#@testing
     expect_equal( unclass(val)
                 , "\\item some \\emph{text}.")
 })
-#line 484 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 557 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_to_Rd.ol', {#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                  , c( "\\itemize{"
+                       , "\\item First" 
+                       , "\\item Second" 
+                       , "}" 
+                  )) 
+    
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                                 , htmltools::tags$dl("Second")
+    ))
+    )    
+})
+#line 583 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.p', {#@testing
     expect_is(html_to_Rd(htmltools::p()), 'Rd')
     expect_equal(unclass(html_to_Rd(htmltools::p())), character(0))
     expect_is(html_to_Rd(htmltools::p("text")), 'Rd')
     expect_equal(unclass(html_to_Rd(htmltools::p("text"))), c("text", ""))
 })
-#line 517 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 616 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.small', {#@testing
     html <- htmltools::tags$small("something small")
     expect_warning( val <- html_to_Rd(html)
@@ -189,7 +249,7 @@ test_that('html_to_Rd.small', {#@testing
     })
 
 })
-#line 667 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+#line 766 "/rdtf/documentation/R/Fun-toRd-shiny.R"
 test_that('html_to_Rd.* table functions', {#@testing html_to_Rd.* table functions
     html <-
         with(htmltools::tags, {
@@ -238,4 +298,23 @@ test_that('html_to_Rd.* table functions', {#@testing html_to_Rd.* table function
                    , nrows = 5, ncols = 4)
                 )
 
+})
+#line 818 "/rdtf/documentation/R/Fun-toRd-shiny.R"
+test_that('html_to_Rd.ul', {#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                , c( "\\itemize{"
+                   , "\\item First" 
+                   , "\\item Second" 
+                   , "}" 
+                   )) 
+
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                               , htmltools::tags$dl("Second")
+                                               ))
+                )    
 })
