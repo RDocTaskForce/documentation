@@ -4,7 +4,7 @@
 context('tests extracted from file `Class-Vector.R`')
 #line 20 "/rdtf/documentation/R/Class-Vector.R"
 test_that('setVector', {#! @testing
-    new.class <- setVector('name') # creates `Vector()`
+    new.class <- setVector('name', where=globalenv()) # creates `Vector()`
     name.vector <- new.class()
     name.vector[[1]] <- as.name('a')
     name.vector[[2]] <- as.name('b')

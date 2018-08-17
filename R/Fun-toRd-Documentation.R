@@ -22,8 +22,7 @@ function( obj
         Rd[['aliases']]  <- Rd_tag(doc_get_aliases(obj), 'alias')
     if (!rlang::is_empty(obj@concepts) && !('concepts' %in% exclude))
         Rd[['concepts']] <- Rd_tag(doc_get_concepts(obj), 'concept')
-    Rd
-    # sapply(Rd, collapse, with='\n')
+    toRd(Rd, ...)
 })
 if(FALSE){#! @testing
     null.object <- new('Documentation')

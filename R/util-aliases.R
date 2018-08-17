@@ -14,29 +14,59 @@ s <- function(x, ...){
         names(new.attr) <- as.character(substitute(c(...)))[-1]
     else if(any(. <- is.na(names(new.attr)) | names(new.attr) == ''))
         names(new.attr) <- ifelse(., as.character(substitute(c(...)))[-1], names(new.attr))
-    attributes(x) <- new.attr
+
+    for (a in names(new.attr))
+        attr(x, a) <- new.attr[[a]]
     return(x)
 }
 if(FALSE){#@testing
     msg <- "An failure message"
     val <- s(FALSE, msg, count = 5)
     expect_identical(attributes(val), list(msg=msg, count=5))
-    
+
+    val <- s(c(a=1, b=2), count=2)
+    expect_identical(names(val), c('a','b'))
 }
-
-
 
 #' Equivalent to add_class
-cl <- function(x, new)s(x, class=c(new, class(s)))
+cl <- function(x, new){s(x, class=c(new, attr(x, 'class')))}
+if(FALSE){#@testing
+    x <- cl(TRUE, 'success')
+    expect_is(x, 'success')
+
+    y <- cl(x, 'a big success')
+    expect_is(y, 'success')
+    expect_is(y, 'a big success')
+
+    expect_identical(cl('text', 'class')
+                    , structure('text', class='class'))
+}
+
+
 
 #' Shortcut for creating text vectors without quotes.
-.T <- function (...) #< names and literal strings.
+.T <- function(...) #< names and literal strings.
 {
-    c <- as.character(x <- substitute(c(...)))[-1]
-    names(c) <- names(as.list(x))[-1]
-    return(c)
+    x <- substitute(c(...))
+    val <- as.character(x)
+    if (!is.null(n <- names(x)))
+        names(val) <- ifelse( is.na(n) | n == ''
+                            , as.character(x)
+                            , names(x))
+    return(val[-1L])
     #' @return a character vector, optionally with names.
 }
+if(FALSE){#@testing
+    expect_equal(.T(._, s, cl, .T)
+                , c('._', 's', 'cl', '.T')
+                )
+    expect_equal( .T(a=._, s, cl, .T)
+                , c(a='._', s='s', cl='cl', .T='.T')
+                )
+}
+
+
+
 
 clean_Rd <- tools:::toRd.default
 

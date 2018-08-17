@@ -1,7 +1,9 @@
 #' @include Fun-documentation.R
+
+
+# Tag classifications ----------------------------------------------------------
 .html5.tags.discouraged.reasons <-
     .T( b      = "Use strong"
-      , center = "Use css"
       , i      = "Use em"
       , small  = "Do not use formatting tags."
       , sup    = "Do not use formatting tags."
@@ -30,7 +32,7 @@
 .html5.tags.disallowed <-
     .T( area, address, article, audio
       , base, bdi, bdo, body
-      , canvas, col, colgroup, command
+      , canvas, center, col, colgroup, command
       , datalist, del, details, dnf
       , embed
       , fieldset, footer, form
@@ -49,6 +51,8 @@
       , var, video, wbr
       )
 
+# Utilities --------------------------------------------------------------------
+# Condition Utilities ==========================================================
 doc_warning_html5_discouraged <- function(tag, alt=NULL){
     doc_warning(._("Use of HTML direct formatting tags %s is discouraged.", dQuote(tag)) %<<%
                 (if (!is.null(alt))
@@ -77,7 +81,7 @@ if(FALSE){#@testing
     a <- htmltools::tags$p( "Some paragraph text", e)
     b <- htmltools::code("plot(rnorm(100))")
     x <- htmltools::tags$div( a, b)
-    
+
     expect_identical(html_get_type(x), 'div')
     expect_identical(html_get_type(x$children), c('p', 'code'))
 }
@@ -89,28 +93,28 @@ html_is_type <- function(html, type){
 on_failure(html_is_type) <- function(call, env){
     actual.class <- html_get_type(eval(call$html, envir = env))
     expected.class <- eval(call$type, envir = env)
-    deparse(call$html)  %<<% 
-        "is of type" %<<% dQuote(actual.class) %<<<% 
+    deparse(call$html)  %<<%
+        "is of type" %<<% dQuote(actual.class) %<<<%
         ";" %<<% "expected a" %<<% dQuote(expected.class)
 }
 if(FALSE){#@testing html_is_type
     a <- htmltools::a('link')
-    expect_true(html_is_type(a, 'a')) 
-    
-    withr::with_options(list(useFancyQuotes=FALSE), 
+    expect_true(html_is_type(a, 'a'))
+
+    withr::with_options(list(useFancyQuotes=FALSE),
                         expect_equal( see_if(html_is_type(a, 'li'))
-                                      , s(FALSE, msg = 'a is of type "a"; expected a "li"') 
+                                      , s(FALSE, msg = 'a is of type "a"; expected a "li"')
                         ))
 }
 
-html_has_valid_children <- 
+html_has_valid_children <-
 function(html, allowed){
     ctypes <- html_get_type(html$children)
     good <- ctypes %in% allowed
     if (all(good)) return(TRUE)
     bad.tags <- sort(unique(ctypes[!good]))
     msg <- ._("HTML tag %s contains invalid child", html_get_type(html)) %<<%
-           ngettext( sum(!good), "tag", "tags") %<<% 
+           ngettext( sum(!good), "tag", "tags") %<<%
            ngettext( length(bad.tags), "of type", "of types") %<<%
            comma_list(bad.tags) %<<<% '.'
     s(FALSE, msg=msg)
@@ -118,44 +122,47 @@ function(html, allowed){
 if(FALSE){#@testing
     good.html <- with(htmltools::tags, ol(li('hello'), li("world") ))
     expect_true(see_if(html_has_valid_children(good.html, 'li')))
-    
+
     bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition") ))
     expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
                 , s(FALSE, msg="HTML tag ol contains invalid child tags of types dd and dt."))
-    
+
     bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dd("definition"), a("link") ))
     expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
                 , s(FALSE, msg="HTML tag ol contains invalid child tags of types a, dd, and dt."))
-    
+
     bad.html <- with(htmltools::tags, ol(li('hello'), dt("term")))
     expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
                 , s(FALSE, msg="HTML tag ol contains invalid child tag of type dt."))
-    
+
     bad.html <- with(htmltools::tags, ol(li('hello'), dt("term"), dt("term")))
     expect_equal( see_if(html_has_valid_children(bad.html, 'li'))
                 , s(FALSE, msg="HTML tag ol contains invalid child tags of type dt."))
 }
 
-html_to_Rd <- function(html, ...){
-    if (inherits(html, 'Rd')) return(html)
-    if (is.character(html)) return(Rd(html, ...))
-    if (identical(class(html), 'list')) return(Rd(lapply(html, html_to_Rd, ...)))
-    assert_that(inherits(html, 'shiny.tag'))
-    if (!is.null(.f <- match.fun(paste0('html_to_Rd.', html$name))))
-        return(.f(html, ...))
-    if (html$name %in% .html5.tags.allowed){
-        doc_error(._("html_to_Rd.%s is not yet implimented.", html$name)
-                 , type = "html_to_Rd-not_implimented")
-    } else
-    if (html$name %in% .html5.tags.disallowed){
-        doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
-                     "While %1$s is a valid HTML5 tag, documentation" %<<%
-                     "does not currently support it's conversion to Rd."
-                    , sQuote(html$name), type="html_to_Rd-unsupported_tag"))
-    } else
-    doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
-                 "%1$s is a not a valid HTML5 tag.", sQuote(html$name)))
+# Other Utilities ==============================================================
+.protocols <- .T(http, https, ftp, mailto, file, data, irc)
+url.pattern <- paste0('^(', collapse(.protocols, with='|'), ')://')
+is_url <- function(x){grepl(url.pattern, x)}
+
+pkg.base.pattern <- "[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9]"
+pkg.pattern <-  "^" %<<<% pkg.base.pattern %<<<% "$"
+name.pattern <- "[a-zA-Z.][a-zA-Z0-9_.]*(-[a-zA-Z]+)?"
+pkg.dest.pattern <- "^" %<<<% pkg.base.pattern %<<<% ":" %<<<% name.pattern %<<<% "$"
+is_rd_link <- function(x){
+    (x == '') | grepl("^=", x) | grepl(pkg.pattern, x) | grepl(pkg.dest.pattern, x)
 }
+if(FALSE){#@testing
+    expect_true(is_rd_link(''))
+    expect_true(is_rd_link('=abc-class'))
+    expect_true(is_rd_link('terms.object'))
+    expect_true(is_rd_link('base:abc'))
+    expect_false(is_rd_link("http://r-project.org"))
+}
+
+is_header <- function(html){grepl('h[1-6]', html$name)}
+
+# Generator Functions-----------------------------------------------------------
 
 make_simple_html_converter <-
 function(html.tag, rd.tag, allowed.children=NULL, envir = parent.frame()){
@@ -174,7 +181,7 @@ function(html.tag, rd.tag, allowed.children=NULL, envir = parent.frame()){
         value = FormattedText("A vector of mode character correctly escaped" %<<%
                               "and classed as 'Rd_tag' and 'Rd'.")
         )
-    fun <- 
+    fun <-
     if (!is.null(allowed.children)) {
         assert_that(is.character(allowed.children))
         expr <- substitute( env=list( allowed.children = allowed.children
@@ -223,12 +230,12 @@ if(FALSE){#@testing
     val <- test_fun(html)
     expect_is(val, 'Rd_tag')
     expect_equal(unclass(val), "\\rdtag{content}")
-    
+
     expect_error(test_fun(htmltools::tag('not the right tag', varArgs = list('content'))))
-    
+
     test_children <- make_simple_html_converter('htmltag', 'rdtag', allowed.children = c('tag1', 'tag2'))
     expect_is(test_children, 'function')
-    
+
 }
 
 
@@ -237,6 +244,7 @@ function( html
         , warn.info.loss = default(warn.info.loss, 'warning', fun='Rd')
         , ...
         ){
+    assert_that(inherits(html, "shiny.tag"))
     html_conversion_information_loss(html$name, warn.info.loss)
     html_to_Rd(html$children)
 }
@@ -248,26 +256,81 @@ if(FALSE){#@testing
     expect_equal(unclass(val), "content")
 }
 
+# html_to_Rd -------------------------------------------------------------------
+html_to_Rd <- function(html, ...){
+    if (inherits(html, 'Rd')) return(html)
+    if (is.character(html)) return(Rd(clean_Rd(html), ...))
+    if (identical(class(html), 'list')) return(Rd(lapply(html, html_to_Rd, ...)))
+    assert_that(inherits(html, 'shiny.tag'))
+    if (!is.null(.f <- match.fun(paste0('html_to_Rd.', html$name))))
+        return(.f(html, ...))
+    if (html$name %in% .html5.tags.allowed){
+        doc_error(._("html_to_Rd.%s is not yet implimented.", html$name)
+                 , type = "html_to_Rd-not_implimented")
+    } else
+    if (html$name %in% .html5.tags.disallowed){
+        doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
+                     "While %1$s is a valid HTML5 tag, documentation" %<<%
+                     "does not currently support it's conversion to Rd."
+                    , sQuote(html$name), type="html_to_Rd-unsupported_tag"))
+    } else
+    doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
+                 "%1$s is a not a valid HTML5 tag.", sQuote(html$name)))
+}
+
+# Generated Methods ============================================================
+
+### <aside> #####
+html_to_Rd.aside <- make_simple_html_converter('aside', 'note')
+if(FALSE){
+    html <- htmltools::tags$aside(c("Just a note", "that in html is called an aside."))
+    val <- html_to_Rd(html)
+
+    expect_is(val, 'Rd')
+    expect_equal( unclass(val)
+                  , c("\\note{"
+                      , "Just a note"
+                      , "that in html is called an aside."
+                      , "}"))
+}
+
+### <em> #####
+html_to_Rd.em <- make_simple_html_converter('em','emph')
+
+### <cite> #####
+html_to_Rd.cite <- make_simple_html_converter('cite', 'cite')
+if(FALSE){
+    html <- htmltools::tags$cite("a citation")
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal(unclass(val), "\\cite{a citation}")
+}
 
 
-.protocols <- .T(http, https, ftp, mailto, file, data, irc)
-url.pattern <- paste0('^(', collapse(.protocols, with='|'), ')://')
-is_url <- function(x)grepl(url.pattern, x)
+# Extractor Methods ============================================================
 
-pkg.base.pattern <- "[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9]"
-pkg.pattern <-  "^" %<<<% pkg.base.pattern %<<<% "$"
-name.pattern <- "[a-zA-Z.][a-zA-Z0-9_.]*(-[a-zA-Z]+)?"
-pkg.dest.pattern <- "^" %<<<% pkg.base.pattern %<<<% ":" %<<<% name.pattern %<<<% "$"
-is_rd_link <- function(x){
-    (x == '') | grepl("^=", x) | grepl(pkg.pattern, x) | grepl(pkg.dest.pattern, x)
+### <dd> #####
+html_to_Rd.dd <- html_simple_extractor
+
+
+# Discouraged Methods ==========================================================
+
+html_to_Rd.b <- function(html, ...){
+    doc_warning_html5_discouraged('b', 'strong')
+    content <- Rd(lapply(html$children, html_to_Rd))
+    Rd_tag(content, 'b')
 }
 if(FALSE){#@testing
-    expect_true(is_rd_link(''))
-    expect_true(is_rd_link('=abc-class'))
-    expect_true(is_rd_link('terms.object'))
-    expect_true(is_rd_link('base:abc'))
-    expect_false(is_rd_link("http://r-project.org"))
+    html <- htmltools::tags$b("something to bold")
+    expect_warning( val <- html_to_Rd(html)
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_is(val, 'Rd_tag')
+    expect_identical(unclass(val), "\\b{something to bold}")
 }
+
+
+
+# Complex Methods ==============================================================
 
 html_to_Rd.a <- function(html, ...){
     href <- html$attribs$href
@@ -332,53 +395,23 @@ if(FALSE){#@testing
                   , class = 'documentation-warning-html_to_Rd')
 }
 
-html_to_Rd.aside <- make_simple_html_converter('aside', 'note')
-if(FALSE){
-    html <- htmltools::tags$aside(c("Just a note", "that in html is called an aside."))
-    val <- html_to_Rd(html)
-
-    expect_is(val, 'Rd')
-    expect_equal( unclass(val)
-                  , c("\\note{"
-                      , "Just a note"
-                      , "that in html is called an aside."
-                      , "}"))
-}
-
-html_to_Rd.b <- function(html, ...){
-    doc_warning_html5_discouraged('b', 'strong')
-    content <- Rd(lapply(html$children, html_to_Rd))
-    Rd_tag(content, 'b')
-}
-if(FALSE){#@testing
-    html <- htmltools::tags$b("something to bold")
-    expect_warning( val <- html_to_Rd(html)
-                  , class = "documentation-warning-html_to_Rd-discouraged")
-    expect_is(val, 'Rd_tag')
-    expect_identical(unclass(val), "\\b{something to bold}")
-}
-
-html_to_Rd.br <- function(html, ...){
-    assert_that( length(html$children) == 0L)
-    s("\\cr", class = c('Rd_tag', 'Rd'))
+html_to_Rd.br <- function(html){
+    assert_that( html_is_type(html, 'br'))
+    if (length(html$children) > 0)
+        doc_error_html5_malformed('br', "cannot have children.")
+    return(cl('\\cr', 'Rd'))
 }
 if(FALSE){#@testing
     html <- htmltools::tags$br()
     val <- html_to_Rd(html)
-    expect_is(val, 'Rd_tag')
+    expect_is(val, 'Rd')
     expect_identical(unclass(val), "\\cr")
+
+    html <- with(htmltools::tags, br('text'))
+    expect_error( html_to_Rd(html)
+                , class = "documentation-error-html_to_Rd-malformed_html")
 }
 
-html_to_Rd.cite <- function(html, ...){
-    content <- Rd(lapply(html$children, html_to_Rd))
-    Rd_tag(content, 'cite')
-}
-if(FALSE){
-    html <- htmltools::tags$cite("a citation")
-    val <- html_to_Rd(html)
-    expect_is(val, 'Rd_tag')
-    expect_equal(unclass(val), "\\cite{a citation}")
-}
 
 html_to_Rd.code <- function(html, ...){
     assert_that( is.list(html$children)
@@ -400,9 +433,6 @@ if(FALSE){#@testing
     expect_identical(unclass(rd), "\\code{'a' \\%in\\% letters}")
 }
 
-
-
-is_header <- function(html) grepl('h[1-6]', html$name)
 html_to_Rd.div <- function(html, sub.section=FALSE, ...){
     assert_that( is.flag(sub.section))
     children <- html$children
@@ -455,7 +485,6 @@ html_to_Rd.dt <- function(html, ...){
                )
     Rd_tag(html$children[[1]], 'dfn')
 }
-html_to_Rd.dd <- html_simple_extractor
 html_to_Rd.dl <- function(html, ...){
     assert_that( length(html$children) %% 2 == 0
                , all( sapply(html$children, `[[`, 'name') %in% c('dd', 'dt') )
@@ -498,9 +527,6 @@ if(FALSE){#@testing
                    , "}"
                    ) )
 }
-
-
-html_to_Rd.em <- make_simple_html_converter('em','emph')
 
 
 html_to_Rd.h1 <-
@@ -562,15 +588,15 @@ if(FALSE){#@testing
     expect_is(val, 'Rd_tag')
     expect_equal( unclass(val)
                   , c( "\\itemize{"
-                       , "\\item First" 
-                       , "\\item Second" 
-                       , "}" 
-                  )) 
-    
+                       , "\\item First"
+                       , "\\item Second"
+                       , "}"
+                  ))
+
     expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
                                                  , htmltools::tags$dl("Second")
     ))
-    )    
+    )
 }
 
 
@@ -823,31 +849,19 @@ if(FALSE){#@testing
     expect_is(val, 'Rd_tag')
     expect_equal( unclass(val)
                 , c( "\\itemize{"
-                   , "\\item First" 
-                   , "\\item Second" 
-                   , "}" 
-                   )) 
+                   , "\\item First"
+                   , "\\item Second"
+                   , "}"
+                   ))
 
     expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
                                                , htmltools::tags$dl("Second")
                                                ))
-                )    
+                )
 }
 
-if(FALSE){#Development
-    e <- htmltools::em('with some emphatic text.')
-    a <- htmltools::tags$p( "Some paragraph text", e)
-    b <- htmltools::code("plot(rnorm(100))")
-    x <- htmltools::tags$div( a, b)
 
-    expect_is(html_to_Rd(e), 'Rd')
-    expect_equal(unclass(html_to_Rd(e)), "\\emph{with some emphatic text.}")
-
-
-    html <- b
-    html <- a
-
-}
+# toRd Method ------------------------------------------------------------------
 
 setOldClass('shiny.tag')
 setMethod('toRd', 'shiny.tag', function(obj, ...)html_to_Rd(obj, ...))

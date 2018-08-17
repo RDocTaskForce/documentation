@@ -18,7 +18,7 @@ setClass( Class=Class, contains = 'list'
         )
 }
 if(FALSE){#! @testing
-    new.class <- setVector('name') # creates `Vector()`
+    new.class <- setVector('name', where=globalenv()) # creates `Vector()`
     name.vector <- new.class()
     name.vector[[1]] <- as.name('a')
     name.vector[[2]] <- as.name('b')

@@ -201,17 +201,19 @@ if(FALSE){#! @testing
         invisible(x)
     }
 
-    trace(default_, exit =
-              substitute(doc_error("Documentation debugging\n"
-                                    , domains=domains
-                                    , type = "trace_test")))
-    val <- tryCatch( print(s(list(), class='my_class'))
-                   , "documentation-error-trace_test" = function(e){attr(e, 'domains')}
-                   )
-    expect_is(val, 'character')
-    expect_length(val, 5)
-    expect_identical( val, c("DEFAULTS", "test-documentation", "print", "my_class", "OVERRIDE"))
-    untrace(default_)
+    if (interactive() && tracingState()) {
+        trace(default_, exit =
+                  substitute(doc_error("Documentation debugging\n"
+                                      , domains=domains
+                                      , type = "trace_test")))
+        val <- tryCatch( print(s(list(), class='my_class'))
+                       , "documentation-error-trace_test" = function(e){attr(e, 'domains')}
+                       )
+        expect_is(val, 'character')
+        expect_length(val, 5)
+        expect_identical( val, c("DEFAULTS", "test-documentation", "print", "my_class", "OVERRIDE"))
+        untrace(default_)
+    }
 }
 
 #' @export

@@ -3,7 +3,7 @@
 .conditions <- c('message', 'warning', 'error', 'none')
 
 doc_error <- function(msg, ..., type=NULL, call=sys.call(1)){
-    class <- c( if (!is.null(type)) 'documentation-error-' %<<<% type
+    class <- c( paste0('documentation-error-', type) %if% (!is.null(type))
               , 'documentation-error', 'error', 'condition')
     cond <- structure(list(message = msg, call=call)
                      , ..., class=class)

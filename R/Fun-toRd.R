@@ -9,32 +9,36 @@
         if (all( sapply(object, is.character)
                | sapply(object, is.null)
                )) return(TRUE)
-        else deparse(substitute(object)) %<<%
-            ._("is a list but not all elements are characters.")
-    } else deparse(substitute(x)) %<<%
-        ._("is neither character nor a list of characters.")
+        else s(FALSE, msg=deparse(substitute(object)) %<<%
+                ._("is a list but not all elements are characters."))
+    } else s(FALSE, msg=deparse(substitute(x)) %<<%
+        ._("is neither character nor a list of characters."))
 }
 
+setOldClass('Rd')
+
+#' @export
 Rd <-
 function( x
         , ... #< ignored.
         , collapse.lines  = default(collapse.lines, FALSE)
         , collapse.with   = default(collapse.with , "\n" )
         , wrap.lines      = default(wrap.lines    , FALSE)
-        , wrap.at         = default(wrap.lines    , 72L  )
+        , wrap.at         = default(wrap.at       , 72L  )
         ){
     if (inherits(x, 'Rd')) return(x)
     assert_that(.valid_Rd(x))
-    if (is.list(x)) return(s(unlist(lapply(x, Rd)), class='Rd'))
-
+    if (is.list(x)){
+        l <- lapply(x, Rd)
+        return(s(unlist(l), class='Rd'))
+    }
     if (collapse.lines && wrap.lines)
         doc_warning(._("Options 'collapse.lines' and 'wrap.lines'" %<<%
                        "should not both be set as the combination is" %<<%
                        "likely to produce undersireable effects."))
 
-    x <- clean_Rd(x)
-    x <- .Rd_strwrap(x, wrap.lines, wrap.at)
-    x <- .Rd_collapse(x, collapse.lines, collapse.with)
+    x <- .Rd_strwrap(x, wrap.lines=wrap.lines, wrap.at=wrap.at)
+    x <- .Rd_collapse(x, collapse.lines=collapse.lines, collapse.with=collapse.with)
     s(x, class='Rd')
 }
 if(FALSE){
@@ -58,29 +62,24 @@ if(FALSE){
 
     d <- Rd(c <- .Rd_indent(b, TRUE, with='        ')
            , wrap.lines = TRUE, collapse.lines = FALSE) %>% unclass
+
+    expect_error(Rd(NULL))
+
+
+    val <- Rd(c(a="1", b="2"))
+    expect_equal(names(val), c('a','b'))
 }
 
 
-
+### toRd #######################################################################
 #' @export
 #' @importFrom tools toRd
 # setGeneric('toRd', tools::toRd, valueClass=c('Rd', 'character', 'list'))
 setGeneric('toRd', def =
 function(obj, ...){
     ans <- standardGeneric("toRd")
-    if (is.list(ans)){
-        if (any(null <- sapply(ans, is.null)))
-            ans <- ans[!null]
-        if (!all( sapply(ans, is.character)))
-            doc_error(._( "Method of generic function %1$s for class %2$s"%<<%
-                          "returned a list, but not of character vectors." %<<%
-                          "Methods of %1$s are expected to retun a %3$s vector."
-                        , sQuote("toRd"), dQuote(class(obj)), 'character')
-                     , type="toRd-invalid_result" )
-        ans <- sapply(ans, collapse_nl)
-    }
     if (is.character(ans))
-        return (s(ans, class='Rd'))
+        return(Rd(ans))
     else
         doc_error(._( "Method of generic function %1$s for class %2$s" %<<%
                       "returned a %4$s." %<<%
@@ -93,6 +92,15 @@ toRd@valueClass <- 'Rd'
 if(FALSE){
     val <- toRd('character')
     expect_identical(val, Rd("character"))
+
+    val <- toRd(c( "use the \\backslash to escape."
+                 , "and '{}' to group."
+                 ))
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val)
+                    , c( "use the \\\\backslash to escape."
+                       , "and '\\{\\}' to group."
+                       ) )
 }
 
 set_option_documentation( "documentation::Rd::indent"
@@ -282,10 +290,76 @@ if(FALSE){#! @testing
     val <- Rd_tag('dest', 'link', opt='pkg')
     expect_is(val, 'Rd')
     expect_identical(unclass(val), "\\link[pkg]{dest}")
+
+    obj <-
+        c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
+                                  , person('Drew'  , 'Blue')
+                                  )
+    expect_identical( unclass(toRd(obj))
+                    , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
+                    )
 }
 
+#' @S3method toRd list
+toRd.list <- function(obj, ...){
+    val <- lapply(obj, toRd)
+    assert_that( all(purrr::map_lgl(val, inherits, 'Rd'))
+               , all(purrr::map_lgl(val, is.character))
+               )
+    if (!is.null(names(obj))){
+        lens <- purrr::map_int(val, length)
+        new.names <- rep(names(obj), lens)
+        s(unlist(val), names=new.names)
+    } else return(unlist(val))
+}
+if(FALSE){#@testing
+    l <- list( first = Rd("first text")
+             , second = Rd(c("second", "text"))
+             , third = NULL
+             )
+
+    val <- toRd(l)
+
+    expect_is(val, 'Rd')
+    expect_true(is.character(val))
+    expect_equal(unclass(val)
+                , c( first  = "first text"
+                   , second = "second"
+                   , second = "text"
+                   )
+                )
+
+    obj <- list(author = c( person('Andrew', 'Redd'
+                                  , email='andrew.redd@hsc.utah.edu')
+                          , person('Drew'  , 'Blue')
+                          ))
+    expect_identical( unclass(toRd(obj))
+                    , c(author ="Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue")
+                    )
+}
+
+
 #' @export
-setMethod('toRd', 'person',
+#' @S3method toRd Rd
+toRd.Rd <- function(obj, ...){
+    assert_that(.valid_Rd(obj))
+    obj
+}
+if(FALSE){#@testing
+    obj <- Rd("test")
+    expect_identical(toRd(obj), obj)
+    expect_error(toRd(cl(TRUE, 'Rd')))
+
+    obj <- Rd("\\rd")
+    expect_identical(toRd(obj), obj)
+
+    selectMethod('toRd', class(obj))
+}
+
+
+
+#' @S3method toRd person
+toRd.person<-
 function( obj
         , ...
         , include = c('given', 'family', 'email')
@@ -293,7 +367,7 @@ function( obj
     comma_list(format( obj, include = include
                      , braces  = list(email = c('\\email{', '}'))
                      ))
-})
+}
 if(FALSE){#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     val <- toRd(object)
@@ -319,6 +393,7 @@ if(FALSE){#! @testing
                 )
 }
 
+### bibstyle('documentation') #####
 tools::bibstyle('documentation', collapse = collapse, .init=TRUE)
 if(FALSE){#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
@@ -328,7 +403,7 @@ if(FALSE){#!@testing documentation bibstyle
     expect_true(default.style != doc.style)
 }
 
-
+### toRd,Documentation-Keyword #####
 setMethod('toRd', 'Documentation-Keyword', function( obj, ...)sprintf("\\keyword{%s}", obj@.Data))
 if(FALSE){#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
@@ -338,6 +413,7 @@ if(FALSE){#! @testing
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 }
 
+### toRd,FormattedText #####
 setMethod('toRd', 'FormattedText',
 function( obj
         , ...

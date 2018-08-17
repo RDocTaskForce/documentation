@@ -4,14 +4,23 @@
 context('tests extracted from file `Fun-format.R`')
 #line 68 "/rdtf/documentation/R/Fun-format.R"
 test_that('get_formatter', {#@testing
-    expect_identical(get_formatter('toRd'), toRd)
-    expect_identical(get_formatter('Rd'), toRd)
+    formatter.toRd <- get_formatter('toRd')
+    expect_is(formatter.toRd, 'nonstandardGenericFunction')
+    expect_identical( formatter.toRd@generic
+                    , s('toRd', package="documentation"))
+
+    formatter.Rd <- get_formatter('toRd')
+    expect_is(formatter.Rd, 'nonstandardGenericFunction')
+    expect_identical( formatter.Rd@generic
+                    , s('toRd', package="documentation"))
+
+    expect_identical(formatter.Rd, formatter.toRd)
 
     expect_error( get_formatter('not a format')
                 , class = "documentation-error-format-not_defined"
                 )
 })
-#line 87 "/rdtf/documentation/R/Fun-format.R"
+#line 96 "/rdtf/documentation/R/Fun-format.R"
 test_that('get_formatter_ext', {#@testing
     expect_identical(get_formatter_ext('toRd'), '.Rd')
     expect_identical(get_formatter_ext('Rd'), '.Rd')
@@ -21,7 +30,7 @@ test_that('get_formatter_ext', {#@testing
                   )
     expect_identical( value, '.not_a_format')
 })
-#line 106 "/rdtf/documentation/R/Fun-format.R"
+#line 115 "/rdtf/documentation/R/Fun-format.R"
 test_that('get_formatter_dir', {#@testing
     expect_identical(get_formatter_dir('toRd'), 'man')
     expect_identical(get_formatter_dir('Rd'), 'man')

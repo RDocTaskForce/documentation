@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd.R`')
-#line 127 "/rdtf/documentation/R/Fun-toRd.R"
+#line 135 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('.Rd_indent', {#@testing
     x <- c("test strings", "second line")
 
@@ -40,7 +40,7 @@ test_that('.Rd_indent', {#@testing
     expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
                   , class = "documentation-warning" )
 })
-#line 211 "/rdtf/documentation/R/Fun-toRd.R"
+#line 219 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('.Rd_strwrap', {#@testing
     x <- stringi::stri_rand_lipsum(1)
 
@@ -73,7 +73,7 @@ test_that('.Rd_strwrap', {#@testing
                     , c("   hello", "", "   world")
                     )
 })
-#line 263 "/rdtf/documentation/R/Fun-toRd.R"
+#line 271 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('test', NULL), "name is not a string")
     expect_error(Rd_tag('test', c('a', 'b')), "name is not a string")
@@ -96,9 +96,54 @@ test_that('Rd_tag', {#! @testing
     val <- Rd_tag('dest', 'link', opt='pkg')
     expect_is(val, 'Rd')
     expect_identical(unclass(val), "\\link[pkg]{dest}")
+
+    obj <-
+        c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
+                                  , person('Drew'  , 'Blue')
+                                  )
+    expect_identical( unclass(toRd(obj))
+                    , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
+                    )
 })
-#line 297 "/rdtf/documentation/R/Fun-toRd.R"
-test_that('toRd,person-method', {#! @testing
+#line 315 "/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd.list', {#@testing
+    l <- list( first = Rd("first text")
+             , second = Rd(c("second", "text"))
+             , third = NULL
+             )
+
+    val <- toRd(l)
+
+    expect_is(val, 'Rd')
+    expect_true(is.character(val))
+    expect_equal(unclass(val)
+                , c( first  = "first text"
+                   , second = "second"
+                   , second = "text"
+                   )
+                )
+
+    obj <- list(author = c( person('Andrew', 'Redd'
+                                  , email='andrew.redd@hsc.utah.edu')
+                          , person('Drew'  , 'Blue')
+                          ))
+    expect_identical( unclass(toRd(obj))
+                    , c(author ="Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue")
+                    )
+})
+#line 348 "/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd.Rd', {#@testing
+    obj <- Rd("test")
+    expect_identical(toRd(obj), obj)
+    expect_error(toRd(cl(TRUE, 'Rd')))
+
+    obj <- Rd("\\rd")
+    expect_identical(toRd(obj), obj)
+
+    selectMethod('toRd', class(obj))
+})
+#line 371 "/rdtf/documentation/R/Fun-toRd.R"
+test_that('toRd.person', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     val <- toRd(object)
     expect_is(val, 'Rd')
@@ -122,7 +167,7 @@ test_that('toRd,person-method', {#! @testing
                            , class='Rd')
                 )
 })
-#line 323 "/rdtf/documentation/R/Fun-toRd.R"
+#line 398 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('documentation bibstyle', {#!@testing documentation bibstyle
     object <- citation() %>% structure(class='bibentry')
     default.style <- toRd(object, style='JSS')
@@ -130,7 +175,7 @@ test_that('documentation bibstyle', {#!@testing documentation bibstyle
 
     expect_true(default.style != doc.style)
 })
-#line 333 "/rdtf/documentation/R/Fun-toRd.R"
+#line 408 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     val <- toRd(obj)
@@ -138,7 +183,7 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( unclass(val)
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 354 "/rdtf/documentation/R/Fun-toRd.R"
+#line 430 "/rdtf/documentation/R/Fun-toRd.R"
 test_that('toRd,FormattedText-method', {#! @testing
     obj <- FormattedText()
     expect_identical(toRd(obj), Rd(character(0)))

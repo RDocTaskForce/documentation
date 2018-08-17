@@ -66,8 +66,17 @@ function(format){
     })
 }
 if(FALSE){#@testing
-    expect_identical(get_formatter('toRd'), toRd)
-    expect_identical(get_formatter('Rd'), toRd)
+    formatter.toRd <- get_formatter('toRd')
+    expect_is(formatter.toRd, 'nonstandardGenericFunction')
+    expect_identical( formatter.toRd@generic
+                    , s('toRd', package="documentation"))
+
+    formatter.Rd <- get_formatter('toRd')
+    expect_is(formatter.Rd, 'nonstandardGenericFunction')
+    expect_identical( formatter.Rd@generic
+                    , s('toRd', package="documentation"))
+
+    expect_identical(formatter.Rd, formatter.toRd)
 
     expect_error( get_formatter('not a format')
                 , class = "documentation-error-format-not_defined"

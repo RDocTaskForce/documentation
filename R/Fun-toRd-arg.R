@@ -14,7 +14,6 @@ if(FALSE){#! @testing
 }
 
 
-
 setMethod('toRd', 'ArgumentList',
 function( obj
         , ...
