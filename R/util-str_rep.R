@@ -9,3 +9,10 @@ if(FALSE){#@testing
 }
 
 
+space <- function(n=1)str_rep(' ', n)
+if(FALSE){
+    expect_identical(space(), ' ')
+    expect_identical(space(0), '')
+    expect_identical(space(3), '   ')
+}
+

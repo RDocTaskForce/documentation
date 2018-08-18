@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-aliases.R`')
-#line 22 "/rdtf/documentation/R/util-aliases.R"
+#line 26 "/rdtf/documentation/R/util-aliases.R"
 test_that('s', {#@testing
     msg <- "An failure message"
     val <- s(FALSE, msg, count = 5)
@@ -11,7 +11,7 @@ test_that('s', {#@testing
     val <- s(c(a=1, b=2), count=2)
     expect_identical(names(val), c('a','b'))
 })
-#line 33 "/rdtf/documentation/R/util-aliases.R"
+#line 40 "/rdtf/documentation/R/util-aliases.R"
 test_that('cl', {#@testing
     x <- cl(TRUE, 'success')
     expect_is(x, 'success')
@@ -23,7 +23,7 @@ test_that('cl', {#@testing
     expect_identical(cl('text', 'class')
                     , structure('text', class='class'))
 })
-#line 59 "/rdtf/documentation/R/util-aliases.R"
+#line 66 "/rdtf/documentation/R/util-aliases.R"
 test_that('.T', {#@testing
     expect_equal(.T(._, s, cl, .T)
                 , c('._', 's', 'cl', '.T')

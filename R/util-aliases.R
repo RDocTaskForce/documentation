@@ -8,7 +8,11 @@
 }
 
 #' alias for structure
-s <- function(x, ...){
+#'
+#' @param .Data An object, any object.
+#' @param ...   Attributes, names will be inferred from
+#'              passed objects if not named
+s <- function( .Data, ...){
     new.attr <- list(...)
     if (is.null(names(new.attr)))
         names(new.attr) <- as.character(substitute(c(...)))[-1]
@@ -16,8 +20,8 @@ s <- function(x, ...){
         names(new.attr) <- ifelse(., as.character(substitute(c(...)))[-1], names(new.attr))
 
     for (a in names(new.attr))
-        attr(x, a) <- new.attr[[a]]
-    return(x)
+        attr(.Data, a) <- new.attr[[a]]
+    return(.Data)
 }
 if(FALSE){#@testing
     msg <- "An failure message"
@@ -29,6 +33,9 @@ if(FALSE){#@testing
 }
 
 #' Equivalent to add_class
+#'
+#' @param x an object, but not an S4 object
+#' @param new the new class to append.
 cl <- function(x, new){s(x, class=c(new, attr(x, 'class')))}
 if(FALSE){#@testing
     x <- cl(TRUE, 'success')

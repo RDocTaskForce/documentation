@@ -1,22 +1,7 @@
 #' @include Classes.R
 #' @include Fun-default.R
 
-.valid_Rd <- function(object){
-    if (inherits(object, 'Rd')) return(TRUE)
-    if (is.character(object)) return(TRUE)
-    else if (is.list(object)){
-        if (length(object) == 0) return(TRUE)
-        if (all( sapply(object, is.character)
-               | sapply(object, is.null)
-               )) return(TRUE)
-        else s(FALSE, msg=deparse(substitute(object)) %<<%
-                ._("is a list but not all elements are characters."))
-    } else s(FALSE, msg=deparse(substitute(x)) %<<%
-        ._("is neither character nor a list of characters."))
-}
-
 setOldClass('Rd')
-
 #' @export
 Rd <-
 function( x
@@ -27,11 +12,11 @@ function( x
         , wrap.at         = default(wrap.at       , 72L  )
         ){
     if (inherits(x, 'Rd')) return(x)
-    assert_that(.valid_Rd(x))
     if (is.list(x)){
         l <- lapply(x, Rd)
         return(s(unlist(l), class='Rd'))
     }
+    assert_that(is.character(x))
     if (collapse.lines && wrap.lines)
         doc_warning(._("Options 'collapse.lines' and 'wrap.lines'" %<<%
                        "should not both be set as the combination is" %<<%
@@ -41,7 +26,7 @@ function( x
     x <- .Rd_collapse(x, collapse.lines=collapse.lines, collapse.with=collapse.with)
     s(x, class='Rd')
 }
-if(FALSE){
+if(FALSE){#@testing
     a <- "test"
     b <- Rd(a)
     expect_is(b, 'Rd')
@@ -195,6 +180,15 @@ function( x, ...
     assert_that(is.string(collapse.with))
     s(collapse(x, with = collapse.with), class=attr(x, 'class'))
 }
+if(FALSE){#@testing
+    expect_identical( .Rd_collapse(c("hello", "world"), collapse.lines=TRUE, collapse.with="\xE1")
+                    , "hello\xE1world")
+
+    x <- Rd(c("hello", "world"))
+    expect_identical(.Rd_collapse(x, collapse.lines=TRUE, collapse.with="\xE1")
+                    , Rd("hello\xE1world"))
+}
+
 
 .Rd_get_indent <- function(x){
     gsub("^( *)[^ ].*$", "\\1", x[[1]])
@@ -313,6 +307,12 @@ toRd.list <- function(obj, ...){
     } else return(unlist(val))
 }
 if(FALSE){#@testing
+    l <- list('\\hello', '%world')
+    expect_identical( toRd(l)
+                    , s( c("\\\\hello", "\\%world")
+                       , class='Rd')
+                    )
+
     l <- list( first = Rd("first text")
              , second = Rd(c("second", "text"))
              , third = NULL
@@ -342,7 +342,7 @@ if(FALSE){#@testing
 #' @export
 #' @S3method toRd Rd
 toRd.Rd <- function(obj, ...){
-    assert_that(.valid_Rd(obj))
+    assert_that(is.character(obj) && inherits(obj, 'Rd'))
     obj
 }
 if(FALSE){#@testing
@@ -394,14 +394,21 @@ if(FALSE){#! @testing
 }
 
 ### bibstyle('documentation') #####
-tools::bibstyle('documentation', collapse = collapse, .init=TRUE)
-if(FALSE){#!@testing documentation bibstyle
-    object <- citation() %>% structure(class='bibentry')
-    default.style <- toRd(object, style='JSS')
-    doc.style     <- toRd(object, style='documentation')
-
-    expect_true(default.style != doc.style)
-}
+# setHook( packageEvent('documentation', event = "onLoad")
+#        , function(...){
+#             if (requireNamespace("tools", quietly = TRUE))
+#                 tools::bibstyle('documentation', collapse = collapse, .init=TRUE)
+#        }
+#        )
+# if(FALSE){#!@testing documentation bibstyle
+#     expect_true("documentation" %in% tools::getBibstyle())
+#
+#     object <- citation() %>% structure(class='bibentry')
+#     default.style <- toRd(object, style='JSS')
+#     doc.style     <- toRd(object, style='documentation')
+#
+#     expect_true(default.style != doc.style)
+# }
 
 ### toRd,Documentation-Keyword #####
 setMethod('toRd', 'Documentation-Keyword', function( obj, ...)sprintf("\\keyword{%s}", obj@.Data))

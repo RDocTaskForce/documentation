@@ -32,11 +32,11 @@ get_option <-
         assert_that(is.string(name))
 
         parts <- stringi::stri_split(name, fixed="::")[[1]]
-        domains <- head(parts, -1)
-        id <- tail(parts, 1)
+        domains <- utils::head(parts, -1)
+        id <- utils::tail(parts, 1)
 
         for( i in length(domains):0){
-            spec <- collapse(c(head(domains, i), id), with='::')
+            spec <- collapse(c(utils::head(domains, i), id), with='::')
             if (!identical(. <- getOption(spec, .not.found), .not.found))
                 return(.)
         }

@@ -72,7 +72,7 @@ html_conversion_information_loss <- function(tag, cond='warning'){
 }
 html_get_type <- function(x){
     if (identical(class(x), 'list')) return(sapply(x, html_get_type))
-    else if (identical(class(x), 'shiny.tag')) return(x$name)
+    else if (inherits(x, 'shiny.tag')) return(x$name)
     else if (is.character(x)) return("")
     else doc_error(._("Cannot get HTML type from type %s", dQuote(class(x))))
 }
@@ -84,6 +84,15 @@ if(FALSE){#@testing
 
     expect_identical(html_get_type(x), 'div')
     expect_identical(html_get_type(x$children), c('p', 'code'))
+
+    html <- htmltools::tags$li('with some emphatic text.')
+    class(html) <- c('li', 'shiny.tag')
+    expect_identical(html_get_type(html), 'li')
+
+    expect_identical(html_get_type('character'), '')
+
+    expect_error( html_get_type(NULL)
+                , class = "documentation-error" )
 }
 
 html_is_type <- function(html, type){
@@ -160,7 +169,14 @@ if(FALSE){#@testing
     expect_false(is_rd_link("http://r-project.org"))
 }
 
-is_header <- function(html){grepl('h[1-6]', html$name)}
+is_header <- function(html){
+    inherits(html, 'shiny.tag') && grepl('h[1-6]', html$name)
+}
+if(FALSE){#@testing
+    expect_true(is_header(htmltools::tags$h1("yes")))
+    expect_false(is_header(htmltools::tags$b("yes")))
+    expect_false(is_header("yes"))
+}
 
 # Generator Functions-----------------------------------------------------------
 
@@ -188,28 +204,31 @@ function(html.tag, rd.tag, allowed.children=NULL, envir = parent.frame()){
                                     , html.tag=html.tag
                                     , rd.tag=rd.tag
                                     ),
+            # nocov start
             function(html, ...){
                 assert_that( html_is_type(html, html.tag)
                            , html_has_valid_children(html, allowed=allowed.children)
                            )
                 Rd_tag(html_to_Rd(html$children), rd.tag)
             }
+            # nocov end
         )
         s( eval(expr, envir=envir)
          , allowed.children = allowed.children
          , rd.tag = rd.tag
          )
     } else {
+        # nocov start
         expr <- substitute(#env=list(rd.tag=rd.tag, html.tag=html.tag),
             function(html, ...){
-                assert_that( inherits(html, 'shiny.tag')
-                           , html_get_type(html) == html.tag
-                           )
+                assert_that( html_is_type(html, html.tag))
                 Rd_tag(html_to_Rd(html$children), rd.tag)
             })
+        # nocov end
         eval(expr, envir=parent.frame())
     }
     documentation(fun) <- docs
+    attr(fun, 'srcref') <- NULL
     fun
 }
 if(FALSE){#@testing
@@ -217,13 +236,15 @@ if(FALSE){#@testing
     expect_identical( formals(test_fun)
                     , as.pairlist(alist(html=, ...=))
                     )
+    if(F){
     expect_identical( trimws(deparse(body(test_fun), 500))
                     , c( '{'
-                       , "assert_that(inherits(html, \"shiny.tag\"), html_get_type(html) == \"htmltag\")"
+                       , "assert_that(html_is_type(html, \"htmltag\"))"
                        , "Rd_tag(html_to_Rd(html$children), \"rdtag\")"
                        , "}"
                        )
                     )
+    }
     expect_true(is_documented('test_fun', environment(), complete=FALSE))
 
     html <- htmltools::tag('htmltag', varArgs = list('content'))
@@ -236,6 +257,16 @@ if(FALSE){#@testing
     test_children <- make_simple_html_converter('htmltag', 'rdtag', allowed.children = c('tag1', 'tag2'))
     expect_is(test_children, 'function')
 
+    if(F){
+    expect_identical( trimws(deparse(body(test_children), 500))
+                    , c( '{'
+                       , 'assert_that(html_is_type(html, "htmltag"),' %<<%
+                            'html_has_valid_children(html, allowed = c("tag1", "tag2")))'
+                       , 'Rd_tag(html_to_Rd(html$children), "rdtag")'
+                       , '}'
+                       )
+                    )
+    }
 }
 
 
@@ -257,30 +288,75 @@ if(FALSE){#@testing
 }
 
 # html_to_Rd -------------------------------------------------------------------
-html_to_Rd <- function(html, ...){
-    if (inherits(html, 'Rd')) return(html)
-    if (is.character(html)) return(Rd(clean_Rd(html), ...))
-    if (identical(class(html), 'list')) return(Rd(lapply(html, html_to_Rd, ...)))
+#' Convert html shiny.tag objects to Rd.
+#'
+#' Dispatchs on on the type html tag, ie. the 'name' attribute.
+#' @export
+html_to_Rd <- function (html, ...) {
+    UseMethod("html_to_Rd", html)
+}
+
+#' @export
+html_to_Rd.default <- function(html, ...){
+    doc_error(._("Cannot convert %1$s to HTML.", class(html)))
+}
+if(FALSE){#@testing
+    expect_error( html_to_Rd(1L), class='documentation-error')
+}
+
+#' @S3method html_to_Rd character
+html_to_Rd.character <- function(html, ...){
+    assert_that(is.character(html))
+    return(Rd(clean_Rd(html), ...))
+}
+
+#' @S3method html_to_Rd list
+html_to_Rd.list <- function(html, ...){
+    assert_that(identical(class(html), 'list'))
+    if (length(html)==0) return(Rd(character(0)))
+    return(Rd(lapply(html, html_to_Rd, ...)))
+}
+
+#' @S3method html_to_Rd Rd
+html_to_Rd.Rd <- function(html, ...){
+    assert_that( inherits(html, 'Rd')
+               , is.character(html)
+               )
+    html
+}
+if(FALSE){#@testing
+    expect_identical( html_to_Rd(Rd("hi")), Rd("hi"))
+    expect_error(html_to_Rd.Rd("text") )
+}
+
+#' @S3method html_to_Rd shiny.tag
+html_to_Rd.shiny.tag <- function(html, ...){
     assert_that(inherits(html, 'shiny.tag'))
-    if (!is.null(.f <- match.fun(paste0('html_to_Rd.', html$name))))
-        return(.f(html, ...))
-    if (html$name %in% .html5.tags.allowed){
-        doc_error(._("html_to_Rd.%s is not yet implimented.", html$name)
-                 , type = "html_to_Rd-not_implimented")
-    } else
-    if (html$name %in% .html5.tags.disallowed){
+    # if (html$name %in% .html5.tags.allowed) {
+    #     doc_error(._("html_to_Rd.%s is not yet implimented.", html$name)
+    #              , type = "html_to_Rd-not_implimented")
+    # }
+    # if (identical(class(html), 'shiny.tag')){
+    tryCatch({
+        type <- html_get_type(html)
+        class(html) <- c(type, 'shiny.tag')
+        utils::getS3method('html_to_Rd', type)(html, ...)
+    }, error = function(e){
+        if (inherits(e, 'documentation-error')) stop(e)
         doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
                      "While %1$s is a valid HTML5 tag, documentation" %<<%
                      "does not currently support it's conversion to Rd."
                     , sQuote(html$name), type="html_to_Rd-unsupported_tag"))
-    } else
-    doc_error(._("Cannot convert shiny.tag of type %1$s." %<<%
-                 "%1$s is a not a valid HTML5 tag.", sQuote(html$name)))
+    })
+
+
+    # }
 }
 
 # Generated Methods ============================================================
 
 ### <aside> #####
+### @S3method html_to_Rd aside
 html_to_Rd.aside <- make_simple_html_converter('aside', 'note')
 if(FALSE){
     html <- htmltools::tags$aside(c("Just a note", "that in html is called an aside."))
@@ -295,9 +371,11 @@ if(FALSE){
 }
 
 ### <em> #####
+### @S3method html_to_Rd em
 html_to_Rd.em <- make_simple_html_converter('em','emph')
 
 ### <cite> #####
+#' @S3method html_to_Rd cite
 html_to_Rd.cite <- make_simple_html_converter('cite', 'cite')
 if(FALSE){
     html <- htmltools::tags$cite("a citation")
@@ -306,18 +384,112 @@ if(FALSE){
     expect_equal(unclass(val), "\\cite{a citation}")
 }
 
+### <h1>...<h6> #####
+#' @S3method html_to_Rd h1
+#' @S3method html_to_Rd h2
+#' @S3method html_to_Rd h3
+#' @S3method html_to_Rd h4
+#' @S3method html_to_Rd h5
+#' @S3method html_to_Rd h6
+html_to_Rd.h1 <-
+html_to_Rd.h2 <-
+html_to_Rd.h3 <-
+html_to_Rd.h4 <-
+html_to_Rd.h5 <-
+html_to_Rd.h6 <-
+    html_simple_extractor
+
+### <kbd> #####
+#' @S3method html_to_Rd kbd
+html_to_Rd.kbd <- make_simple_html_converter('kbd', 'kbd')
+if(FALSE){#@testing
+    html <- htmltools::tags$kbd("abc")
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd')
+    expect_equal( unclass(val), "\\kbd{abc}")
+}
+
+### <ol> #####
+#' @S3method html_to_Rd ol
+html_to_Rd.ol <- make_simple_html_converter('ol', 'itemize', 'li')
+if(FALSE){#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                  , c( "\\itemize{"
+                       , "\\item First"
+                       , "\\item Second"
+                       , "}"
+                  ))
+
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                                 , htmltools::tags$dl("Second")
+    ))
+    )
+}
+
+### <pre> #####
+#' @S3method html_to_Rd pre
+html_to_Rd.pre <- make_simple_html_converter("pre", "preformatted")
+
+### <q> #####
+#' @S3method html_to_Rd q
+html_to_Rd.q <- make_simple_html_converter("pre", "dQuote")
+
+### <samp> #####
+#' @S3method html_to_Rd samp
+html_to_Rd.samp <- make_simple_html_converter("samp", "preformatted")
+
+### <strong> #####
+#' @S3method html_to_Rd strong
+html_to_Rd.strong <- make_simple_html_converter('strong','strong')
+
+### <ul> #####
+#' @S3method html_to_Rd ul
+html_to_Rd.ul <- make_simple_html_converter('ul', 'itemize', 'li')
+if(FALSE){#@testing
+    html <- htmltools::tags$ol( htmltools::tags$li("First")
+                              , htmltools::tags$li("Second")
+                              )
+    val <- html_to_Rd(html)
+    expect_is(val, 'Rd_tag')
+    expect_equal( unclass(val)
+                , c( "\\itemize{"
+                   , "\\item First"
+                   , "\\item Second"
+                   , "}"
+                   ))
+
+    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
+                                               , htmltools::tags$dl("Second")
+                                               ))
+                )
+}
 
 # Extractor Methods ============================================================
 
 ### <dd> #####
+#' @S3method html_to_Rd dd
 html_to_Rd.dd <- html_simple_extractor
+
+### <span> #####
+#' @S3method html_to_Rd span
+html_to_Rd.span <- html_simple_extractor
+
+### <td> #####
+#' @S3method html_to_Rd td
+html_to_Rd.td <- html_simple_extractor
 
 
 # Discouraged Methods ==========================================================
 
+#' @S3method html_to_Rd b
 html_to_Rd.b <- function(html, ...){
     doc_warning_html5_discouraged('b', 'strong')
-    content <- Rd(lapply(html$children, html_to_Rd))
+    content <- html_to_Rd(html$children, ...)
     Rd_tag(content, 'b')
 }
 if(FALSE){#@testing
@@ -328,10 +500,59 @@ if(FALSE){#@testing
     expect_identical(unclass(val), "\\b{something to bold}")
 }
 
+#' @S3method html_to_Rd small
+html_to_Rd.small <-
+function( html
+        , size = default_("Rd.small.size", "\\small")
+        , ...){
+    doc_warning_html5_discouraged('small')
+    match.arg(size, c("\\small", "\\footnotesize", "\\scriptsize", "\\tiny"))
+    content <- html_to_Rd(html$children)
+
+    if (length(content)==0)
+        Rd(character(0))
+    else if (length(content)==1)
+        s( sprintf("{%s %s}", size, content), class='Rd')
+    else
+        s(c("{" %<<<% size
+           , content
+           , "}"), class='Rd')
+}
+if(FALSE){#@testing
+    html <- htmltools::tags$small("something small")
+    expect_warning( val <- html_to_Rd(html)
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val), "{\\small something small}")
+
+    expect_warning( val <- html_to_Rd(html, size="\\tiny")
+                  , class = "documentation-warning-html_to_Rd-discouraged")
+    expect_identical(unclass(val), "{\\tiny something small}")
+
+    expect_error(suppressWarnings(val <- html_to_Rd(html, size="\\miniscule")))
+
+    html <- htmltools::tags$small(c("something small", "and another thing"))
+    withr::with_options( list("Rd.small.size" = '\\scriptsize'),{
+        expect_warning( val <- html_to_Rd(html)
+                      , class = "documentation-warning-html_to_Rd-discouraged")
+        expect_equal(unclass(val)
+                    , c("{\\scriptsize"
+                       , "something small"
+                       , "and another thing"
+                       , "}"
+                       ) )
+    })
+
+    expect_identical( suppressWarnings(html_to_Rd(htmltools::tags$small()))
+                    , Rd(character(0))
+                    )
+
+}
 
 
 # Complex Methods ==============================================================
 
+#' @S3method html_to_Rd a
 html_to_Rd.a <- function(html, ...){
     href <- html$attribs$href
     assert_that(all(purrr::map_lgl(html$children, is.character)))
@@ -345,6 +566,12 @@ html_to_Rd.a <- function(html, ...){
                  , type = 'html_to_Rd' )
 }
 if(FALSE){#@testing
+    expect_identical( html_to_Rd(htmltools::a("somewhere"))
+                    , cl(Rd("\\link{somewhere}"), 'Rd_tag')
+                    )
+
+
+
     a <- htmltools::a("some text", href="https://r-project.org")
 
     val <- html_to_Rd(htmltools::a("some text", href="https://r-project.org"))
@@ -367,11 +594,13 @@ if(FALSE){#@testing
     expect_is(val, 'Rd_tag')
     expect_identical(unclass(val), "\\link[=somewhere]{some text}")
 
-
+    expect_error( html_to_Rd.a(htmltools::a("some text", href="somewhere over the rainbow"))
+                , class = "documentation-error-html_to_Rd" )
     expect_error( html_to_Rd(htmltools::a("some text", href="somewhere over the rainbow"))
                 , class = "documentation-error-html_to_Rd" )
 }
 
+#' @S3method html_to_Rd abbr
 html_to_Rd.abbr <- function(html, ...){
     assert_that( all(purrr::map_lgl(html$children, is.character))
                  , length(html$children) == 1L
@@ -395,7 +624,8 @@ if(FALSE){#@testing
                   , class = 'documentation-warning-html_to_Rd')
 }
 
-html_to_Rd.br <- function(html){
+#' @S3method html_to_Rd br
+html_to_Rd.br <- function(html, ...){
     assert_that( html_is_type(html, 'br'))
     if (length(html$children) > 0)
         doc_error_html5_malformed('br', "cannot have children.")
@@ -408,11 +638,13 @@ if(FALSE){#@testing
     expect_identical(unclass(val), "\\cr")
 
     html <- with(htmltools::tags, br('text'))
+    expect_error( html_to_Rd.br(html)
+                , class = "documentation-error-html_to_Rd-malformed_html")
     expect_error( html_to_Rd(html)
                 , class = "documentation-error-html_to_Rd-malformed_html")
 }
 
-
+#' @S3method html_to_Rd code
 html_to_Rd.code <- function(html, ...){
     assert_that( is.list(html$children)
                , all(purrr::map_lgl(html$children, is.character))
@@ -433,6 +665,7 @@ if(FALSE){#@testing
     expect_identical(unclass(rd), "\\code{'a' \\%in\\% letters}")
 }
 
+#' @S3method html_to_Rd div
 html_to_Rd.div <- function(html, sub.section=FALSE, ...){
     assert_that( is.flag(sub.section))
     children <- html$children
@@ -443,13 +676,13 @@ html_to_Rd.div <- function(html, sub.section=FALSE, ...){
         children <- children[-1]
     } else
         doc_error_html5_malformed('div', "cannot determine title of section.")
-    content <- Rd(lapply(children, html_to_Rd, sub.section=TRUE))
+    content <- html_to_Rd(children, sub.section=TRUE)
 
     name <- ifelse(sub.section, "subsection", "section") %<<<%
         "{" %<<<% Rd(title) %<<<% "}"
     Rd_tag(content, name)
 }
-if(FALSE){
+if(FALSE){#@testing
     txt <- stringi::stri_rand_lipsum(3)
     title <- "test title"
     html <- htmltools::tags$div(txt, title=title)
@@ -477,14 +710,19 @@ if(FALSE){
 
     expect_equal( tail(val, 2), c( "}", "}") )
 
+    expect_error( html_to_Rd(with(htmltools::tags, div( em("Section Header"), ss)))
+                , class="documentation-error-html_to_Rd-malformed_html" )
 }
 
+#' @S3method html_to_Rd dt
 html_to_Rd.dt <- function(html, ...){
     assert_that( length(html$children) == 1
                , is.character(html$children[[1]])
                )
     Rd_tag(html$children[[1]], 'dfn')
 }
+
+#' @S3method html_to_Rd dl
 html_to_Rd.dl <- function(html, ...){
     assert_that( length(html$children) %% 2 == 0
                , all( sapply(html$children, `[[`, 'name') %in% c('dd', 'dt') )
@@ -526,21 +764,38 @@ if(FALSE){#@testing
                    , "\\item{\\dfn{term2}}{definition 2.}"
                    , "}"
                    ) )
+
+    html <- htmltools::tags$dl( htmltools::tags$dt("term1")
+                                , htmltools::tags$dd("definition 1.")
+                                , htmltools::tags$dd("definition 2.")
+                              , htmltools::tags$dt("term2")
+                              )
+    expect_error( html_to_Rd(html)
+                , class="documentation-error-html_to_Rd-malformed_html" )
+
+
 }
 
-
-html_to_Rd.h1 <-
-html_to_Rd.h2 <-
-html_to_Rd.h3 <-
-html_to_Rd.h4 <-
-html_to_Rd.h5 <-
-html_to_Rd.h6 <-
-    html_simple_extractor
-
+#' @S3method html_to_Rd html
 html_to_Rd.html <- function(html, ...){
-    Rd(lapply(html$children, html_to_Rd))
+    html_to_Rd(html$children)
+}
+if(FALSE){#@testing
+    html1 <- htmltools::tags$dl( htmltools::tags$dt("term1")
+                                 , htmltools::tags$dd("definition 1.")
+                               , htmltools::tags$dt("term2")
+                                 , htmltools::tags$dd("definition 2.")
+                               )
+
+    html2 <- htmltools::tags$html(html1)
+
+    expect_identical( html_to_Rd(html1)
+                    , cl(html_to_Rd(html2), 'Rd_tag')
+                    )
 }
 
+
+#' @S3method html_to_Rd img
 html_to_Rd.img <- function(html, ...){
     assert_that( length(html$children) == 0)
     src <- html$attribs$src
@@ -557,18 +812,14 @@ if(FALSE){#@testing
     expect_is(val, 'Rd')
     expect_equal( unclass(val)
                 , "\\figure{test.png}{options: alt=\"alternate text\" height=100 width=100}")
+
+    html <- htmltools::tags$img(alt ='alternate text', height=100, width=100)
+    expect_error(html_to_Rd(html), class="documentation-error")
 }
 
-html_to_Rd.kbd <- make_simple_html_converter('kbd', 'kbd')
-if(FALSE){#@testing
-    html <- htmltools::tags$kbd("abc")
-    val <- html_to_Rd(html)
-    expect_is(val, 'Rd')
-    expect_equal( unclass(val), "\\kbd{abc}")
-}
-
+#' @S3method html_to_Rd li
 html_to_Rd.li <- function(html, ...){
-    s( "\\item" %<<% collapse0(Rd(lapply(html$children, html_to_Rd)))
+    s( "\\item" %<<% collapse0(html_to_Rd(html$children))
        , class='Rd')
 }
 if(FALSE){#@testing
@@ -579,27 +830,8 @@ if(FALSE){#@testing
                 , "\\item some \\emph{text}.")
 }
 
-html_to_Rd.ol <- make_simple_html_converter('ol', 'itemize', 'li')
-if(FALSE){#@testing
-    html <- htmltools::tags$ol( htmltools::tags$li("First")
-                              , htmltools::tags$li("Second")
-                              )
-    val <- html_to_Rd(html)
-    expect_is(val, 'Rd_tag')
-    expect_equal( unclass(val)
-                  , c( "\\itemize{"
-                       , "\\item First"
-                       , "\\item Second"
-                       , "}"
-                  ))
 
-    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
-                                                 , htmltools::tags$dl("Second")
-    ))
-    )
-}
-
-
+#' @S3method html_to_Rd p
 html_to_Rd.p <- function(html, ...){
     content <- lapply(html$children, html_to_Rd)
     if (length(content)==0) return(Rd(character(0)))
@@ -613,66 +845,18 @@ if(FALSE){#@testing
     expect_equal(unclass(html_to_Rd(htmltools::p("text"))), c("text", ""))
 }
 
-html_to_Rd.pre <- make_simple_html_converter("pre", "preformatted")
-html_to_Rd.q <- make_simple_html_converter("pre", "dQuote")
-html_to_Rd.samp <- make_simple_html_converter("samp", "preformatted")
 
+#' @S3method html_to_Rd section
 html_to_Rd.section <- html_to_Rd.div
-html_to_Rd.span <- html_simple_extractor
 
 
-
-html_to_Rd.small <-
-function( html
-        , size = default_("Rd.small.size", "\\small")
-        , ...){
-    doc_warning_html5_discouraged('small')
-    match.arg(size, c("\\small", "\\footnotesize", "\\scriptsize", "\\tiny"))
-    content <- Rd(lapply(html$children, html_to_Rd))
-
-    if (length(content)==0)
-        Rd(character(0))
-    else if (length(content)==1)
-        s( sprintf("{%s %s}", size, content), class='Rd')
-    else
-        s(c("{" %<<<% size
-           , content
-           , "}"), class='Rd')
-}
-if(FALSE){#@testing
-    html <- htmltools::tags$small("something small")
-    expect_warning( val <- html_to_Rd(html)
-                  , class = "documentation-warning-html_to_Rd-discouraged")
-    expect_is(val, 'Rd')
-    expect_identical(unclass(val), "{\\small something small}")
-
-    expect_warning( val <- html_to_Rd(html, size="\\tiny")
-                  , class = "documentation-warning-html_to_Rd-discouraged")
-    expect_identical(unclass(val), "{\\tiny something small}")
-
-    expect_error(suppressWarnings(val <- html_to_Rd(html, size="\\miniscule")))
-
-    html <- htmltools::tags$small(c("something small", "and another thing"))
-    withr::with_options( list("Rd.small.size" = '\\scriptsize'),{
-        expect_warning( val <- html_to_Rd(html)
-                      , class = "documentation-warning-html_to_Rd-discouraged")
-        expect_equal(unclass(val)
-                    , c("{\\scriptsize"
-                       , "something small"
-                       , "and another thing"
-                       , "}"
-                       ) )
-    })
-
-}
-
-html_to_Rd.strong <- make_simple_html_converter('strong','strong')
-
+#' @S3method html_to_Rd table
 html_to_Rd.table <-
 function( html
         , ...
         , col.align = default(col.align, 'l') #< default column alignment.
         , collapse.lines = default(collapse.lines, FALSE)
+        , collapse.with  = default(collapse.with, FALSE)
         ){
     allowed.chilren <- c('thead', 'tbody', 'tfoot')
     ctypes <- html_get_type(html$children)
@@ -718,6 +902,8 @@ function( html
         , content
         ), class='Rd', nrows = nrows, ncols = ncols)
 }
+
+#' @S3method html_to_Rd th
 html_to_Rd.th <-
 function( html
         , warn.info.loss = default(warn.info.loss, 'warning', fun='Rd')
@@ -726,7 +912,8 @@ function( html
                          , warn.info.loss=warn.info.loss
                          , ...)
 }
-html_to_Rd.td <- html_simple_extractor
+
+#' @S3method html_to_Rd tr
 html_to_Rd.tr <- function(html, head=FALSE, ...){
     allowed.children <- if (head) 'th' else 'td'
     assert_that( all(html_get_type(html$children) %in% allowed.children) )
@@ -737,6 +924,8 @@ html_to_Rd.tr <- function(html, head=FALSE, ...){
      , class = 'Rd'
      )
 }
+
+#' @S3method html_to_Rd tbody
 html_to_Rd.tbody <-
 function( html, ...
         , collapse.lines  = default(collapse.lines, FALSE)
@@ -753,18 +942,23 @@ function( html, ...
     if (collapse.lines)
         s(.Rd_collapse( rows, collapse.lines = collapse.lines
                       , collapse.with = "\\cr" %<<<% collapse.with)
-         , ncols = ncols, nrows = length(rows))
+         , ncols = ncols, nrows = length(rows), class='Rd')
     else if(length(rows) > 1L)
         s( stringi::stri_split(collapse(rows, with = "\\cr\xE1"), fixed="\xE1")[[1]]
-         , ncols = ncols, nrows = length(rows))
+         , ncols = ncols, nrows = length(rows), class='Rd')
     else s( rows[[1]]
-          , ncols = ncols, nrows = length(rows))
+          , ncols = ncols, nrows = length(rows), class='Rd')
 }
+
+#' @S3method html_to_Rd tfoot
 html_to_Rd.tfoot <-
 function(html, ..., warn.info.loss  = default(warn.info.loss, 'message')){
+    if(length(html$children)==0) return(Rd(character(0)))
     html_conversion_information_loss('tfoot', cond = warn.info.loss)
     html_to_Rd.tbody(html, warn.info.loss = warn.info.loss, ...)
 }
+
+#' @S3method html_to_Rd thead
 html_to_Rd.thead <-
 function( html, ...
         , collapse.lines  = default(collapse.lines, FALSE)
@@ -773,7 +967,7 @@ function( html, ...
         ){
     assert_that( all(html_get_type(html$children) %in% c('tr')) )
     rows <- lapply( html$children, html_to_Rd, head=TRUE
-                  , warn.info.loss=warn.info.loss )
+                  , warn.info.loss=warn.info.loss, ... )
     if (length(rows)==0) return(Rd(character(0)))
 
     ncols <- max(purrr::map_int(rows, attr, 'ncols'))
@@ -781,13 +975,13 @@ function( html, ...
     if (collapse.lines)
         s(.Rd_collapse( rows
                       , collapse.lines = collapse.lines
-                      , collapse.with = " \\cr" %<<<% collapse.with)
-         , ncols = ncols, nrows = length(rows))
+                      , collapse.with = "\\cr" %<<<% collapse.with)
+         , ncols = ncols, nrows = length(rows), class='Rd')
     else if(length(rows) > 1L)
-        s( stringi::stri_split(collapse(rows, with = " \\cr\xE1"), fixed="\xE1")[[1]]
-         , ncols = ncols, nrows = length(rows))
+        s( stringi::stri_split(collapse(rows, with = "\\cr\xE1"), fixed="\xE1")[[1]]
+         , ncols = ncols, nrows = length(rows), class='Rd')
     else s( rows[[1]]
-          , ncols = ncols, nrows = length(rows))
+          , ncols = ncols, nrows = length(rows), class='Rd')
 }
 if(FALSE){#@testing html_to_Rd.* table functions
     html <-
@@ -837,32 +1031,108 @@ if(FALSE){#@testing html_to_Rd.* table functions
                    , nrows = 5, ncols = 4)
                 )
 
+    html <-
+        with(htmltools::tags, {
+            table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
+                 , tfoot( tr( td('Count'), td('1'), td('3'), td('1') ) )
+                 , align = "right|center|center|center"
+                 )
+        })
+    expect_error(html_to_Rd(html), class="documentation-error-html_to_Rd-malformed_html")
+
+    html <-
+        with(htmltools::tags, {
+            table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
+                 , tfoot( tr( td('Count'), td('1'), td('3'), td('1') ) )
+                 , align = "right|center|center|center"
+                 )
+        })
+    expect_error(html_to_Rd(html), class="documentation-error-html_to_Rd-malformed_html")
+
+
+    expect_identical( html_to_Rd(htmltools::tags$thead())
+                    , Rd(character(0))
+                    )
+    expect_identical( html_to_Rd(htmltools::tags$tbody())
+                    , Rd(character(0))
+                    )
+    expect_identical( html_to_Rd(htmltools::tags$tfoot())
+                    , Rd(character(0))
+                    )
+
+    thead <- with(htmltools::tags,
+                  thead( tr( th(''), th('C'), th('D'), th('E') )
+                       , tr( th('.'), th('1'), th('2'), th('3') )
+                       ))
+    val <- html_to_Rd( thead, collapse.lines=TRUE
+                     , warn.info.loss = 'none'
+                     )
+    expect_is(val, 'Rd')
+    expect_identical( val
+                    , s(Rd(" \\tab C \\tab D \\tab E\\cr" %\%
+                           ". \\tab 1 \\tab 2 \\tab 3"
+                          ), nrows=2L, ncols=4L)
+                    )
+    val <- html_to_Rd( thead, collapse.lines=FALSE
+                     , warn.info.loss = 'none'
+                     )
+    expect_is(val, 'Rd')
+    expect_identical( val
+                    , s(Rd(c( " \\tab C \\tab D \\tab E\\cr"
+                            , ". \\tab 1 \\tab 2 \\tab 3"
+                            )
+                          ), nrows=2L, ncols=4L)
+                    )
+
+    tfoot <- with(htmltools::tags,
+                tfoot( tr( td('Count'), td('1'), td('2'), td('3') )
+                     , tr( td('Total'), td('A'), td('B'), td('C') )
+                     ))
+
+    val <- html_to_Rd( tfoot, collapse.lines=TRUE
+                     , warn.info.loss = 'none'
+                     )
+    expect_is(val, 'Rd')
+    expect_identical( val
+                    , s(Rd("Count \\tab 1 \\tab 2 \\tab 3\\cr" %\%
+                           "Total \\tab A \\tab B \\tab C"
+                          ), nrows=2L, ncols=4L)
+                    )
+
+    val <- html_to_Rd( tfoot, collapse.lines=FALSE
+                     , warn.info.loss = 'none'
+                     )
+    expect_is(val, 'Rd')
+    expect_identical( val
+                    , s(Rd(c( "Count \\tab 1 \\tab 2 \\tab 3\\cr"
+                            , "Total \\tab A \\tab B \\tab C"
+                            )
+                          ), nrows=2L, ncols=4L)
+                    )
 }
 
 
-html_to_Rd.ul <- make_simple_html_converter('ul', 'itemize', 'li')
-if(FALSE){#@testing
-    html <- htmltools::tags$ol( htmltools::tags$li("First")
-                              , htmltools::tags$li("Second")
-                              )
-    val <- html_to_Rd(html)
-    expect_is(val, 'Rd_tag')
-    expect_equal( unclass(val)
-                , c( "\\itemize{"
-                   , "\\item First"
-                   , "\\item Second"
-                   , "}"
-                   ))
-
-    expect_error( html_to_Rd(htmltools::tags$ol( htmltools::tags$li("First")
-                                               , htmltools::tags$dl("Second")
-                                               ))
-                )
-}
-
-
-# toRd Method ------------------------------------------------------------------
+# toRd,shiny.tag ------------------------------------------------------------------
 
 setOldClass('shiny.tag')
-setMethod('toRd', 'shiny.tag', function(obj, ...)html_to_Rd(obj, ...))
-
+setMethod('toRd', 'shiny.tag', function(obj, ...){
+    if (identical(class(obj), 'shiny.tag'))
+        class(obj) <- c(html_get_type(obj), 'shiny.tag')
+    html_to_Rd(obj, ...)
+})
+if(FALSE){#@testing
+    html <-
+        with(htmltools::tags, {
+            table( thead( tr( th(''), th('C1'), th('C2'), th('C3') ) )
+                 , tbody( tr( td('R1'), td('O'), td('X'), td('O') )
+                        , tr( td('R2'), td('X'), td('X'), td('O') )
+                        , tr( td('R3'), td('O'), td('X'), td('X') )
+                        )
+                 , tfoot( tr( td('Count'), td('1'), td('3'), td('1') ) )
+                 , align = "right|center|center|center"
+                 )
+        })
+    expect_identical( toRd(html, warn.info.loss='none')
+                    , html_to_Rd(html, warn.info.loss='none')
+                    )
+}
