@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Vector.R`')
-#line 20 "/rdtf/documentation/R/Class-Vector.R"
+#line 20 "R/Class-Vector.R"
 test_that('setVector', {#! @testing
     new.class <- setVector('name', where=globalenv()) # creates `Vector()`
     name.vector <- new.class()

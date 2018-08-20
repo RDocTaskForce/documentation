@@ -2,11 +2,11 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-Documentation.R`')
-#line 27 "/rdtf/documentation/R/Fun-toRd-Documentation.R"
-test_that('toRd,Documentation-method', {#! @testing
-    null.object <- new('Documentation')
+#line 27 "R/Fun-toRd-Documentation.R"
+test_that('toRd,BaseDocumentation-method', {#! @testing
+    null.object <- new('BaseDocumentation')
 
-    object <- new( "Documentation"
+    object <- new( "BaseDocumentation"
                  , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                                   , person('Drew'  , 'Blue')
                                   )

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-function.R`')
-#line 24 "/rdtf/documentation/R/Fun-toRd-function.R"
+#line 20 "R/Fun-toRd-function.R"
 test_that('toRd,function-Documentation-method', {#! @testing
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')

@@ -2,19 +2,36 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation.R`')
-#line 75 "/rdtf/documentation/R/Class-Documentation.R"
-test_that('initialize,Documentation-method', {#!@testing
-    x <- new('Documentation')
+#line 77 "R/Class-Documentation.R"
+test_that('initialize,BaseDocumentation-method', {#!@testing
+    x <- new('BaseDocumentation')
     expect_identical(x@author, person())
     expect_identical(x@title, character(0))
 
-    x <- new('Documentation'
+    x <- new('BaseDocumentation'
             , author     = person('Andrew', 'Redd')
             , references = citation()
+            , title = "Test Documentation"
+            , description = "plain text"
+            , keywords = 'documentation'
+            , seealso = Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")
+            , examples = expression(function_documentation("hw", title="Hello world"))
             )
-    expect_equal(x@author, person('Andrew', 'Redd'))
+    expect_identical( x@author, person('Andrew', 'Redd'))
+    expect_identical( x@title,  "Test Documentation")
+    expect_identical( x@description,  FT("plain text"))
+    expect_identical( x@description,  FT("plain text"))
+    expect_identical( x@keywords,  keyword("documentation"))
+    expect_identical( x@seealso,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
+    # expect_identical( x@examples,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
+    expect_identical( cl(x@references, 'citation'), citation())
+    
+    
+    # x <- new( 'BaseDocumentation')
+    
+    
 })
-#line 97 "/rdtf/documentation/R/Class-Documentation.R"
+#line 116 "R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -23,10 +40,10 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
 
 })
-#line 112 "/rdtf/documentation/R/Class-Documentation.R"
+#line 131 "R/Class-Documentation.R"
 test_that('as.list,Documentation-method', {#! @testing
     x <-
-    object <- new( "Documentation"
+    object <- new( "BaseDocumentation"
              , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                               , person('Drew'  , 'Blue')
                               )

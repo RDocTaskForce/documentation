@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation-Default-Value.R`')
-#line 43 "/rdtf/documentation/R/Class-Documentation-Default-Value.R"
+#line 43 "R/Class-Documentation-Default-Value.R"
 test_that('Documentation-Default-Value', {#!@testing Documentation-Default-Value
     expect_is(new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )

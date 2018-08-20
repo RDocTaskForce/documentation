@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-default.R`')
-#line 151 "/rdtf/documentation/R/Fun-default.R"
+#line 151 "R/Fun-default.R"
 test_that('default_', {#! @testing
     o <-list( 'documentation::default_test_function::test.arg' = 1
             , 'documentation::inherited.arg' = 2
@@ -70,7 +70,7 @@ test_that('default_', {#! @testing
         untrace(default_)
     }
 })
-#line 232 "/rdtf/documentation/R/Fun-default.R"
+#line 232 "R/Fun-default.R"
 test_that('default', {#! @testing
     opar <- options()
     options( 'documentation::default_test_function::test.arg' = 1

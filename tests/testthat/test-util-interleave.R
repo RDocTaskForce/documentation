@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-interleave.R`')
-#line 15 "/rdtf/documentation/R/util-interleave.R"
+#line 15 "R/util-interleave.R"
 test_that('interleave', {#! @testing
     expect_equal(interleave( 1:3, 4:6 ), c(1,4,2,5,3,6) )
     expect_is(interleave( 1:3, 4:6 ), 'integer' )

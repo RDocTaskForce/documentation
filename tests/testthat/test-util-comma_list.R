@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-comma_list.R`')
-#line 15 "/rdtf/documentation/R/util-comma_list.R"
+#line 15 "R/util-comma_list.R"
 test_that('comma_list', {#! @testing
     expect_is(comma_list(1), 'character')
     expect_equal(comma_list(1), '1')

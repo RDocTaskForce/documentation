@@ -212,10 +212,11 @@ expect_equal(x, "setGeneric('yolo', ...)")
 #' @export
 extract_tests <-
 function( pkg = '.'     #< package to extract tests for.
-        , verbose = getOption('verbose', FALSE) #< print messages
+        , verbose  = default(verbose, FALSE) #< print messages
+        , full.path = default(full.path, NA)
         ){
     #! Extract tests for testing directory.
-    if (file.exists(file.path(pkg, "DESCRIPTION"))) {
+    if (is.character(file) && file.exists(file.path(pkg, "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg, "DESCRIPTION"))
         desc <- structure(as.list(desc), names=tolower(colnames(desc)))
         desc$path <- normalizePath(pkg)
@@ -225,7 +226,7 @@ function( pkg = '.'     #< package to extract tests for.
         pkg <- devtools::as.package(pkg)
     }
     if (.Platform$OS.type == "windows")
-        pkg$path <- gsub("\\\\", "/", pkg$path)
+        pkg$path <- normalizePath(pkg$path, '/')
     for(e in intersect(c('imports', 'suggests', 'depends', 'collate'), names(pkg)))
         pkg[[e]] <- trimws(strsplit(pkg[[e]], "\\s*,\\s*")[[1]], 'both')
 
@@ -233,7 +234,7 @@ function( pkg = '.'     #< package to extract tests for.
         warning("testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
     test.dir <- file.path(pkg$path, "tests", "testthat")
     if (!file.exists(test.dir)) {
-        if (verbose) message("create directory `", test.dir, "`")
+        if (verbose) message("Creating directory `", test.dir, "`")
         dir.create(test.dir, recursive=TRUE)
     }
     if (!file.exists(.f <- file.path(test.dir, "..", "testthat.R"))){
@@ -246,8 +247,24 @@ function( pkg = '.'     #< package to extract tests for.
               )
            , file=.f, sep='\n')
     }
-    files <- list.files( file.path(pkg, "R"), pattern="\\.r$", ignore.case=T, full.names=T)
-    structure( lapply(files, extract_tests_to_file_, test.dir=test.dir, verbose=verbose)
+    
+    files <- if(is.na(full.path)){
+        old <- setwd(dir=pkg$path)
+        on.exit(setwd(old))
+        file.path("R", 
+            list.files( "R", pattern="\\.r$", ignore.case=TRUE, full.names=FALSE))
+    } else if (full.path) {
+        list.files( file.path(pkg$path, "R"), pattern="\\.r$", ignore.case=TRUE, full.names=TRUE)
+    } else {
+        old <- setwd(dir=file.path(pkg$path, 'R'))
+        on.exit(setwd(old))
+        list.files( ".", pattern="\\.r$", ignore.case=TRUE, full.names=FALSE)
+    }
+    structure( lapply( files, extract_tests_to_file_
+                     , test.dir=test.dir
+                     , verbose=verbose
+                     , full.path = isTRUE(full.path)
+                     )
              , names = files)
 
 }
@@ -265,13 +282,71 @@ if(FALSE){#@TESTING
                                   )
                                , "hello_world"
                                )
-                         , names = normalizePath(file.path(pkg, 'R', c('Class.R', 'function.R')), '/')
+                         , names = file.path('R', c('Class.R', 'function.R'))
                          )
+    
+    test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/')
+    expect_identical(list.files(test.dir), c('test-Class.R', 'test-function.R'))
+    
+    file <- file.path(test.dir, 'test-Class.R')
+    expect_identical( readLines(file)[c(1:5)]
+                    , c( "#! This file was automatically produced by the documentation package."
+                       , "#! Changes will be overwritten."
+                       , ""
+                       , "context('tests extracted from file `Class.R`')"
+                       , "#line 4 \"R/Class.R\""
+                       )
+                    )  
 
     expect_equal( result, expected)
     expect_true(dir.exists(file.path(pkg, "tests", "testthat")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-Class.R")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-function.R")))
+
+    expect_warning( result <- extract_tests(pkg, full.path = TRUE)
+                  , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
+    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
+                                  , "show,Test-Class-method"
+                                  , "setGeneric(\"yolo\", ...)"
+                                  )
+                               , "hello_world")
+                         , names = normalizePath(file.path(pkg, 'R', c('Class.R', 'function.R')), "/")
+                         )
+    expect_identical(result, expected)
+
+    file <- file.path(test.dir, 'test-Class.R')
+    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/')
+    expect_identical( readLines(file)[c(1:5)]
+                    , c( "#! This file was automatically produced by the documentation package."
+                       , "#! Changes will be overwritten."
+                       , ""
+                       , "context('tests extracted from file `" %<<<% from %<<<% "`')"
+                       , "#line 4 \"" %<<<% from %<<<%"\""
+                       )
+                    )
+    
+    
+    expect_warning( result <- extract_tests(pkg, full.path = FALSE)
+                  , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
+    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
+                                  , "show,Test-Class-method"
+                                  , "setGeneric(\"yolo\", ...)"
+                                  )
+                               , "hello_world")
+                         , names = c('Class.R', 'function.R')
+                         )
+    expect_identical(result, expected)
+    
+    file <- file.path(test.dir, 'test-Class.R')
+    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/')
+    expect_identical( readLines(file)[c(1:5)]
+                    , c( "#! This file was automatically produced by the documentation package."
+                       , "#! Changes will be overwritten."
+                       , ""
+                       , "context('tests extracted from file `" %<<<% basename(from) %<<<% "`')"
+                       , "#line 4 \"" %<<<% basename(from) %<<<%"\""
+                       )
+                    )
 
     unlink(tmp.dir, recursive=TRUE)
 }

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-format.R`')
-#line 68 "/rdtf/documentation/R/Fun-format.R"
+#line 68 "R/Fun-format.R"
 test_that('get_formatter', {#@testing
     formatter.toRd <- get_formatter('toRd')
     expect_is(formatter.toRd, 'nonstandardGenericFunction')
@@ -20,7 +20,7 @@ test_that('get_formatter', {#@testing
                 , class = "documentation-error-format-not_defined"
                 )
 })
-#line 96 "/rdtf/documentation/R/Fun-format.R"
+#line 96 "R/Fun-format.R"
 test_that('get_formatter_ext', {#@testing
     expect_identical(get_formatter_ext('toRd'), '.Rd')
     expect_identical(get_formatter_ext('Rd'), '.Rd')
@@ -30,7 +30,7 @@ test_that('get_formatter_ext', {#@testing
                   )
     expect_identical( value, '.not_a_format')
 })
-#line 115 "/rdtf/documentation/R/Fun-format.R"
+#line 115 "R/Fun-format.R"
 test_that('get_formatter_dir', {#@testing
     expect_identical(get_formatter_dir('toRd'), 'man')
     expect_identical(get_formatter_dir('Rd'), 'man')

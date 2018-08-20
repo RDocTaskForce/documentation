@@ -2,13 +2,13 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-arg.R`')
-#line 10 "/rdtf/documentation/R/Fun-toRd-arg.R"
+#line 10 "R/Fun-toRd-arg.R"
 test_that('toRd,arg-Documentation-method', {#! @testing
     a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
     expect_identical( unclass(toRd(a))
                     , "\\item{testing}{a testing argument}")
 })
-#line 24 "/rdtf/documentation/R/Fun-toRd-arg.R"
+#line 24 "R/Fun-toRd-arg.R"
 test_that('toRd,ArgumentList-method', {#! @testing
     a <- new("arg-Documentation", name= 'testing', description='a testing argument', default=new('Documentation-No-Default-Value'))
     b <- arg_('testing', 'a testing argument')

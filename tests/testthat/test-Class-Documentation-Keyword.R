@@ -2,8 +2,8 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation-Keyword.R`')
-#line 29 "/rdtf/documentation/R/Class-Documentation-Keyword.R"
-test_that('setClass("Documentation-Keyword", ...)', {#! @testing
+#line 30 "R/Class-Documentation-Keyword.R"
+test_that('keyword', {#! @testing
     x <- new('Documentation-Keyword', 'utilities')
     expect_true(validObject(x))
     expect_error(new('Documentation-Keyword', 'utils'))

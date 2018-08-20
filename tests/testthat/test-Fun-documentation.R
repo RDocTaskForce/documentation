@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-documentation.R`')
-#line 28 "/rdtf/documentation/R/Fun-documentation.R"
+#line 28 "R/Fun-documentation.R"
 test_that('setGeneric("documentation", ...)', {#! @testing
     test_function <- function(x){
         return(x)
@@ -21,10 +21,10 @@ test_that('setGeneric("documentation", ...)', {#! @testing
                               )
     expect_is(documentation(test_function), 'Documentation')
 })
-#line 77 "/rdtf/documentation/R/Fun-documentation.R"
+#line 77 "R/Fun-documentation.R"
 test_that('documentation<-,ANY,Documentation-method', {#! @testing
     x <- 1
-    y <- new('Documentation', title='testing')
+    y <- new('BaseDocumentation', title='testing')
 
     documentation(x) <- y
     expect_identical(attr(x, 'documentation'), y)

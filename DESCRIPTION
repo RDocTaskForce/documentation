@@ -65,7 +65,6 @@ Collate:
     'Fun-extract_tests.R'
     'Fun-toRd.R'
     'Fun-format.R'
-    'Fun-is-language.R'
     'Fun-toRd-Documentation.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-check_documented.R`')
-#line 28 "/rdtf/documentation/R/Fun-check_documented.R"
+#line 28 "R/Fun-check_documented.R"
 test_that('is_documented', {#@testing
     test_function <- function(x){}
 
