@@ -75,6 +75,25 @@ doc_condition <- function(msg, cond, ..., type=NULL, call = sys.call(1)){
           , message = doc_message(msg, ..., type=type, call=call)
           )
 }
+if(FALSE){#@testing
+    expect_null(doc_condition("test message", NULL))
+
+    expect_message( doc_condition("test message", FALSE, type='testing')
+                  , class = "documentation-message-testing" )
+    expect_warning( doc_condition("test message", NA   , type='testing')
+                  , class = "documentation-warning-testing" )
+    expect_error  ( doc_condition("test message", TRUE , type='testing')
+                  , class = "documentation-error-testing" )
+
+    expect_null(doc_condition("test message", 'none'))
+    expect_message( doc_condition("test message", 'message', type='testing')
+                  , class = "documentation-message-testing" )
+    expect_warning( doc_condition("test message", 'warning', type='testing')
+                  , class = "documentation-warning-testing" )
+    expect_error  ( doc_condition("test message", 'error'  , type='testing')
+                  , class = "documentation-error-testing" )
+}
+
 
 
 doc_dnf_error <-
@@ -171,6 +190,24 @@ function( name = NULL #< name of the object
            else ._("No documentation comments found for '%s'.", as.character(name))
     doc_condition(msg, cond, name=name, type = "no_comments", call=call)
 }
+if(FALSE){#@testing
+    expect_null(no_doc_comments('testing', NULL))
+    expect_message( no_doc_comments('testing', FALSE)
+                  , class="documentation-message-no_comments")
+    expect_warning( no_doc_comments('testing', NA)
+                  , class="documentation-warning-no_comments")
+    expect_error  ( no_doc_comments('testing', TRUE)
+                  , class="documentation-error-no_comments")
+
+    expect_null(no_doc_comments('testing', 'none'))
+    expect_message( no_doc_comments('testing', 'message')
+                  , class="documentation-message-no_comments")
+    expect_warning( no_doc_comments('testing', 'warning')
+                  , class="documentation-warning-no_comments")
+    expect_error  ( no_doc_comments('testing', 'error')
+                  , class="documentation-error-no_comments")
+}
+
 
 doc_overwrite <- function(name = NULL, cond = 'message', call=sys.call(1)){
     doc_condition( if (is.null(name)) ._("Object alreay has documentation.")

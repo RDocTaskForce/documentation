@@ -19,6 +19,7 @@ setVector( element = "Prose"
 setClass('Documentation', contains='VIRTUAL')
 
 
+### BaseDocumentation-class #####
 #TODO add srcref to Documentation when created.
 setClass( "BaseDocumentation", contains='Documentation'
         , slots = c( author      = "person"
@@ -41,6 +42,7 @@ setClass( "BaseDocumentation", contains='Documentation'
                           )
         )
 
+### intialize,BaseDocumentation #####
 setMethod("initialize", 'BaseDocumentation',
     function( .Object
             , ...
@@ -70,7 +72,12 @@ setMethod("initialize", 'BaseDocumentation',
             } else if(inherits(references, 'bibentry')){
                 .Object@references <- references
             } else {
-                .Object@references <- new('References', references)
+                doc_error(._("Invalid argument for references, received %s." %<<%
+                             "Expected a %s"
+                            , dQuote(collapse(class(references), '/'))
+                            , dQuote(getSlots(class(.Object))[['references']])
+                            )
+                         , type="invalid_argument")
             }
         return(.Object)
     })
@@ -96,13 +103,22 @@ if(FALSE){#!@testing
     expect_identical( x@seealso,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
     # expect_identical( x@examples,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
     expect_identical( cl(x@references, 'citation'), citation())
-    
-    
-    # x <- new( 'BaseDocumentation')
-    
-    
+
+
+    cit <- citation()
+    bib <- s(cit, class='bibentry')
+    lrf <- list(bib)
+    x <- new( 'BaseDocumentation', references = cit)
+    expect_identical(doc_get_references(x), bib)
+
+    x <- new( 'BaseDocumentation', references = bib)
+    expect_identical(doc_get_references(x), bib)
+
+    expect_error(x <- new( 'BaseDocumentation', references = lrf)
+                , class = 'documentation-error-invalid_argument')
 }
 
+### documented #####
 #' @export
 setGeneric("documented",
 function(object, ...){
@@ -122,6 +138,7 @@ if(FALSE){#@testing
 
 }
 
+### as.list,Documentation #####
 setMethod("as.list", 'Documentation',
 function(x, ...){
     structure( lapply(slotNames(x), getElement, object=x)

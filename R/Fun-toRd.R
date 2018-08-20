@@ -59,7 +59,7 @@ if(FALSE){#@testing
 #' @export
 #' @importFrom tools toRd
 # setGeneric('toRd', tools::toRd, valueClass=c('Rd', 'character', 'list'))
-setGeneric('toRd', def =
+setGeneric('toRd',
 function(obj, ...){
     ans <- standardGeneric("toRd")
     if (is.character(ans))
@@ -73,7 +73,7 @@ function(obj, ...){
                     ))
 })
 toRd@valueClass <- 'Rd'
-if(FALSE){
+if(FALSE){#@testing
     val <- toRd('character')
     expect_identical(val, Rd("character"))
 
@@ -86,7 +86,11 @@ if(FALSE){
                        , "and '\\{\\}' to group."
                        ) )
 }
-
+if(FALSE){#@testing
+    toRd.test_class <- function(obj, ...)obj
+    expect_error( toRd(cl(1L, 'test_class'))
+                , class = "documentation-error")
+}
 set_option_documentation( "documentation::Rd::indent"
    , description = "Determines if code should be indented when formatted.  Should default to FALSE when unset."
    , default = FALSE
@@ -97,6 +101,8 @@ set_option_documentation( "documentation::Rd::indent.with"
    , default = "  "
    , constraints = list(~is.string(.))
    )
+
+# Helpers ============================================
 .Rd_indent <-
 function( x, ...
         , indent      = default_("indent"     , FALSE, fun='Rd')
@@ -293,6 +299,8 @@ if(FALSE){#! @testing
                     )
 }
 
+# S3 Methods ----------------------------------------------------------
+
 #' @S3method toRd list
 toRd.list <- function(obj, ...){
     val <- lapply(obj, toRd)
@@ -438,12 +446,12 @@ if(FALSE){#! @testing
     expect_false(identical(toRd(obj), obj))
 }
 
-setMethod('toRd', 'FormattedText/character', 
+### toRd,FormattedText/character #####
+setMethod('toRd', 'FormattedText/character',
 function(obj, ...){
     txt <- S3Part(obj, strictS3 =TRUE)
-    
     if (length(txt)==0L) return(Rd(character(0)))
-    if (length(txt)==1L) return(toRd(txt))    
+    if (length(txt)==1L) return(toRd(txt))
         paragraphs <- lapply(txt, toRd, ...)
     cl( unlist(utils::head(interleave(paragraphs, as.list(rep('', length(paragraphs)))), -1L)), 'Rd')
 })
@@ -453,6 +461,8 @@ if(FALSE){#@testing
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'Rd')
     expect_identical(mode(as.rd), 'character')
-    
+
     expect_true(all(as.rd[c(2,4)]==''))
+
+    expect_identical(toRd(FT()), Rd(character(0)))
 }

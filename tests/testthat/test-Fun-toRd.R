@@ -31,7 +31,27 @@ test_that('Rd', {#@testing
     val <- Rd(c(a="1", b="2"))
     expect_equal(names(val), c('a','b'))
 })
-#line 119 "R/Fun-toRd.R"
+#line 76 "R/Fun-toRd.R"
+test_that('toRd@valueClass', {#@testing
+    val <- toRd('character')
+    expect_identical(val, Rd("character"))
+
+    val <- toRd(c( "use the \\backslash to escape."
+                 , "and '{}' to group."
+                 ))
+    expect_is(val, 'Rd')
+    expect_identical(unclass(val)
+                    , c( "use the \\\\backslash to escape."
+                       , "and '\\{\\}' to group."
+                       ) )
+})
+#line 89 "R/Fun-toRd.R"
+test_that('toRd@valueClass', {#@testing
+    toRd.test_class <- function(obj, ...)obj
+    expect_error( toRd(cl(1L, 'test_class'))
+                , class = "documentation-error")
+})
+#line 125 "R/Fun-toRd.R"
 test_that('.Rd_indent', {#@testing
     x <- c("test strings", "second line")
 
@@ -69,7 +89,7 @@ test_that('.Rd_indent', {#@testing
     expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
                   , class = "documentation-warning" )
 })
-#line 182 "R/Fun-toRd.R"
+#line 188 "R/Fun-toRd.R"
 test_that('.Rd_collapse', {#@testing
     expect_identical( .Rd_collapse(c("hello", "world"), collapse.lines=TRUE, collapse.with="\xE1")
                     , "hello\xE1world")
@@ -78,7 +98,7 @@ test_that('.Rd_collapse', {#@testing
     expect_identical(.Rd_collapse(x, collapse.lines=TRUE, collapse.with="\xE1")
                     , Rd("hello\xE1world"))
 })
-#line 212 "R/Fun-toRd.R"
+#line 218 "R/Fun-toRd.R"
 test_that('.Rd_strwrap', {#@testing
     x <- stringi::stri_rand_lipsum(1)
 
@@ -111,7 +131,7 @@ test_that('.Rd_strwrap', {#@testing
                     , c("   hello", "", "   world")
                     )
 })
-#line 264 "R/Fun-toRd.R"
+#line 270 "R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('test', NULL), "name is not a string")
     expect_error(Rd_tag('test', c('a', 'b')), "name is not a string")
@@ -143,7 +163,7 @@ test_that('Rd_tag', {#! @testing
                     , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
                     )
 })
-#line 308 "R/Fun-toRd.R"
+#line 316 "R/Fun-toRd.R"
 test_that('toRd.list', {#@testing
     l <- list('\\hello', '%world')
     expect_identical( toRd(l)
@@ -175,7 +195,7 @@ test_that('toRd.list', {#@testing
                     , c(author ="Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue")
                     )
 })
-#line 347 "R/Fun-toRd.R"
+#line 355 "R/Fun-toRd.R"
 test_that('toRd.Rd', {#@testing
     obj <- Rd("test")
     expect_identical(toRd(obj), obj)
@@ -186,7 +206,7 @@ test_that('toRd.Rd', {#@testing
 
     selectMethod('toRd', class(obj))
 })
-#line 370 "R/Fun-toRd.R"
+#line 378 "R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     val <- toRd(object)
@@ -211,7 +231,7 @@ test_that('toRd.person', {#! @testing
                            , class='Rd')
                 )
 })
-#line 414 "R/Fun-toRd.R"
+#line 422 "R/Fun-toRd.R"
 test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     val <- toRd(obj)
@@ -219,7 +239,7 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( unclass(val)
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 429 "R/Fun-toRd.R"
+#line 437 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/Rd-method', {#! @testing
     obj <- FT_Rd()
     expect_is(obj, 'FormattedText/Rd')
@@ -231,13 +251,15 @@ test_that('toRd,FormattedText/Rd-method', {#! @testing
     expect_identical(unclass(toRd(obj)), 'Hello world!')
     expect_false(identical(toRd(obj), obj))
 })
-#line 450 "R/Fun-toRd.R"
+#line 458 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/character-method', {#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'Rd')
     expect_identical(mode(as.rd), 'character')
-    
+
     expect_true(all(as.rd[c(2,4)]==''))
+
+    expect_identical(toRd(FT()), Rd(character(0)))
 })

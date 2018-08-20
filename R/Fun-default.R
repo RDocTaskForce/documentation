@@ -125,17 +125,17 @@ default_ <-
             , fun
             , suffix  = character(0)
             ){
-        call.no <- min(which(sapply(sys.frames(), identical, parent.frame(n))))
-        S3 <- is_S3_method_call(call.no)
-        S4 <- is_S4_method_call(call.no)
-        if (missing(fun)) {
+    call.no <- min(which(sapply(sys.frames(), identical, parent.frame(n))))
+    S3 <- is_S3_method_call(call.no)
+    S4 <- is_S4_method_call(call.no)
+    if (missing(fun)) {
             fun <- as.character(sys.call(ifelse(S3, call.no-1L, call.no))[[1L]])
     } else if(!is.null(fun)){
         assert_that(is.string(fun))
     }
     if (missing(pkg)){
         pkg   = getPackageName(topenv(parent.frame(n)))
-        if(pkg =='.GlobalEnv' || pkg == "base" || pkg == '') pkg <- NULL
+        if (pkg =='.GlobalEnv' || pkg == "base" || pkg == '') pkg <- NULL
     } else if(!is.null(pkg)){
         assert_that(is.string(pkg))
     }
@@ -181,8 +181,6 @@ if(FALSE){#! @testing
                   , no        = no.arg
                   )
         }
-        default_test_function('test')
-
         expect_equal(default_test_function('test'), 1)
         expect_equal(default_test_function('inherited'), 2)
         expect_equal(default_test_function('global'), 3)
@@ -215,6 +213,21 @@ if(FALSE){#! @testing
         untrace(default_)
     }
 }
+if(FALSE){#@testing default in global env
+    o <-list( 'default_test_function::test.arg' = 1
+            , 'global.arg' = "abc"
+            )
+    withr::with_options(o, {
+        global_test_function <- function(name){
+            default_(name, TRUE, fun='default_test_function')
+        }
+        environment(global_test_function) <- globalenv()
+        expect_equal(global_test_function('test.arg'     ), 1    )
+        expect_equal(global_test_function('global.arg'   ), 'abc')
+        expect_true (global_test_function('no.arg'       )       )
+    })
+}
+
 
 #' @export
 default <-
@@ -248,9 +261,3 @@ if(FALSE){#! @testing
     options(opar)
 }
 
-if(FALSE){
-    undebug(default)
-    debug(default)
-
-    options(test_function)
-}

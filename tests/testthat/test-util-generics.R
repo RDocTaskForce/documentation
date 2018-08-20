@@ -13,7 +13,6 @@ test_that('which.list', {#@testing
 #line 43 "R/util-generics.R"
 test_that('whichS3Generic', {#@testing
     f <- gen <- function(x, l = TRUE, ...){
-
         if (l){
             y <- UseMethod("gen")
             stopifnot(y>0)
@@ -36,9 +35,11 @@ test_that('whichS3Generic', {#@testing
     f <- html_to_Rd
     expect_true(isS3Generic(f))
     expect_true(any(unlist(.is_UseMethod(body(f)))))
-    expect_identical(.find_UseMethod(body(f)), 2L)
+    # expect_identical(.find_UseMethod(body(f)), 2L)
+
+    expect_null(whichS3Generic(rnorm))
 })
-#line 77 "R/util-generics.R"
+#line 78 "R/util-generics.R"
 test_that('is_S3_method_call', {#@testing
     print.my_class <- function(x, ...){return(invisible(is_S3_method_call()))}
 
@@ -49,7 +50,7 @@ test_that('is_S3_method_call', {#@testing
     expect_false(val)
     expect_false(is_S3_method_call())
 })
-#line 99 "R/util-generics.R"
+#line 100 "R/util-generics.R"
 test_that('get_S3_method_specialization', {#@testing
     print.my_class <- function(x, ...)return(invisible(get_S3_method_specialization()))
 
@@ -59,7 +60,7 @@ test_that('get_S3_method_specialization', {#@testing
     val <- print.my_class(s(list(), class="my_class"))
     expect_null(val)
 })
-#line 117 "R/util-generics.R"
+#line 118 "R/util-generics.R"
 test_that('is_S4_method_call', {#@testing
     setClass('test_class','list')
     setMethod('show', 'test_class', function(object){
@@ -75,7 +76,7 @@ test_that('is_S4_method_call', {#@testing
     expect_false(other_show(object))
     expect_false(is_S4_method_call())
 })
-#line 146 "R/util-generics.R"
+#line 147 "R/util-generics.R"
 test_that('get_S4_method_specialization', {#@testing
     setClass('test_class','list')
     setMethod('show', 'test_class', function(object){

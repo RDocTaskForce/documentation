@@ -25,6 +25,10 @@ s <- function( .Data, ...){
 }
 if(FALSE){#@testing
     msg <- "An failure message"
+    val <-s(FALSE, msg)
+    expect_identical(attributes(val), list(msg=msg))
+
+
     val <- s(FALSE, msg, count = 5)
     expect_identical(attributes(val), list(msg=msg, count=5))
 

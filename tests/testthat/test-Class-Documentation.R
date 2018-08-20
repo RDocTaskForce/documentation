@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation.R`')
-#line 77 "R/Class-Documentation.R"
+#line 84 "R/Class-Documentation.R"
 test_that('initialize,BaseDocumentation-method', {#!@testing
     x <- new('BaseDocumentation')
     expect_identical(x@author, person())
@@ -25,13 +25,21 @@ test_that('initialize,BaseDocumentation-method', {#!@testing
     expect_identical( x@seealso,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
     # expect_identical( x@examples,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
     expect_identical( cl(x@references, 'citation'), citation())
-    
-    
-    # x <- new( 'BaseDocumentation')
-    
-    
+
+
+    cit <- citation()
+    bib <- s(cit, class='bibentry')
+    lrf <- list(bib)
+    x <- new( 'BaseDocumentation', references = cit)
+    expect_identical(doc_get_references(x), bib)
+
+    x <- new( 'BaseDocumentation', references = bib)
+    expect_identical(doc_get_references(x), bib)
+
+    expect_error(x <- new( 'BaseDocumentation', references = lrf)
+                , class = 'documentation-error-invalid_argument')
 })
-#line 116 "R/Class-Documentation.R"
+#line 132 "R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -40,7 +48,7 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
 
 })
-#line 131 "R/Class-Documentation.R"
+#line 148 "R/Class-Documentation.R"
 test_that('as.list,Documentation-method', {#! @testing
     x <-
     object <- new( "BaseDocumentation"

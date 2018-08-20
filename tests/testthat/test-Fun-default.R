@@ -36,8 +36,6 @@ test_that('default_', {#! @testing
                   , no        = no.arg
                   )
         }
-        default_test_function('test')
-
         expect_equal(default_test_function('test'), 1)
         expect_equal(default_test_function('inherited'), 2)
         expect_equal(default_test_function('global'), 3)
@@ -70,7 +68,22 @@ test_that('default_', {#! @testing
         untrace(default_)
     }
 })
-#line 232 "R/Fun-default.R"
+#line 216 "R/Fun-default.R"
+test_that('default in global env', {#@testing default in global env
+    o <-list( 'default_test_function::test.arg' = 1
+            , 'global.arg' = "abc"
+            )
+    withr::with_options(o, {
+        global_test_function <- function(name){
+            default_(name, TRUE, fun='default_test_function')
+        }
+        environment(global_test_function) <- globalenv()
+        expect_equal(global_test_function('test.arg'     ), 1    )
+        expect_equal(global_test_function('global.arg'   ), 'abc')
+        expect_true (global_test_function('no.arg'       )       )
+    })
+})
+#line 245 "R/Fun-default.R"
 test_that('default', {#! @testing
     opar <- options()
     options( 'documentation::default_test_function::test.arg' = 1

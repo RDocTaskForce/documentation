@@ -42,7 +42,6 @@ whichS3Generic <- function(f){
 }
 if(FALSE){#@testing
     f <- gen <- function(x, l = TRUE, ...){
-
         if (l){
             y <- UseMethod("gen")
             stopifnot(y>0)
@@ -65,13 +64,15 @@ if(FALSE){#@testing
     f <- html_to_Rd
     expect_true(isS3Generic(f))
     expect_true(any(unlist(.is_UseMethod(body(f)))))
-    expect_identical(.find_UseMethod(body(f)), 2L)
+    # expect_identical(.find_UseMethod(body(f)), 2L)
+
+    expect_null(whichS3Generic(rnorm))
 }
 
 is_S3_method_call <- function(which=-1){
     if (which < 0) which <- sys.nframe() + which
-    if(abs(which) >= sys.nframe()) return(FALSE)
-    if(is.null(fun<- sys.function(which-1))) return(FALSE)
+    if(abs(which) >= sys.nframe()) return(FALSE)           # nocov
+    if(is.null(fun<- sys.function(which-1))) return(FALSE) # nocov
     isS3Generic(fun)
 }
 if(FALSE){#@testing
@@ -108,7 +109,7 @@ if(FALSE){#@testing
 
 is_S4_method_call <- function(which=-1L){
     if (which < 0) which <- sys.nframe() + which
-    if (which >= sys.nframe()) return(FALSE)
+    if (which >= sys.nframe()) return(FALSE)             # nocov
     inherits(sys.function(which), "MethodDefinition") ||
         (  sys.call(which)[[1L]] == '.local'
            && sys.call(which-1L) == sys.call(which-2L)
@@ -141,7 +142,7 @@ get_S4_method_specialization <-
             frame <- sys.frame(which-1L)
             return(class(get(name, envir=frame)))
         } else
-            stop("Could not determine target of S4 method.")
+            stop("Could not determine target of S4 method.") # nocov
     }
 if(FALSE){#@testing
     setClass('test_class','list')
@@ -162,5 +163,3 @@ if(FALSE){#@testing
     val <- toRd(object)
     expect_equal(as.character(val), 'test_class')
 }
-
-

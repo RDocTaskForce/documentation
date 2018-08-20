@@ -89,6 +89,9 @@ if(FALSE){#! @testing arg
 
     M <- ArgumentList(a, b)
     expect_identical(L, M)
+
+    expect_identical(c(M, c), AL(a,b,c))
+    expect_identical(c(M, AL(c,d)), AL(a,b,c,d))
 }
 
 

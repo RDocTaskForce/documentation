@@ -36,7 +36,26 @@ test_that('doc_warning', {#@testing
                  )
     expect_identical(x, "General documentation warning.")
 })
-#line 87 "R/util-errors.R"
+#line 78 "R/util-errors.R"
+test_that('doc_condition', {#@testing
+    expect_null(doc_condition("test message", NULL))
+
+    expect_message( doc_condition("test message", FALSE, type='testing')
+                  , class = "documentation-message-testing" )
+    expect_warning( doc_condition("test message", NA   , type='testing')
+                  , class = "documentation-warning-testing" )
+    expect_error  ( doc_condition("test message", TRUE , type='testing')
+                  , class = "documentation-error-testing" )
+
+    expect_null(doc_condition("test message", 'none'))
+    expect_message( doc_condition("test message", 'message', type='testing')
+                  , class = "documentation-message-testing" )
+    expect_warning( doc_condition("test message", 'warning', type='testing')
+                  , class = "documentation-warning-testing" )
+    expect_error  ( doc_condition("test message", 'error'  , type='testing')
+                  , class = "documentation-error-testing" )
+})
+#line 106 "R/util-errors.R"
 test_that('doc_dnf_error', {#@testing
     expect_error(doc_dnf_error(), "Documentation not found.")
     expect_error(doc_dnf_error("throw me"), "Documentation not found for 'throw me'.")
@@ -54,7 +73,7 @@ test_that('doc_dnf_error', {#@testing
                  )
     expect_identical(x, "Documentation not found!")
 })
-#line 111 "R/util-errors.R"
+#line 130 "R/util-errors.R"
 test_that('doc_invalid', {#@testing
     expect_error(doc_invalid(), "Documentation is not valid.")
     expect_error(doc_invalid("throw me"), "Documentation for 'throw me' is not valid.")
@@ -72,7 +91,7 @@ test_that('doc_invalid', {#@testing
                  )
     expect_identical(x, "Documentation is invalid!")
 })
-#line 134 "R/util-errors.R"
+#line 153 "R/util-errors.R"
 test_that('doc_incomplete', {#@testing
     expect_warning(doc_incomplete(), "Documentation is incomplete.")
     expect_warning(doc_incomplete("hello"), "Documentation is incomplete for 'hello'.")
@@ -90,7 +109,7 @@ test_that('doc_incomplete', {#@testing
                  )
     expect_identical(x, "Documentation is incomplete")
 })
-#line 161 "R/util-errors.R"
+#line 180 "R/util-errors.R"
 test_that('doc_no_src', {#@testing
     expect_error(doc_no_src(), class='documentation-error-no_src')
 })

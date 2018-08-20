@@ -7,3 +7,9 @@ test_that('str_rep', {#@testing
     expect_equal(str_rep('#', 3), '###')
     expect_equal(str_rep(c('r', 'l'), 5), "rlrlr")
 })
+#line 13 "R/util-str_rep.R"
+test_that('space', {#@testing
+    expect_identical(space(), ' ')
+    expect_identical(space(0), '')
+    expect_identical(space(3), '   ')
+})
