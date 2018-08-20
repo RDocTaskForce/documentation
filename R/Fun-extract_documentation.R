@@ -130,6 +130,9 @@ function( object
     }
     if (length(docs@arguments) > 1L){
         o <- order(match(names(docs@arguments), names(formals(object))))
+        #TODO Should I add checking here to see if the arguments are
+        #     actually in the function formals?
+        #TODO Should I add options for the sorting of the arguments alphabetically?
         docs@arguments <- docs@arguments[o]
     }
     docs
@@ -146,6 +149,12 @@ if(FALSE){#@testing
     expect_is(docs, 'function-Documentation')
 }
 
+#' Extract documentation for an object from sources.
+#' 
+#' This generic function extracts documentation from source files.
+#' Documentation should be of the form of roxygen comments or relative comments.
+#' 
+#' @export
 extract_documentation <-
 function( object   #< Object for which to extract documentation.
         , ...      #< passed on to methods.
@@ -172,6 +181,7 @@ function( object   #< Object for which to extract documentation.
     UseMethod('extract_documentation')
 }
 
+#' @export
 extract_documentation.function <-
 function( object   #< function to document.
         , ...      #< passed on. Should not be needed when calling directly.
@@ -197,45 +207,8 @@ function( object   #< function to document.
     if (!(has.roxy || length(rel.comments)))
         no_doc_comments(name)
     roxy.block <- .get_roxy_block(object, ..., options=list(markdown=markdown))
-    return(.construct_documentation.function(object, roxy.block, pd))
-
-    docs <- if (has.roxy){
-        as(roxy.block, 'function-Documentation')
-    } else new('function-Documentation')
-    if (length(rel.comments)) {
-        associated <- pd_get_relative_comment_associated_ids(rel.comments, pd)
-        for (a in unique(associated)){
-            if (pd_is_function_arg(a, pd, .check=FALSE)){
-                arg.name <- pd_text(a, pd)
-                if (arg.name %in% names(docs@arguments))
-                    doc_error(._( "documentation for %s already contains" %<<%
-                                  "documentation for argument %s"
-                                , doc_get_name(docs), arg.name))
-                comments <- rel.comments[!is.na(associated) & associated==a]
-                text <- strip_doc_comment_leads(pd_text(comments, pd))
-                docs@arguments[[arg.name]] <-
-                    arg_( name = arg.name
-                        , description = collapse(text)
-                        )
-            } else {
-                file <- pd_filename(pd)
-                line <- pd_start_line(rel.comments[match(a, associated)], pd)
-                doc_warning(._( "orphan relative comment found in %s on line %s"
-                              , file, line )
-                           , filename = file
-                           , line = line
-                           , type= "orphan_comment")
-            }
-        }
-    }
-    if (length(docs@arguments) > 1L){
-        o <- order(match(names(docs@arguments), names(formals(object))))
-        #TODO Should I add checking here to see if the arguments are
-        #     actually in the function formals?
-        #TODO Should I add options for the sorting of the arguments alphabetically?
-        docs@arguments <- docs@arguments[o]
-    }
-    if (.is_undefined(doc_get_name(docs)))
+    docs <- .construct_documentation.function(object, roxy.block, pd)
+    if (.is_undefined(docs@name))
         docs@name <- as.name(name)
     else if (!missing(name) && deparse(docs@name) != deparse(name))
         doc_error( "Name provided does not match source."

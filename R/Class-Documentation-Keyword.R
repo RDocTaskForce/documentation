@@ -19,6 +19,7 @@ rownames(db) = keyword
 db
 })
 
+keyword <- 
 setClass("Documentation-Keyword", contains='character'
         , validity = function(object){
                 is.valid <- object %in% keyword.db$KEYWORD

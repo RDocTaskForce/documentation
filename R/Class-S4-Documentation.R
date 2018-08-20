@@ -11,7 +11,7 @@ setVector( element = "slot-Documentation"
          )
 
 S4_documentation <-
-setClass( 'S4-Documentation', contains='Documentation'
+setClass( 'S4-Documentation', contains='BaseDocumentation'
         , slots = c( Slots = 'Slots-Documentation'
                    , documented.class = 'character'
                    , origin.package   = 'character'

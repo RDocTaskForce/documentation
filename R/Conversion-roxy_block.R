@@ -3,7 +3,6 @@
 .roxy.namespace <- roxygen2::roclet_tags( roxygen2::roclet('namespace'))
 .roxy.namespace.tags <- names(.roxy.namespace)
 
-setOldClass('roxy_block')
 setAs('roxy_block', 'Documentation', function(from){
     call <- attr(from, 'call')
     while (call[[1]] == as.name('<-'))
@@ -13,6 +12,10 @@ setAs('roxy_block', 'Documentation', function(from){
 })
 
 setAs('roxy_block', 'function-Documentation', function(from){
+    if ('rdname' %in% from)
+        browser()
+    
+    
     docs <- new('function-Documentation')
     for (i in seq_along(from)) {
         switch( names(from)[[i]]
@@ -29,6 +32,9 @@ setAs('roxy_block', 'function-Documentation', function(from){
               , 'keywords' = {
                     docs@keywords <- as(from[[i]], 'Documentation-Keyword')
               }
+              , 'usage' = {
+                    docs@usage <- as(parse(text=unlist(strsplit(from[[i]], '\n'))), 'usage')
+              }
               , 'details' = {
                     docs@sections[['details']] <- as(from[[i]], 'Prose')
               }
@@ -40,7 +46,7 @@ setAs('roxy_block', 'function-Documentation', function(from){
                     if (name %in% slotNames(functionDocumentation)){
                         if (functionDocumentation@slots[[name]] == 'FormattedText')
                             value <- as(value, 'FormattedText')
-                        slot(docs, name) <- value
+                        slot(docs, name) <- as(value, getSlots(functionDocumentation)[name])
                     } else {
                         warning(name, ' is not a valid function-Documentation slot name.')
                     }

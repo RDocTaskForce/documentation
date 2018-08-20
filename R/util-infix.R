@@ -33,7 +33,6 @@ if(FALSE){#! @testing %<<%
 
 #' @rdname documentation-infix-operators
 `%<<<%` <- function(lhs, rhs) paste(collapse0(lhs), collapse(rhs), sep="")
-
 if(FALSE){#! @testing %<<<%
     a <- 'A vain chalks above the integrated biscuit. '
     b <- ' Within the ground burns the leader.'

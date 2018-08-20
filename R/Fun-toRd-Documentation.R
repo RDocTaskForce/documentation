@@ -2,7 +2,7 @@
 #' @include Classes.R
 #' @include Fun-toRd.R
 
-setMethod('toRd', 'Documentation',
+setMethod('toRd', 'BaseDocumentation',
 function( obj
         , ...
         , exclude = character(0)
@@ -25,9 +25,9 @@ function( obj
     toRd(Rd, ...)
 })
 if(FALSE){#! @testing
-    null.object <- new('Documentation')
+    null.object <- new('BaseDocumentation')
 
-    object <- new( "Documentation"
+    object <- new( "BaseDocumentation"
                  , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                                   , person('Drew'  , 'Blue')
                                   )

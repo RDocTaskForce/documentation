@@ -3,7 +3,7 @@
 #' @include utils.R
 
 option_documentation <-
-setClass('option-Documentation', contains = 'Documentation'
+setClass('option-Documentation', contains = 'BaseDocumentation'
         , slots = c( key         = 'character'
                    , default     = 'Documentation-Default-Value'
                    , constraints = 'list'
@@ -18,7 +18,7 @@ setMethod('initialize', 'option-Documentation',
             ){
         #! Create documentation for a function argument.
         .Object@key         <- as.character(key)
-        .Object@description <- FormattedText(as.character(description))
+        .Object@description <- FT(as.character(description))
         if(!missing(default))
             .Object@default     <- as(default, 'Documentation-Default-Value')
         .Object@constraints <- constraints

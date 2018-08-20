@@ -16,12 +16,11 @@ setVector( element = "Prose"
          , Class   = "SectionList"
          )
 
-#' @importFrom utils bibentry person
-setOldClass('bibentry')
-setOldClass('person')
+setClass('Documentation', contains='VIRTUAL')
+
 
 #TODO add srcref to Documentation when created.
-setClass( "Documentation"
+setClass( "BaseDocumentation", contains='Documentation'
         , slots = c( author      = "person"
                    , title       = "character"
                    , description = "FormattedText"
@@ -35,11 +34,14 @@ setClass( "Documentation"
                    , export      = "logical"     #< NA means defer decision.
                    )
         , prototype = list( author     = person()
+                          , title = character(0)
                           , references = bibentry()
+                          , seealso    = FT()
+                          , description= FT()
                           )
         )
 
-setMethod("initialize", 'Documentation',
+setMethod("initialize", 'BaseDocumentation',
     function( .Object
             , ...
             , author      = NULL
@@ -52,8 +54,8 @@ setMethod("initialize", 'Documentation',
     {
         .Object <- callNextMethod( .Object, ...)
         if (!is.null(keywords   ))  .Object@keywords    <- new("Documentation-Keyword", keywords   )
-        if (!is.null(description))  .Object@description <- new("FormattedText"        , description)
-        if (!is.null(seealso    ))  .Object@seealso     <- new("FormattedText"        , seealso    )
+        if (!is.null(description))  .Object@description <- FT(description)
+        if (!is.null(seealso    ))  .Object@seealso     <- FT(seealso    )
         if (!is.null(author     ))  .Object@author      <- utils::as.person(author)
         if (!is.null(examples   )){ .Object@examples  <-
             if(inherits(examples, 'list')){
@@ -73,15 +75,32 @@ setMethod("initialize", 'Documentation',
         return(.Object)
     })
 if(FALSE){#!@testing
-    x <- new('Documentation')
+    x <- new('BaseDocumentation')
     expect_identical(x@author, person())
     expect_identical(x@title, character(0))
 
-    x <- new('Documentation'
+    x <- new('BaseDocumentation'
             , author     = person('Andrew', 'Redd')
             , references = citation()
+            , title = "Test Documentation"
+            , description = "plain text"
+            , keywords = 'documentation'
+            , seealso = Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")
+            , examples = expression(function_documentation("hw", title="Hello world"))
             )
-    expect_equal(x@author, person('Andrew', 'Redd'))
+    expect_identical( x@author, person('Andrew', 'Redd'))
+    expect_identical( x@title,  "Test Documentation")
+    expect_identical( x@description,  FT("plain text"))
+    expect_identical( x@description,  FT("plain text"))
+    expect_identical( x@keywords,  keyword("documentation"))
+    expect_identical( x@seealso,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
+    # expect_identical( x@examples,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
+    expect_identical( cl(x@references, 'citation'), citation())
+    
+    
+    # x <- new( 'BaseDocumentation')
+    
+    
 }
 
 #' @export
@@ -111,7 +130,7 @@ function(x, ...){
 })
 if(FALSE){#! @testing
     x <-
-    object <- new( "Documentation"
+    object <- new( "BaseDocumentation"
              , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                               , person('Drew'  , 'Blue')
                               )

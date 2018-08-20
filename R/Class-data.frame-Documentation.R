@@ -1,6 +1,6 @@
 #' @include utils.R
 
-setClass( "data.frame-Documentation", contains = "Documentation"
+setClass( "data.frame-Documentation", contains = "BaseDocumentation"
         , slots = c( source = "bibentry" )
         , prototype = prototype( keywords=new('Documentation-Keyword', 'data') )
         )

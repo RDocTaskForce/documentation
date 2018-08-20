@@ -179,9 +179,12 @@ function( envir = parent.frame() #< environment with objects to documents.
     results
 }
 if(F){# development
+    devtools::load_all(export_all = FALSE)
     envir <- ns <- asNamespace('documentation')
-    results <- document_env(ns, exclude="^\\..+")
+    (results <- document_env(ns, exclude="^\\..+"))
 
+    extract_documentation(`%otherwise%`)
+    
     library(dplyr)
     results %>% filter(Name == "%<<%")
     results %>% filter(Name == "as.filename")
@@ -275,26 +278,13 @@ if(FALSE){#@testing
                     , as.name("example_function1"))
 }
 
-setOldClass("package")
-
 #' @describeIn document  Document a package documentation style.
-#' #'
-#' #' When document is provided a character string it is assumed
-#' #' to be the path to a package.
-#' #'
-#' #' @note character vectors do not carry any class information
-#' #' and thus documentation cannot be extracted
-#' setMethod('document', 'package',
-#' function( object  #< the package to document.
-#'         , only.exports = TRUE
-#'         , ...     #< passed on to document_env
-#'         ){
-#'     pkg <- devtools::as.package(object)
-#'     devtools::load_all(pkg, export_all=FALSE)
-#'     ns <- asNamespace(pkg$package)
-#'     document_env(ns, ..., only.exports=only.exports)
-#' })
-
+#' 
+#' When document is provided a character string it is assumed
+#' to be the path to a package.
+#' 
+#' @note character vectors do not carry any class information
+#' and thus documentation cannot be extracted
 document_package <-
 function(pkg = '.', ..., only.exports = TRUE){
     pkg <- devtools::as.package(pkg)
@@ -302,6 +292,5 @@ function(pkg = '.', ..., only.exports = TRUE){
     ns <- asNamespace(pkg$package)
     document_env(ns, only.exports=only.exports, ...)
 }
-
 
 

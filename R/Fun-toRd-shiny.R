@@ -1114,7 +1114,6 @@ if(FALSE){#@testing html_to_Rd.* table functions
 
 # toRd,shiny.tag ------------------------------------------------------------------
 
-setOldClass('shiny.tag')
 setMethod('toRd', 'shiny.tag', function(obj, ...){
     if (identical(class(obj), 'shiny.tag'))
         class(obj) <- c(html_get_type(obj), 'shiny.tag')

@@ -76,7 +76,7 @@ function( object, value
 })
 if(FALSE){#! @testing
     x <- 1
-    y <- new('Documentation', title='testing')
+    y <- new('BaseDocumentation', title='testing')
 
     documentation(x) <- y
     expect_identical(attr(x, 'documentation'), y)

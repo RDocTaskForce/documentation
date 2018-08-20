@@ -25,19 +25,25 @@ function(name, valueClass="character", where = topenv()){
     documentation(where[[fun.name]]) <-
         function_documentation( name = fun.name
                               , title = "Documentation accessor for" %<<% name
-                              , description = "This is an automatically generated function for accessing the" %<<%
+                              , description = FT("This is an automatically generated function for accessing the" %<<%
                                     name %<<% "of a documentation object." %<<%
                                     "Specific methods may override the default behavior, " %<<%
                                     "especially when the" %<<% name %<<%
                                     "is expected to conform to a standard" %<<%
-                                    "or is generated form other known information."
+                                    "or is generated form other known information.")
                               )
 }
 # nocov end
 
-slotNames(getClass('Documentation'))
 local({
-    documentation.slots <- getSlots(getClass('Documentation'))
+    documentation.slots <- 
+        c( getSlots(getClass('Documentation'))
+         , getSlots(getClass('BaseDocumentation'))
+         , getSlots(getClass('function-Documentation'))
+         , getSlots(getClass('option-Documentation'))
+         )
+    documentation.slots <- 
+        documentation.slots[unique(names(documentation.slots))]
     for (i in seq_along(documentation.slots)){
         slot.name <- names(documentation.slots)[[i]]
         slot.class <- documentation.slots[[i]]

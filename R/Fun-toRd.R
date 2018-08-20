@@ -1,7 +1,6 @@
 #' @include Classes.R
 #' @include Fun-default.R
 
-setOldClass('Rd')
 #' @export
 Rd <-
 function( x
@@ -275,7 +274,7 @@ if(FALSE){#! @testing
     name <- 'testing'
     expect_equal(unclass(Rd_tag(name)), '\\name{testing}')
 
-    obj <- new('FormattedText', stringi::stri_rand_lipsum(3))
+    obj <- FT(stringi::stri_rand_lipsum(3))
     as.tag <- Rd_tag(obj)
     expect_is(as.tag, 'Rd_tag')
     expect_length(as.tag, 7)
@@ -420,32 +419,40 @@ if(FALSE){#! @testing
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 }
 
-### toRd,FormattedText #####
-setMethod('toRd', 'FormattedText',
-function( obj
-        , ...
-        , add.blank.lines = TRUE
-        ){
-    #! Convert formatted text into Rd lines.
-    #!
-    #! \\note{ Assumes that each element of the text is a paragraph.)
-    if( length(obj) == 0) return(character(0))
-    else if( length(obj) == 1) return(obj@.Data)
-    else return( utils::head(interleave(obj, rep('', length(obj))),-1) )
 
+### toRd,FormattedText/Rd #####
+setMethod('toRd', 'FormattedText/Rd',
+function( obj, ...){
+    #! Convert formatted text into Rd lines.
+    S3Part(obj, strictS3 =TRUE)
 })
 if(FALSE){#! @testing
-    obj <- FormattedText()
-    expect_identical(toRd(obj), Rd(character(0)))
+    obj <- FT_Rd()
+    expect_is(obj, 'FormattedText/Rd')
+    val <- toRd(obj)
+    attr(class(val), 'package') <- NULL
+    expect_identical(val, Rd(character(0)))
 
-    obj <- FormattedText('Hello world!')
-    expect_identical(toRd(obj), Rd('Hello world!'))
+    obj <- FT_Rd('Hello world!')
+    expect_identical(unclass(toRd(obj)), 'Hello world!')
     expect_false(identical(toRd(obj), obj))
+}
 
+setMethod('toRd', 'FormattedText/character', 
+function(obj, ...){
+    txt <- S3Part(obj, strictS3 =TRUE)
+    
+    if (length(txt)==0L) return(Rd(character(0)))
+    if (length(txt)==1L) return(toRd(txt))    
+        paragraphs <- lapply(txt, toRd, ...)
+    cl( unlist(utils::head(interleave(paragraphs, as.list(rep('', length(paragraphs)))), -1L)), 'Rd')
+})
+if(FALSE){#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
     expect_equal(length(as.rd), 5 )
     expect_is(as.rd, 'Rd')
     expect_identical(mode(as.rd), 'character')
+    
+    expect_true(all(as.rd[c(2,4)]==''))
 }
-

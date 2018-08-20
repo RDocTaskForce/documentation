@@ -41,7 +41,7 @@ whichS3Generic <- function(f){
           )
 }
 if(FALSE){#@testing
-    gen <- function(x, l = TRUE, ...){
+    f <- gen <- function(x, l = TRUE, ...){
 
         if (l){
             y <- UseMethod("gen")
@@ -65,7 +65,7 @@ if(FALSE){#@testing
     f <- html_to_Rd
     expect_true(isS3Generic(f))
     expect_true(any(unlist(.is_UseMethod(body(f)))))
-    expect_identical(.find_UseMethod(body(f)), list(c(7L,2L)))
+    expect_identical(.find_UseMethod(body(f)), 2L)
 }
 
 is_S3_method_call <- function(which=-1){

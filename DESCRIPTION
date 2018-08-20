@@ -28,6 +28,7 @@ Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
+    'util-generics.R'
     'util-postlogic.R'
     'util-comma_list.R'
     'util-interleave.R'
@@ -37,15 +38,18 @@ Collate:
     'util-aliases.R'
     'util-errors.R'
     'util-infix.R'
+    'setup-set_old_classes.R'
     'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
     'Class-FormattedText.R'
     'Class-Vector.R'
     'Class-Documentation.R'
+    'Class-usage.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
     'Class-S4-Documentation.R'
+    'Class-Shared-Documenation.R'
     'Class-data.frame-Documentation.R'
     'Class-option-Documentation.R'
     'Classes.R'
@@ -61,15 +65,16 @@ Collate:
     'Fun-extract_tests.R'
     'Fun-toRd.R'
     'Fun-format.R'
+    'Fun-is-language.R'
     'Fun-toRd-Documentation.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-function.R'
     'Fun-toRd-option.R'
     'Fun-toRd-shiny.R'
+    'Fun-toRd-usage.R'
     'Fun-write_documentation.R'
     'Funs.R'
-    'util-generics.R'
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0
 Enhances: devtools
 Encoding: UTF-8
 Remotes:
