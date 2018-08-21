@@ -14,8 +14,8 @@ setAs('roxy_block', 'Documentation', function(from){
 setAs('roxy_block', 'function-Documentation', function(from){
     if ('rdname' %in% from)
         browser()
-    
-    
+
+
     docs <- new('function-Documentation')
     for (i in seq_along(from)) {
         switch( names(from)[[i]]
@@ -54,8 +54,16 @@ setAs('roxy_block', 'function-Documentation', function(from){
             )
     }
     alias <- attr(from, 'object')$alias
-    if (!is.null(alias))
-        docs@name <- as.name(alias)
+    if (!is.null(alias)) {
+        if (.is_undefined(docs@name))
+            docs@name <- as.name(alias)
+        else if (!identical(docs@name, alias)){
+            doc_warning(._("documentation already has a name, %s," %<<%
+                           "that doesn't match the alias, %s."
+                          , dQuote(doc_get_name(docs)), dQuote(alias)))
+            docs@aliases <- c(docs@aliases, alias)
+        }
+    }
     return(docs)
 })
 if(FALSE){#@testing setAs,roxy_block,function-Documentation
@@ -76,4 +84,24 @@ if(FALSE){#@testing setAs,roxy_block,function-Documentation
     expect_null(docs@arguments$x)
     expect_equal(docs@arguments$y, arg(y, "explicit documentation for y"))
 }
+if(FALSE){#@testing
+    text <- "
+    #' Testing name mismatch
+    #'
+    #' A description
+    #'
+    #' @name hello_world
+    #' @aliases example_hello_world
+    hw <- function( greeting = 'hello' #< What to say.
+                  , who = 'world'      #< who to say it to.
+                  ){
+        cat(greeting, who)
+    }
+    "
+    txt.roxy <- roxygen2::parse_text(text)[[1]]
+    expect_warning( doc <- as(txt.roxy, 'function-Documentation')
+                  , class="documentation-warning-roxy_block")
 
+    expect_equal( doc_get_name(doc), "hello_world")
+    expect_equal( doc_get_aliases(doc), c("example_hello_world", "hw"))
+}

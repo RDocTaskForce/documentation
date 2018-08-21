@@ -105,7 +105,7 @@ function( object
         pd <- get_parse_data(object)
     else if(length(pd_all_root_ids(pd)) > 1L)
         doc_error( ._("Bad parse data (multiple root ids found).")
-                 , type = "invalid_argument")
+                 , type = "bad_pd")
     id <- attr(pd, 'id')
     if (is.null(id)){
         id <- root <- pd_all_root_ids(pd)
@@ -184,7 +184,7 @@ if(FALSE){#@testing
     expect_length(pd_all_root_ids(pd), 3)
 
     expect_error( .construct_documentation.function(example_function1, roxy.block, pd)
-                , class='documentation-error-invalid_argument')
+                , class='documentation-error-bad_pd')
 }
 if(FALSE){#@testing
     text <- deparse(.construct_documentation.function)
@@ -232,13 +232,13 @@ function( object   #< Object for which to extract documentation.
         ){
     if (!is.null(pd)){
         if (!inherits(pd, 'parse-data'))
-            doc_error( ._("Bad parse data (incorrect class)"), type ="bad_pd")
+            doc_error( ._("Bad parse data (incorrect class)"), type ="invalid_argument")
         if (length(pd_all_root_ids(pd)) > 1L)
             doc_error( ._("Bad parse data (multiple root ids found)."), type = "bad_pd")
     }
     if (!is.null(roxy.block)){
         if(!inherits(roxy.block, "roxy_block"))
-            doc_error( ._("Bad roxy.block (incorrect class)"), type ="bad_roxy")
+            doc_error( ._("Bad roxy.block (incorrect class)"), type ="invalid_argument")
         if ( !is.null(alias <- attr(roxy.block, 'object')$alias)
           && !(as.character(name) %in% alias)
            )
@@ -247,21 +247,44 @@ function( object   #< Object for which to extract documentation.
     }
     UseMethod('extract_documentation')
 }
+if(FALSE){#@testing
+    test.file <- system.file("examples", "example_multiple.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+    expect_length(pd_all_root_ids(pd), 3)
+
+    roxys <- roxygen2::parse_file(test.file)
+
+    expect_error( extract_documentation(example_function1, pd=iris)
+                , class='documentation-error-invalid_argument')
+    expect_error( extract_documentation(example_function1, pd=pd)
+                , class='documentation-error-bad_pd')
+
+    expect_error(extract_documentation(example_function1, roxy.block = list())
+                , class='documentation-error-invalid_argument')
+    expect_error(extract_documentation(example_function1, roxy.block = roxys[[3]])
+                , class='documentation-error-bad_roxy')
+
+    docs <- extract_documentation(example_function1)
+}
+
 
 #' @export
 extract_documentation.function <-
 function( object   #< function to document.
         , ...      #< passed on. Should not be needed when calling directly.
-        , pd = NULL #< The parse data for object, and only object.
+        , pd         = NULL  #< parse data for object.
+        , roxy.block = NULL  #< Roxygen2 block for object.
         , markdown = getOption("documentation::use_markdown", TRUE) #< use markdown?
         , name = substitute(object) #< explicit naming for indirect calling.
         ){
-    # srcref <- utils::getSrcref(object)
-    # if (is.null(srcref)) doc_no_src(name)
+    assert_that( is.function(object))
+    if (!is_S3_method_call())
+        warning("method should not be called directly")
+
     if (is.null(pd))
         pd <- get_parse_data(object)
-    else if(length(pd_all_root_ids(pd)) > 1L)
-        doc_error( ._("Bad parse data (multiple root ids found)."), type = "bad_pd")
     id <- attr(pd, 'id')
     if (is.null(id)){
         id <- root <- pd_all_root_ids(pd)
@@ -273,10 +296,11 @@ function( object   #< function to document.
 
     if (!(has.roxy || length(rel.comments)))
         no_doc_comments(name)
-    roxy.block <- .get_roxy_block(object, ..., options=list(markdown=markdown))
+    if (is.null(roxy.block))
+        roxy.block <- .get_roxy_block(object, ..., options=list(markdown=markdown))
     docs <- .construct_documentation.function(object, roxy.block, pd)
     if (.is_undefined(docs@name))
-        docs@name <- as.name(name)
+        docs@name <- as.name(name) # nocov
     else if (!missing(name) && deparse(docs@name) != deparse(name))
         doc_error( "Name provided does not match source."
                  , provided=name, source = docs@name)
@@ -317,6 +341,63 @@ if(FALSE){#@testing extract_documentation.function with example_function2
     expect_identical(docs@arguments$y@description, "The y argument description takes 2 lines.")
     expect_identical(docs@name, as.name("example_function2"))
 }
+if(FALSE){#@testing extract_documentation.function errors
+    test.file <- system.file("examples", "example_multiple.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+    expect_length(pd_all_root_ids(pd), 3)
+    roxys <- roxygen2::parse_file(test.file)
+
+    expect_error( extract_documentation(example_function1, pd=iris)
+                , class='documentation-error-invalid_argument')
+    expect_error( extract_documentation(example_function1, pd=pd)
+                , class='documentation-error-bad_pd')
+
+    expect_error(extract_documentation(example_function1, roxy.block = list())
+                , class='documentation-error-invalid_argument')
+    expect_error(extract_documentation(example_function1, roxy.block = roxys[[3]])
+                , class='documentation-error-bad_roxy')
+
+    expect_warning( extract_documentation.function(example_function1)
+                  , "method should not be called directly" )
+
+    docs <- extract_documentation(example_function1)
+
+    spec.pd <- get_parse_data(example_function1)
+    attr(spec.pd, 'id') <- attr(spec.pd, 'root') <- NULL
+
+    docs2 <- extract_documentation(example_function1, pd=spec.pd)
+    expect_identical(docs2, docs)
+}
+if(FALSE){#@testing
+    text <- "
+    #' Testing name mismatch
+    #'
+    #' A description
+    #'
+    #' @name hello_world
+    #'
+    hw <- function( greeting = 'hello' #< What to say.
+                  , who = 'world'      #< who to say it to.
+                  ){
+        cat(greeting, who)
+    }
+    "
+    txt.pd <- get_parse_data(p<- parse(text=text, keep.source=TRUE))
+    eval(p)
+
+    txt.roxy <- roxygen2::parse_text(text)[[1]]
+    attr(txt.roxy, 'object')$alias <-NULL
+
+    expect_error(extract_documentation( hw
+                                      , pd=txt.pd
+                                      , roxy.block = txt.roxy
+                                      , name = 'hw')
+                , class="documentation-error")
+
+}
+
 extract_documentation.standardGeneric <-
 function( object
         , ...

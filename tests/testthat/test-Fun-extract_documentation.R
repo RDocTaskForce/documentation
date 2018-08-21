@@ -63,7 +63,7 @@ test_that('.construct_documentation.function', {#@testing
     expect_length(pd_all_root_ids(pd), 3)
 
     expect_error( .construct_documentation.function(example_function1, roxy.block, pd)
-                , class='documentation-error-invalid_argument')
+                , class='documentation-error-bad_pd')
 })
 #line 189 "R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
@@ -96,7 +96,29 @@ test_that('.construct_documentation.function', {#@testing
     expect_error(.construct_documentation.function( p, roxy , pd)
                 , class='documentation-error')
 })
-#line 285 "R/Fun-extract_documentation.R"
+#line 250 "R/Fun-extract_documentation.R"
+test_that('extract_documentation', {#@testing
+    test.file <- system.file("examples", "example_multiple.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+    expect_length(pd_all_root_ids(pd), 3)
+
+    roxys <- roxygen2::parse_file(test.file)
+
+    expect_error( extract_documentation(example_function1, pd=iris)
+                , class='documentation-error-invalid_argument')
+    expect_error( extract_documentation(example_function1, pd=pd)
+                , class='documentation-error-bad_pd')
+
+    expect_error(extract_documentation(example_function1, roxy.block = list())
+                , class='documentation-error-invalid_argument')
+    expect_error(extract_documentation(example_function1, roxy.block = roxys[[3]])
+                , class='documentation-error-bad_roxy')
+
+    docs <- extract_documentation(example_function1)
+})
+#line 309 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function1', {#@testing extract_documentation.function with example_function1
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -118,7 +140,7 @@ test_that('extract_documentation.function with example_function1', {#@testing ex
     expect_error( documentation(example_function1)
                 , class = 'documentation-error-dnf')
 })
-#line 306 "R/Fun-extract_documentation.R"
+#line 330 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function2', {#@testing extract_documentation.function with example_function2
     test.file <- system.file("examples", "example_function2.R", package='documentation')
     sys.source( test.file, environment(), keep.source=TRUE)
@@ -133,7 +155,65 @@ test_that('extract_documentation.function with example_function2', {#@testing ex
     expect_identical(docs@arguments$y@description, "The y argument description takes 2 lines.")
     expect_identical(docs@name, as.name("example_function2"))
 })
-#line 354 "R/Fun-extract_documentation.R"
+#line 344 "R/Fun-extract_documentation.R"
+test_that('extract_documentation.function errors', {#@testing extract_documentation.function errors
+    test.file <- system.file("examples", "example_multiple.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+    expect_length(pd_all_root_ids(pd), 3)
+    roxys <- roxygen2::parse_file(test.file)
+
+    expect_error( extract_documentation(example_function1, pd=iris)
+                , class='documentation-error-invalid_argument')
+    expect_error( extract_documentation(example_function1, pd=pd)
+                , class='documentation-error-bad_pd')
+
+    expect_error(extract_documentation(example_function1, roxy.block = list())
+                , class='documentation-error-invalid_argument')
+    expect_error(extract_documentation(example_function1, roxy.block = roxys[[3]])
+                , class='documentation-error-bad_roxy')
+
+    expect_warning( extract_documentation.function(example_function1)
+                  , "method should not be called directly" )
+
+    docs <- extract_documentation(example_function1)
+
+    spec.pd <- get_parse_data(example_function1)
+    attr(spec.pd, 'id') <- attr(spec.pd, 'root') <- NULL
+
+    docs2 <- extract_documentation(example_function1, pd=spec.pd)
+    expect_identical(docs2, docs)
+})
+#line 373 "R/Fun-extract_documentation.R"
+test_that('extract_documentation.function', {#@testing
+    text <- "
+    #' Testing name mismatch
+    #'
+    #' A description
+    #'
+    #' @name hello_world
+    #'
+    hw <- function( greeting = 'hello' #< What to say.
+                  , who = 'world'      #< who to say it to.
+                  ){
+        cat(greeting, who)
+    }
+    "
+    txt.pd <- get_parse_data(p<- parse(text=text, keep.source=TRUE))
+    eval(p)
+
+    txt.roxy <- roxygen2::parse_text(text)[[1]]
+    attr(txt.roxy, 'object')$alias <-NULL
+
+    expect_error(extract_documentation( hw
+                                      , pd=txt.pd
+                                      , roxy.block = txt.roxy
+                                      , name = 'hw')
+                , class="documentation-error")
+
+})
+#line 435 "R/Fun-extract_documentation.R"
 test_that('with example_generic', {#@testing with example_generic
     env <- new.env()
     env$.packageName <- "documentation-testing-environment"
