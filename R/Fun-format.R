@@ -19,7 +19,7 @@
 #' @param ext the default file extention to use.
 #' @param overwrite allow overwritting?
 #' @export
-set_formatter<-
+set_formatter<- # nocov start
 function(format, fun, dir = '.', ext = paste0('.', format[[1]]), overwrite=NA){
     assert_that(is.character(format), is.string(dir), is.string(ext))
     if(is.string(fun))
@@ -41,7 +41,7 @@ function(format, fun, dir = '.', ext = paste0('.', format[[1]]), overwrite=NA){
         assign(fmt, info, envir=.documentation_formatters)
     }
     invisible(NULL)
-}
+}# nocov end
 
 set_formatter(c("Rd", "toRd", ".Rd"), toRd, 'man', '.Rd')
 
@@ -81,6 +81,17 @@ if(FALSE){#@testing
     expect_error( get_formatter('not a format')
                 , class = "documentation-error-format-not_defined"
                 )
+
+    assign('my_formatter', function(obj, ...)html_to_Rd(obj, ...)
+          , envir = globalenv())
+
+    expect_warning( fun <- #withr::with_environment(globalenv(), {
+                        get_formatter("my_formatter")
+                    #})
+                  , class='documentation-warning-format-not_defined'
+                  )
+    expect_identical(fun, globalenv()$my_formatter)
+    rm(list='my_formatter', envir = globalenv())
 }
 
 get_formatter_ext <-
@@ -142,4 +153,12 @@ function( x  #< Documentation object
     formatter <- get_formatter(fmt)
     as.character(formatter(x, ...))
 }
-
+if(FALSE){#@testing
+    docs <- function_documentation('test', arguments = arg_('x', 'argument'))
+    rd <- format(docs, fmt='Rd')
+    expect_identical( rd
+                    , c( '\\name{test}'
+                       , '\\arguments{\\item{x}{argument}}'
+                       , '\\usage{test(x)}'
+                       ))
+}
