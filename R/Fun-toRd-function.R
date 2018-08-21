@@ -7,9 +7,9 @@ function( obj
         , ...
         ){
     #' format the function documentation obj to markdown/CommonMark
-    Rd <- callNextMethod()
-    Rd[['arguments']] <- collapse(toRd(obj@arguments), '\n')
-    Rd[['usage']]     <- toRd(obj@usage, ...)
+    Rd <- callNextMethod(obj, exclude=c('usage','arguments'), ...)
+    Rd[['arguments']] <- collapse(toRd(doc_get_arguments(obj)), '\n')
+    Rd[['usage']]     <- toRd(doc_get_usage(obj), ...)
 
     if (is.na(obj@value))
         Rd[['value']] <- ''

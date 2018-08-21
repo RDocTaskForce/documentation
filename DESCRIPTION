@@ -56,6 +56,7 @@ Collate:
     'Conversion-roxy_block.R'
     'Fun-documentation.R'
     'Fun-accessors.R'
+    'Fun-accessors-funtion.R'
     'Fun-check_documented.R'
     'Fun-default.R'
     'Fun-document.R'

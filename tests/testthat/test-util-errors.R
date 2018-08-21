@@ -113,3 +113,21 @@ test_that('doc_incomplete', {#@testing
 test_that('doc_no_src', {#@testing
     expect_error(doc_no_src(), class='documentation-error-no_src')
 })
+#line 193 "R/util-errors.R"
+test_that('no_doc_comments', {#@testing
+    expect_null(no_doc_comments('testing', NULL))
+    expect_message( no_doc_comments('testing', FALSE)
+                  , class="documentation-message-no_comments")
+    expect_warning( no_doc_comments('testing', NA)
+                  , class="documentation-warning-no_comments")
+    expect_error  ( no_doc_comments('testing', TRUE)
+                  , class="documentation-error-no_comments")
+
+    expect_null(no_doc_comments('testing', 'none'))
+    expect_message( no_doc_comments('testing', 'message')
+                  , class="documentation-message-no_comments")
+    expect_warning( no_doc_comments('testing', 'warning')
+                  , class="documentation-warning-no_comments")
+    expect_error  ( no_doc_comments('testing', 'error')
+                  , class="documentation-error-no_comments")
+})

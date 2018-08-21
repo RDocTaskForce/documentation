@@ -9,7 +9,7 @@
 function_documentation <-
 setClass('function-Documentation', contains = 'BaseDocumentation'
         , slots = c( name       = 'name'
-                   , usage      = 'usage'
+                   , usage      = 'Virtual/Usage'
                    , arguments  = 'ArgumentList'
                    , value      = 'FormattedText'
                    )
@@ -35,10 +35,10 @@ setMethod('initialize', 'function-Documentation',
             .Object@arguments <- new('ArgumentList', arguments)
         else
             .Object@arguments <- as(arguments, 'ArgumentList')
-        .Object@value     <- FT(value)
-        if (missing(usage))
-            usage <- as(as.call(c(.Object@name, sapply(arguments, slot, 'name'))), 'usage')
-        .Object@usage     <- as(usage, 'usage')
+        .Object@value <- FT(value)
+        .Object@usage <- if (missing(usage))             usage_waiver()    else
+                         if (is(usage, 'Virtual/Usage')) usage             else
+                                                         as(usage, 'usage')
         .Object <- callNextMethod(.Object, ...)
         .Object
     })
@@ -76,11 +76,16 @@ if(FALSE){#! @testing
     expect_identical(object@arguments, fun.args)
     expect_identical(object@description, FT("create documentation for a function"))
     expect_identical(object@value, FT("A function-Documentation object."))
-        
+
     object <- function_documentation()
     expect_true(.is_undefined(object@name))
-}
 
+
+    a <- arg('x', 'an object')
+    object <- function_documentation(name='testing args', arguments = arg('x', 'an object'))
+    object@arguments
+
+}
 if(FALSE){#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")

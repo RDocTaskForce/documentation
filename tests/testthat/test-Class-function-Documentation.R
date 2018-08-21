@@ -37,11 +37,17 @@ test_that('initialize,function-Documentation-method', {#! @testing
     expect_identical(object@arguments, fun.args)
     expect_identical(object@description, FT("create documentation for a function"))
     expect_identical(object@value, FT("A function-Documentation object."))
-        
+
     object <- function_documentation()
     expect_true(.is_undefined(object@name))
+
+
+    a <- arg('x', 'an object')
+    object <- function_documentation(name='testing args', arguments = arg('x', 'an object'))
+    object@arguments
+
 })
-#line 84 "R/Class-function-Documentation.R"
+#line 89 "R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")

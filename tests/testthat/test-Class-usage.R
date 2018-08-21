@@ -1,15 +1,16 @@
+#! This file was automatically produced by the documentation package.
+#! Changes will be overwritten.
 
-setClass("Virtual/Usage", contains='VIRTUAL')
-
-
-usage <- setClass("usage", contains=c("Virtual/Usage", "expression"))
-if(FALSE){#@testing
+context('tests extracted from file `Class-usage.R`')
+#line 6 "R/Class-usage.R"
+test_that('usage', {#@testing
     u <- usage()
     expect_is(u, 'usage')
     expect_is(u, 'Virtual/Usage')
     expect_is(u, 'expression')
-}
-if(FALSE){#@testing
+})
+#line 12 "R/Class-usage.R"
+test_that('usage', {#@testing
     FD <-
     setClass('FD-test'
             , slots = c( name       = 'name'
@@ -25,36 +26,17 @@ if(FALSE){#@testing
     expect_is(object@usage, 'Virtual/Usage')
     expect_is(object@usage, 'expression')
     removeClass('FD-test')
-}
-
-usageClass <- getClass('usage', where = topenv(environment()))
-setAs("call", 'usage', function(from)new(as.expression(from), Class=usageClass))
-if(FALSE){#@usage
-    call <- substitute(test(x,y))
-    expect_is(call, 'call')
-    expect_is(as(call, 'usage'), "usage")
-    expect_identical(as(call, 'usage'), usage(expression(test(x,y))))
-}
-setAs("name", 'usage', function(from)new(as.expression(from), Class=usageClass))
-if(FALSE){#@usage
-    name <- substitute(hello)
-    expect_is(name, 'name')
-    expect_is(as(name, 'usage'), "usage")
-    expect_identical(as(name, 'usage'), usage(expression(hello)))
-}
-
-setClass("waiver")
-
-usage_waiver <-
-setClass('usage-waiver', contains=c("Virtual/Usage", "waiver"))
-if(FALSE){#@testing
+})
+#line 50 "R/Class-usage.R"
+test_that('usage_waiver', {#@testing
     uv <- usage_waiver()
     expect_error(as.character(uv))
     expect_is(uv, "waiver")
     expect_is(uv, "Virtual/Usage")
     expect_error(usage_waiver(expression(1L)))
-}
-if(FALSE){#@testing
+})
+#line 57 "R/Class-usage.R"
+test_that('usage_waiver', {#@testing
     FD <-
     setClass('FD-test'
             , slots = c( name       = 'name'
@@ -69,5 +51,4 @@ if(FALSE){#@testing
     expect_is(object@usage, 'waiver')
     expect_is(object@usage, 'Virtual/Usage')
     removeClass('FD-test')
-}
-
+})
