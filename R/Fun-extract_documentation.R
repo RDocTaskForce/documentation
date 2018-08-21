@@ -77,7 +77,22 @@ get_parse_data.roxy_block <- function(x,...){
                          , attr(x, 'location')
                          ))
 }
+if(FALSE){#@testing
+    test.file <- system.file("examples", "example_function1.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(example_function1)
 
+    roxy.block <- .get_roxy_block(example_function1, srcfile=test.file)
+
+    val <- get_parse_data(roxy.block)
+    expect_is(val, 'parse-data')
+    expect_equal( as.data.frame(val)
+                , as.data.frame(pd)
+                , check.attributes=FALSE)
+    expect_equal( attr(val, 'root'), attr(pd, 'root') )
+    expect_false( attr(val, 'id') == attr(pd, 'id') )
+}
 
 .construct_documentation.function <-
 function( object
@@ -86,10 +101,11 @@ function( object
         , doc.class = 'function-Documentation'
         , name = deparse(substitute(object))
         ){
-    if (is.null(pd))
+    if (missing(pd) || is.null(pd))
         pd <- get_parse_data(object)
     else if(length(pd_all_root_ids(pd)) > 1L)
-        doc_error( ._("Bad parse data (multiple root ids found)."), type = "bad_pd")
+        doc_error( ._("Bad parse data (multiple root ids found).")
+                 , type = "invalid_argument")
     id <- attr(pd, 'id')
     if (is.null(id)){
         id <- root <- pd_all_root_ids(pd)
@@ -99,7 +115,8 @@ function( object
     has.roxy     <- inherits(roxy.block, 'roxy_block')
     rel.comments <- pd_all_relative_comment_ids(pd)
 
-    if (!(has.roxy || length(rel.comments))) no_doc_comments()
+    if (!(has.roxy || length(rel.comments)))
+        no_doc_comments(name, 'error')
     docs <- if (has.roxy) as(roxy.block, doc.class)
             else new(doc.class)
     if (length(rel.comments)) {
@@ -147,13 +164,63 @@ if(FALSE){#@testing
 
     docs <- .construct_documentation.function(example_function1, roxy.block, pd)
     expect_is(docs, 'function-Documentation')
+
+    docs2 <- .construct_documentation.function(example_function1, roxy.block)
+    expect_is(docs2, 'function-Documentation')
+    expect_identical(docs, docs2)
+
+    attr(pd, 'id') <- attr(pd, 'root') <- NULL
+    docs3 <- .construct_documentation.function(example_function1, roxy.block, pd)
+    expect_is(docs3, 'function-Documentation')
+    expect_identical(docs, docs3)
+
+
+}
+if(FALSE){#@testing
+    test.file <- system.file("examples", "example_multiple.R", package='documentation')
+    sys.source( test.file, keep.source=TRUE)
+    expect_true(exists("example_function1"))
+    pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+    expect_length(pd_all_root_ids(pd), 3)
+
+    expect_error( .construct_documentation.function(example_function1, roxy.block, pd)
+                , class='documentation-error-invalid_argument')
+}
+if(FALSE){#@testing
+    text <- deparse(.construct_documentation.function)
+    pd <- get_parse_data(parse(text=text, keep.source=TRUE))
+
+    expect_error(.construct_documentation.function( .construct_documentation.function, NULL, pd)
+                , class='documentation-error-no_comments')
+}
+if(FALSE){#@testing
+    text <- "
+    #' Testing for bad arguments
+    #'
+    #' A description
+    #'
+    #' @param greeting a message
+    #' @param who whom to greet
+    hw <- function( greeting = 'hello' #< What to say.
+                  , who = 'world'      #< who to say it to.
+                  ){
+        cat(greeting, who)
+    }
+    "
+    pd <- get_parse_data(p<- parse(text=text, keep.source=TRUE))
+    eval(p)
+
+    roxy <- roxygen2::parse_text(text)[[1]]
+    expect_is(roxy, 'roxy_block')
+    expect_error(.construct_documentation.function( p, roxy , pd)
+                , class='documentation-error')
 }
 
 #' Extract documentation for an object from sources.
-#' 
+#'
 #' This generic function extracts documentation from source files.
 #' Documentation should be of the form of roxygen comments or relative comments.
-#' 
+#'
 #' @export
 extract_documentation <-
 function( object   #< Object for which to extract documentation.
