@@ -294,8 +294,10 @@ function( object   #< function to document.
     has.roxy     <- any(pd$token == "ROXYGEN_COMMENT")
     rel.comments <- pd_all_relative_comment_ids(pd)
 
-    if (!(has.roxy || length(rel.comments)))
+    if (!(has.roxy || length(rel.comments))){
         no_doc_comments(name)
+        return(new('function-Documentation', name=name))
+    }
     if (is.null(roxy.block))
         roxy.block <- .get_roxy_block(object, ..., options=list(markdown=markdown))
     docs <- .construct_documentation.function(object, roxy.block, pd)
@@ -397,6 +399,22 @@ if(FALSE){#@testing
                 , class="documentation-error")
 
 }
+if(FALSE){#@testing extract_documentation.function no_doc_comments.
+    text <- "
+    hw <- function( greeting = 'hello'
+                  , who = 'world'
+                  ){
+        cat(greeting, who)
+    }
+    "
+    txt.pd <- get_parse_data(p<- parse(text=text, keep.source=TRUE))
+    eval(p)
+
+    expect_message( docs <- extract_documentation( hw )
+                  , class="documentation-message-no_doc_comments")
+
+    expect_identical(doc_get_name(docs), 'hw')
+}
 
 extract_documentation.standardGeneric <-
 function( object
@@ -408,20 +426,20 @@ function( object
         , name = substitute(object)
         ){
     default.method <- attr(object, 'default')
+    if (!is_S3_method_call())
+        warning("method should not be called directly")
     if (is.null(pd)){
         pd <- get_parse_data(default.method)
         pd <- pd_get_family(id=attr(pd, 'id'), pd=pd)
-    } else if(!inherits(pd, 'parse-data'))
-        doc_error('Bad parse data.', type = "bad_pd")
-
-    if(is.null(srcfile)){
-        srcref <- utils::getSrcref(default.method)
-        if (is.null(srcref)) doc_no_src(name)
-        srcfile <- utils::getSrcFilename(srcref, full.names = TRUE, unique = TRUE)
     }
-
-    if (is.null(roxy.block))
+    if (is.null(roxy.block)){
+        if(is.null(srcfile)){
+            srcref <- utils::getSrcref(default.method)
+            if (is.null(srcref)) doc_no_src(name)
+            srcfile <- utils::getSrcFilename(srcref, full.names = TRUE, unique = TRUE)
+        }
         roxy.block <- .get_roxy_block(object, srcfile=srcfile, ...)
+    }
 
     docs <- .construct_documentation.function(object, roxy.block, pd, name=name)
     if (.is_undefined(docs@name)) docs@name <- as.name(name)
@@ -432,7 +450,7 @@ function( object
 
     return(docs)
 }
-if (FALSE) {#@testing with example_generic
+if(FALSE){#@testing with example_generic
     env <- new.env()
     env$.packageName <- "documentation-testing-environment"
 
@@ -448,4 +466,25 @@ if (FALSE) {#@testing with example_generic
                       "of the functions in the documentation package."  %>%
                         FormattedText())
     expect_identical(docs@value, FormattedText("Methods are restricted to returning an object of class logical."))
+
+    expect_warning(docs2 <- with(env, extract_documentation.standardGeneric(example_generic)))
+
+    expect_identical(docs2, docs)
+}
+if(FALSE){#@testing extract_documentation.standardGeneric no_src error
+    env <- new.env()
+    env$.packageName <- "documentation-testing-environment"
+
+    test.file <- system.file("examples", "standardGeneric.R", package = "documentation")
+    sys.source( test.file, envir = env , keep.source = FALSE)
+
+    env$pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+
+    expect_null(attr(env$example_generic@default, 'srcref'))
+
+    docs <- with(env, {
+        expect_error( extract_documentation(example_generic, pd=pd)
+                    , class="documentation-error-no_src")
+    })
+
 }

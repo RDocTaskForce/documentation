@@ -118,7 +118,7 @@ test_that('extract_documentation', {#@testing
 
     docs <- extract_documentation(example_function1)
 })
-#line 309 "R/Fun-extract_documentation.R"
+#line 311 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function1', {#@testing extract_documentation.function with example_function1
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -140,7 +140,7 @@ test_that('extract_documentation.function with example_function1', {#@testing ex
     expect_error( documentation(example_function1)
                 , class = 'documentation-error-dnf')
 })
-#line 330 "R/Fun-extract_documentation.R"
+#line 332 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function2', {#@testing extract_documentation.function with example_function2
     test.file <- system.file("examples", "example_function2.R", package='documentation')
     sys.source( test.file, environment(), keep.source=TRUE)
@@ -155,7 +155,7 @@ test_that('extract_documentation.function with example_function2', {#@testing ex
     expect_identical(docs@arguments$y@description, "The y argument description takes 2 lines.")
     expect_identical(docs@name, as.name("example_function2"))
 })
-#line 344 "R/Fun-extract_documentation.R"
+#line 346 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function errors', {#@testing extract_documentation.function errors
     test.file <- system.file("examples", "example_multiple.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -185,7 +185,7 @@ test_that('extract_documentation.function errors', {#@testing extract_documentat
     docs2 <- extract_documentation(example_function1, pd=spec.pd)
     expect_identical(docs2, docs)
 })
-#line 373 "R/Fun-extract_documentation.R"
+#line 375 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function', {#@testing
     text <- "
     #' Testing name mismatch
@@ -213,7 +213,24 @@ test_that('extract_documentation.function', {#@testing
                 , class="documentation-error")
 
 })
-#line 435 "R/Fun-extract_documentation.R"
+#line 402 "R/Fun-extract_documentation.R"
+test_that('extract_documentation.function no_doc_comments.', {#@testing extract_documentation.function no_doc_comments.
+    text <- "
+    hw <- function( greeting = 'hello'
+                  , who = 'world'
+                  ){
+        cat(greeting, who)
+    }
+    "
+    txt.pd <- get_parse_data(p<- parse(text=text, keep.source=TRUE))
+    eval(p)
+
+    expect_message( docs <- extract_documentation( hw )
+                  , class="documentation-message-no_doc_comments")
+
+    expect_identical(doc_get_name(docs), 'hw')
+})
+#line 453 "R/Fun-extract_documentation.R"
 test_that('with example_generic', {#@testing with example_generic
     env <- new.env()
     env$.packageName <- "documentation-testing-environment"
@@ -230,4 +247,26 @@ test_that('with example_generic', {#@testing with example_generic
                       "of the functions in the documentation package."  %>%
                         FormattedText())
     expect_identical(docs@value, FormattedText("Methods are restricted to returning an object of class logical."))
+
+    expect_warning(docs2 <- with(env, extract_documentation.standardGeneric(example_generic)))
+
+    expect_identical(docs2, docs)
+})
+#line 474 "R/Fun-extract_documentation.R"
+test_that('extract_documentation.standardGeneric no_src error', {#@testing extract_documentation.standardGeneric no_src error
+    env <- new.env()
+    env$.packageName <- "documentation-testing-environment"
+
+    test.file <- system.file("examples", "standardGeneric.R", package = "documentation")
+    sys.source( test.file, envir = env , keep.source = FALSE)
+
+    env$pd <- get_parse_data(parse(file=test.file, keep.source=TRUE))
+
+    expect_null(attr(env$example_generic@default, 'srcref'))
+
+    docs <- with(env, {
+        expect_error( extract_documentation(example_generic, pd=pd)
+                    , class="documentation-error-no_src")
+    })
+
 })
