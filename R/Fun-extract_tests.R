@@ -53,13 +53,13 @@ function( file              #< file to extract tests from
             if (verbose) message("  + `test.dir` not provided. Setting to `", test.dir, "`")
         }
         file.out <- file.path(test.dir, sprintf("test-%s", basename(file)))
-        if (verbose) message("  + Writting extracted tests to `", file.out,"`.")
+        doc_message(._("  + Writting extracted tests to `%s`.", file.out)) %if% verbose
     }
 
     #! Extract `if(F){#! @TESTTHAT }` blocks from file
     content <- parsetools::extract_test_blocks(file)
     if (length(content)==0){
-        if(verbose) message("No testing blocks found in ", file)
+        if(verbose) message("No testing blocks found in ", dQuote(file))
         return(invisible(character(0)))
     }
     context.line <- sprintf("context('tests extracted from file `%s`')"
@@ -122,7 +122,7 @@ expect_equal(x, c("hello_world", "f2"))
 unlink(tmp.out)
 
 expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
-              , "* Extracting tests from file `" %<<<% tmp.in %<<<% "`."
+              , "* Extracting tests from file `.*`."
               )
 expect_true (file.exists(tmp.out))
 expect_equal( lines
@@ -169,10 +169,12 @@ withr::with_dir(dirname(tmp.in), {
 })
 withr::with_dir(dirname(tmp.in), {
     dir.create('tests')
-    x <- extract_tests_to_file_( file = basename(tmp.in)
-                               , file.out = NULL
-                               , NULL
-                               , verbose=FALSE)
+    expect_message({
+        x <- extract_tests_to_file_( file = basename(tmp.in)
+                                   , file.out = NULL
+                                   , NULL
+                                   , verbose=TRUE)
+    }, "  \\+ `test.dir` not provided. Setting to `.*`")
     file.out <- "tests/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
@@ -195,10 +197,12 @@ withr::with_dir(dirname(tmp.in), {
 })
 withr::with_dir(dirname(tmp.in), {
     dir.create('tests/testthat', recursive = TRUE)
-    x <- extract_tests_to_file_( file = basename(tmp.in)
-                               , file.out = NULL
-                               , NULL
-                               , verbose=FALSE)
+    expect_message({
+        x <- extract_tests_to_file_( file = basename(tmp.in)
+                                   , file.out = NULL
+                                   , NULL
+                                   , verbose=TRUE)
+    }, "  \\+ Writting extracted tests to `.*`.")
     file.out <- "tests/testthat/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
@@ -315,6 +319,25 @@ expect_equal( lines
             )
 expect_equal(x, "setGeneric(\"yolo\", ...)")
 }
+if(FALSE){#@testing extract_tests_to_file_ no test blocks
+'hello_world <- function(){
+    print("hello world")
+}
+
+f2 <- function(){stop("this does nothing")}
+if(F){#! example
+    hw()
+}
+'-> text
+tmp.in  <- tempfile("src-" , fileext=".R")
+tmp.out <- tempfile("test-", fileext=".R")
+
+writeLines(text, tmp.in)
+expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
+              , class = "documentation-message")
+expect_identical(x, character())
+expect_false (file.exists(tmp.out))
+}
 
 
 #' @export
@@ -324,29 +347,29 @@ function( pkg = '.'     #< package to extract tests for.
         , full.path = default(full.path, NA)
         ){
     #! Extract tests for testing directory.
-    if (is.character(file) && file.exists(file.path(pkg, "DESCRIPTION"))) {
+    if (requireNamespace('devtools')){
+        pkg <- devtools::as.package(pkg)
+    } else if (is.character(pkg) && file.exists(file.path(pkg, "DESCRIPTION"))) { # nocov start
         desc <- read.dcf(file.path(pkg, "DESCRIPTION"))
         desc <- structure(as.list(desc), names=tolower(colnames(desc)))
         desc$path <- normalizePath(pkg)
         pkg <- structure(desc, class = 'package')
-    } else {
-        requireNamespace('devtools')
-        pkg <- devtools::as.package(pkg)
-    }
+    }# nocov end
     if (.Platform$OS.type == "windows")
-        pkg$path <- normalizePath(pkg$path, '/')
+        pkg$path <- normalizePath(pkg$path, '/')  # nocov
     for(e in intersect(c('imports', 'suggests', 'depends', 'collate'), names(pkg)))
         pkg[[e]] <- trimws(strsplit(pkg[[e]], "\\s*,\\s*")[[1]], 'both')
 
     if (!"testthat" %in% pkg$suggests)
-        warning("testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
+        doc_warning("testthat not found in suggests." %<<%
+                    "`extract_tests` assumes a testthat infrastructure.")
     test.dir <- file.path(pkg$path, "tests", "testthat")
     if (!file.exists(test.dir)) {
-        if (verbose) message("Creating directory `", test.dir, "`")
+        doc_message("Creating directory `"%<<<% test.dir %<<<%"`") %if% (verbose) #nocov
         dir.create(test.dir, recursive=TRUE)
     }
     if (!file.exists(.f <- file.path(test.dir, "..", "testthat.R"))){
-        if (verbose) message("createing file `", normalizePath(.f), "`")
+        doc_message("creating file `"%<<<%normalizePath(.f)%<<<%"`") %if% (verbose)  #nocov
         cat( c( paste0("# This file was created by `documentation::extract_tests` on ", Sys.time(), ".")
               , "# Once present, this file will not be overwritten and changes will persist."
               , "# To recreate the default version of this file delete and rerun `extract_tests`."
@@ -376,7 +399,7 @@ function( pkg = '.'     #< package to extract tests for.
              , names = files)
 
 }
-if(FALSE){#@TESTING
+if(FALSE){#@testing
     tmp.dir <- tempdir()
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
     package.skeleton("testExtractionTest", path=tmp.dir
@@ -459,9 +482,26 @@ if(FALSE){#@TESTING
     unlink(tmp.dir, recursive=TRUE)
 }
 
-test <- function(pkg = ".", filter=NULL, extract=TRUE, ...){
-    tests <- extract_tests()
-    message(length(unlist(tests)), ' tests extracted.')
+# nocov start
+test <- function(...){
+    if (...length() == 0) {
+        filter <- NULL
+        pkg <- '.'
+    } else
+    if (!is.null(names(l <- list(...)))) {
+        filter <- l$filter
+        pkg <- l$pkg %||% '.'
+    } else
+    if (...length() == 1) {
+        filter <- ..1
+        pkg <- '.'
+    } else
+    if (...length() == 2) {
+        filter <- ..2
+        pkg <- ..1
+    } else doc_error("too many arguments")
+    tests <- extract_tests(pkg)
+    doc_message(length(unlist(tests))%<<<%' tests extracted.')
     if (requireNamespace('devtools'))
         devtools::test(pkg=pkg, filter=filter, ...)
     else
@@ -471,9 +511,8 @@ test <- function(pkg = ".", filter=NULL, extract=TRUE, ...){
 addin_test <- function(){
     stopifnot(requireNamespace("rstudioapi"))
     project <- rstudioapi::getActiveProject()
-    if(is.null(project))
-        project <- getwd()
-    test(project)
+    if (is.null(project)) project <- getwd()
+    test(pkg=project, filter=NULL)
 }
-
+# nocov end
 

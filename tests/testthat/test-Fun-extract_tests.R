@@ -46,7 +46,7 @@ expect_equal(x, c("hello_world", "f2"))
 unlink(tmp.out)
 
 expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
-              , "* Extracting tests from file `" %<<<% tmp.in %<<<% "`."
+              , "* Extracting tests from file `.*`."
               )
 expect_true (file.exists(tmp.out))
 expect_equal( lines
@@ -93,10 +93,12 @@ withr::with_dir(dirname(tmp.in), {
 })
 withr::with_dir(dirname(tmp.in), {
     dir.create('tests')
-    x <- extract_tests_to_file_( file = basename(tmp.in)
-                               , file.out = NULL
-                               , NULL
-                               , verbose=FALSE)
+    expect_message({
+        x <- extract_tests_to_file_( file = basename(tmp.in)
+                                   , file.out = NULL
+                                   , NULL
+                                   , verbose=TRUE)
+    }, "  \\+ `test.dir` not provided. Setting to `.*`")
     file.out <- "tests/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
@@ -119,10 +121,12 @@ withr::with_dir(dirname(tmp.in), {
 })
 withr::with_dir(dirname(tmp.in), {
     dir.create('tests/testthat', recursive = TRUE)
-    x <- extract_tests_to_file_( file = basename(tmp.in)
-                               , file.out = NULL
-                               , NULL
-                               , verbose=FALSE)
+    expect_message({
+        x <- extract_tests_to_file_( file = basename(tmp.in)
+                                   , file.out = NULL
+                                   , NULL
+                                   , verbose=TRUE)
+    }, "  \\+ Writting extracted tests to `.*`.")
     file.out <- "tests/testthat/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
@@ -146,7 +150,7 @@ expect_false(dir.exists(file.path(tempdir(), "tests")))
 
 unlink(tmp.in)
 })
-#line 225 "R/Fun-extract_tests.R"
+#line 229 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setClass', {#@testing extract_tests_to_file_ setClass
 {'
 setClass("Test-Class")
@@ -181,7 +185,7 @@ expect_equal(x, "setClass(\"Test-Class\", ...)")
 unlink(tmp.in)
 unlink(tmp.out)
 })
-#line 259 "R/Fun-extract_tests.R"
+#line 263 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setMethod', {#@testing extract_tests_to_file_ setMethod
 '
 setMethod("show", "Test-Class", function(x){cat("hi")})
@@ -213,7 +217,7 @@ expect_equal(x, "show,Test-Class-method")
 unlink(tmp.in)
 unlink(tmp.out)
 })
-#line 290 "R/Fun-extract_tests.R"
+#line 294 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setGeneric', {#@testing extract_tests_to_file_ setGeneric
 '
 setGeneric("yolo", yolo::yolo)
@@ -242,8 +246,28 @@ expect_equal( lines
             )
 expect_equal(x, "setGeneric(\"yolo\", ...)")
 })
-#line 379 "R/Fun-extract_tests.R"
-test_that('#', {#@TESTING
+#line 322 "R/Fun-extract_tests.R"
+test_that('extract_tests_to_file_ no test blocks', {#@testing extract_tests_to_file_ no test blocks
+'hello_world <- function(){
+    print("hello world")
+}
+
+f2 <- function(){stop("this does nothing")}
+if(F){#! example
+    hw()
+}
+'-> text
+tmp.in  <- tempfile("src-" , fileext=".R")
+tmp.out <- tempfile("test-", fileext=".R")
+
+writeLines(text, tmp.in)
+expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
+              , class = "documentation-message")
+expect_identical(x, character())
+expect_false (file.exists(tmp.out))
+})
+#line 402 "R/Fun-extract_tests.R"
+test_that('extract_tests', {#@testing
     tmp.dir <- tempdir()
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
     package.skeleton("testExtractionTest", path=tmp.dir
