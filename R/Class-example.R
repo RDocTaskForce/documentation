@@ -1,4 +1,5 @@
 #' @include utils.R
+#' @include Class-Vector.R
 
 setClass("Documentation-example", contains='VIRTUAL')
 
@@ -39,4 +40,21 @@ if(FALSE){#@testing
     expect_equal( S3Part(ex, TRUE)[[1]]
                 , expression(test(x,y))[[1]]
                 , check.attributes=FALSE)
+
 }
+setAs('expression', 'Documentation-Examples', function(from){
+    as(as(from, 'example'), 'Documentation-Examples')
+})
+if(FALSE){#@testing
+    x <- expression(test(x,y))
+    val <- as(x, 'Documentation-Examples')
+    expect_is(val, 'Documentation-Examples')
+    expect_length(val, 1)
+
+    e <- as(x, 'example')
+    f <- as(e, 'Documentation-Examples')
+    expect_is(f, 'Documentation-Examples')
+    expect_identical( f[[1]], e)
+}
+
+

@@ -2,6 +2,7 @@
 #' @include Class-Vector.R
 #' @include Class-Documentation-Keyword.R
 #' @include Class-FormattedText.R
+#' @include Class-example.R
 #' @importFrom utils person
 #' @import methods
 
@@ -18,16 +19,14 @@ setVector( element = "Prose"
 
 setClass('Documentation', contains='VIRTUAL')
 
-
 ### BaseDocumentation-class #####
-#TODO add srcref to Documentation when created.
 setClass( "BaseDocumentation", contains='Documentation'
         , slots = c( author      = "person"
                    , title       = "character"
                    , description = "FormattedText"
                    , references  = "bibentry"
                    , seealso     = "FormattedText"
-                   , examples    = "Prose"
+                   , examples    = "Documentation-Examples"
                    , keywords    = "Documentation-Keyword"
                    , aliases     = "character"
                    , concepts    = "character"
@@ -59,13 +58,7 @@ setMethod("initialize", 'BaseDocumentation',
         if (!is.null(description))  .Object@description <- FT(description)
         if (!is.null(seealso    ))  .Object@seealso     <- FT(seealso    )
         if (!is.null(author     ))  .Object@author      <- utils::as.person(author)
-        if (!is.null(examples   )){ .Object@examples  <-
-            if(inherits(examples, 'list')){
-                new('Prose', examples)
-            } else {
-                new('Prose', list(examples))
-            }
-        }
+        if (!is.null(examples   ))  .Object@examples    <- as(examples, 'Documentation-Examples')
         if (!is.null(references ))
             if(inherits(references, 'citation')){
                 .Object@references <- structure(references, class='bibentry')
@@ -85,6 +78,11 @@ if(FALSE){#!@testing
     x <- new('BaseDocumentation')
     expect_identical(x@author, person())
     expect_identical(x@title, character(0))
+    expect_identical(x@description, FT(character(0)))
+    expect_identical(x@seealso, FT(character(0)))
+    expect_identical(x@keywords, new("Documentation-Keyword"))
+    expect_identical(x@examples, new('Documentation-Examples'))
+    expect_identical(x@references, cl(list(), 'bibentry'))
 
     x <- new('BaseDocumentation'
             , author     = person('Andrew', 'Redd')
@@ -101,9 +99,9 @@ if(FALSE){#!@testing
     expect_identical( x@description,  FT("plain text"))
     expect_identical( x@keywords,  keyword("documentation"))
     expect_identical( x@seealso,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
-    # expect_identical( x@examples,  FT(Rd("\\code{\\link[function-Documentation-class]{function-documentation}}")))
+    expect_identical( x@examples,  as(expression(function_documentation("hw", title="Hello world"))
+                                     , 'Documentation-Examples'))
     expect_identical( cl(x@references, 'citation'), citation())
-
 
     cit <- citation()
     bib <- s(cit, class='bibentry')

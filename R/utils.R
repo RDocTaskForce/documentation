@@ -1,4 +1,4 @@
-#' @include setup-set_old_classes.R
+#' @include setup.R
 
 #' @include  util-infix.R
 #' @include  util-aliases.R
