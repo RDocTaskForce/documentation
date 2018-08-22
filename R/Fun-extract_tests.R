@@ -41,10 +41,10 @@ extract_tests_to_file_ <-
 function( file              #< file to extract tests from
         , file.out  = NULL  #< file to write tests to, if provided must be fully specified, ie. `dir` will be ignored.
         , test.dir  = NULL  #< directory where to store extracted blocks.
-        , verbose   = getOption('verbose', FALSE) #< Show progress messages?
+        , verbose   = default('verbose', FALSE) #< Show progress messages?
         , full.path = FALSE
         ){
-    if (verbose) message("* Extracting test from file `", file, "`.")
+    if (verbose) message("* Extracting tests from file `", file, "`.")
     if (is.null(file.out)){
         if (is.null(test.dir)){
             test.dir <- '.'
@@ -79,8 +79,7 @@ function( file              #< file to extract tests from
     #!
     return(attr(content, 'test.names'))
 }
-if(FALSE){#! @testings
-{# Basic
+if(FALSE){#@testing extract_tests_to_file_ Basic
 {'hello_world <- function(){
     print("hello world")
 }
@@ -103,12 +102,13 @@ if (!dir.exists(. <- dirname(tmp.in))) dir.create(.)
 writeLines(text, tmp.in)
 
 x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE)
-lines <- readLines(tmp.out)
 
-expect_true (file.exists(tmp.out))
-expect_equal( lines[-1]
-            , c( "#! changes will be overwritten."
-               , sprintf("context('tests extracted from file `%s`')", tmp.in)
+expect_true ( file.exists(tmp.out))
+expect_equal( lines <- readLines(tmp.out)
+            , c( "#! This file was automatically produced by the documentation package."
+               , "#! Changes will be overwritten."
+               , ""
+               , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
                , sprintf("#line 4 \"%s\"", tmp.in)
                , "test_that('hello_world', {#!@testthat"
                , "    expect_output(hello_world(), \"hello world\")"
@@ -119,11 +119,110 @@ expect_equal( lines[-1]
                , "})"
                ))
 expect_equal(x, c("hello_world", "f2"))
-unlink(tmp.in)
 unlink(tmp.out)
-unlink(dirname(tmp.in))
+
+expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
+              , "* Extracting tests from file `" %<<<% tmp.in %<<<% "`."
+              )
+expect_true (file.exists(tmp.out))
+expect_equal( lines
+            , c( "#! This file was automatically produced by the documentation package."
+               , "#! Changes will be overwritten."
+               , ""
+               , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
+               , sprintf("#line 4 \"%s\"", tmp.in)
+               , "test_that('hello_world', {#!@testthat"
+               , "    expect_output(hello_world(), \"hello world\")"
+               , "})"
+               , sprintf("#line 9 \"%s\"", tmp.in)
+               , "test_that('f2', {#! @test"
+               , "    expect_error(f2())"
+               , "})"
+               ))
+expect_equal(x, c("hello_world", "f2"))
+unlink(tmp.out)
+
+
+withr::with_dir(dirname(tmp.in), {
+    x <- extract_tests_to_file_( file = basename(tmp.in)
+                               , file.out = NULL
+                               , NULL
+                               , verbose=FALSE)
+    file.out <- "test-" %<<<% basename(tmp.in)
+    expect_true(file.exists(file.out))
+    expect_equal( lines <- readLines(file.out)
+                , c( "#! This file was automatically produced by the documentation package."
+                   , "#! Changes will be overwritten."
+                   , ""
+                   , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
+                   , sprintf("#line 4 \"%s\"", basename(tmp.in))
+                   , "test_that('hello_world', {#!@testthat"
+                   , "    expect_output(hello_world(), \"hello world\")"
+                   , "})"
+                   , sprintf("#line 9 \"%s\"", basename(tmp.in))
+                   , "test_that('f2', {#! @test"
+                   , "    expect_error(f2())"
+                   , "})"
+                   ))
+    expect_equal(x, c("hello_world", "f2"))
+    unlink(file.out)
+})
+withr::with_dir(dirname(tmp.in), {
+    dir.create('tests')
+    x <- extract_tests_to_file_( file = basename(tmp.in)
+                               , file.out = NULL
+                               , NULL
+                               , verbose=FALSE)
+    file.out <- "tests/test-" %<<<% basename(tmp.in)
+    expect_true(file.exists(file.out))
+    expect_equal( lines <- readLines(file.out)
+                , c( "#! This file was automatically produced by the documentation package."
+                   , "#! Changes will be overwritten."
+                   , ""
+                   , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
+                   , sprintf("#line 4 \"%s\"", basename(tmp.in))
+                   , "test_that('hello_world', {#!@testthat"
+                   , "    expect_output(hello_world(), \"hello world\")"
+                   , "})"
+                   , sprintf("#line 9 \"%s\"", basename(tmp.in))
+                   , "test_that('f2', {#! @test"
+                   , "    expect_error(f2())"
+                   , "})"
+                   ))
+    expect_equal(x, c("hello_world", "f2"))
+    unlink(file.out)
+    unlink("tests", force = TRUE)
+})
+withr::with_dir(dirname(tmp.in), {
+    dir.create('tests/testthat', recursive = TRUE)
+    x <- extract_tests_to_file_( file = basename(tmp.in)
+                               , file.out = NULL
+                               , NULL
+                               , verbose=FALSE)
+    file.out <- "tests/testthat/test-" %<<<% basename(tmp.in)
+    expect_true(file.exists(file.out))
+    expect_equal( lines <- readLines(file.out)
+                , c( "#! This file was automatically produced by the documentation package."
+                   , "#! Changes will be overwritten."
+                   , ""
+                   , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
+                   , sprintf("#line 4 \"%s\"", basename(tmp.in))
+                   , "test_that('hello_world', {#!@testthat"
+                   , "    expect_output(hello_world(), \"hello world\")"
+                   , "})"
+                   , sprintf("#line 9 \"%s\"", basename(tmp.in))
+                   , "test_that('f2', {#! @test"
+                   , "    expect_error(f2())"
+                   , "})"
+                   ))
+    expect_equal(x, c("hello_world", "f2"))
+    unlink(file.path(tempdir(), "tests"), TRUE, TRUE)
+})
+expect_false(dir.exists(file.path(tempdir(), "tests")))
+
+unlink(tmp.in)
 }
-{# setClass
+if(FALSE){#@testing extract_tests_to_file_ setClass
 {'
 setClass("Test-Class")
 if(FALSE){#!@test
@@ -140,21 +239,24 @@ x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE)
 lines <- readLines(tmp.out)
 
 expect_true (file.exists(tmp.out))
-expect_equal( lines[-(1:2)]
-            , c( sprintf("context('tests extracted from file `%s`')", tmp.in)
+expect_equal( lines
+            , c( "#! This file was automatically produced by the documentation package."
+               , "#! Changes will be overwritten."
+               , ""
+               , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
                , sprintf("#line 3 \"%s\"", tmp.in)
-               , "test_that(\"setClass('Test-Class', ...)\", {#!@test"
+               , "test_that('setClass(\"Test-Class\", ...)', {#!@test"
                , "    expect_true(TRUE)"
                , "    expect_is(getClass(\"Test-Class\"), \"classRepresentation\")"
                , "})"
                )
             )
-expect_equal(x, "setClass('Test-Class', ...)")
+expect_equal(x, "setClass(\"Test-Class\", ...)")
 
 unlink(tmp.in)
 unlink(tmp.out)
 }
-{# setMethod
+if(FALSE){#@testing extract_tests_to_file_ setMethod
 '
 setMethod("show", "Test-Class", function(x){cat("hi")})
 if(FALSE){#!@test
@@ -169,20 +271,23 @@ x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE)
 lines <- readLines(tmp.out)
 
 expect_true (file.exists(tmp.out))
-expect_equal( lines[-(1:2)]
-            , c( sprintf("context('tests extracted from file `%s`')", tmp.in)
+expect_equal( lines
+            , c( "#! This file was automatically produced by the documentation package."
+               , "#! Changes will be overwritten."
+               , ""
+               , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
                , sprintf("#line 3 \"%s\"", tmp.in)
-               , "test_that('show.Test-Class', {#!@test"
+               , "test_that('show,Test-Class-method', {#!@test"
                , "    expect_true(TRUE)"
                , "})"
                )
             )
-expect_equal(x, "show.Test-Class")
+expect_equal(x, "show,Test-Class-method")
 
 unlink(tmp.in)
 unlink(tmp.out)
 }
-{# setGeneric
+if(FALSE){#@testing extract_tests_to_file_ setGeneric
 '
 setGeneric("yolo", yolo::yolo)
 if(FALSE){#!@test
@@ -197,17 +302,20 @@ x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE)
 lines <- readLines(tmp.out)
 
 expect_true (file.exists(tmp.out))
-expect_equal( lines[-(1:2)]
-            , c( sprintf("context('tests extracted from file `%s`')", tmp.in)
+expect_equal( lines
+            , c( "#! This file was automatically produced by the documentation package."
+               , "#! Changes will be overwritten."
+               , ""
+               , sprintf("context('tests extracted from file `%s`')", basename(tmp.in))
                , sprintf("#line 3 \"%s\"", tmp.in)
-               , "test_that(\"setGeneric('yolo', ...)\", {#!@test"
+               , "test_that('setGeneric(\"yolo\", ...)', {#!@test"
                , "    expect_true(TRUE)"
                , "})"
                )
             )
-expect_equal(x, "setGeneric('yolo', ...)")
+expect_equal(x, "setGeneric(\"yolo\", ...)")
 }
-}
+
 
 #' @export
 extract_tests <-
@@ -247,11 +355,11 @@ function( pkg = '.'     #< package to extract tests for.
               )
            , file=.f, sep='\n')
     }
-    
+
     files <- if(is.na(full.path)){
         old <- setwd(dir=pkg$path)
         on.exit(setwd(old))
-        file.path("R", 
+        file.path("R",
             list.files( "R", pattern="\\.r$", ignore.case=TRUE, full.names=FALSE))
     } else if (full.path) {
         list.files( file.path(pkg$path, "R"), pattern="\\.r$", ignore.case=TRUE, full.names=TRUE)
@@ -284,10 +392,10 @@ if(FALSE){#@TESTING
                                )
                          , names = file.path('R', c('Class.R', 'function.R'))
                          )
-    
+
     test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/')
     expect_identical(list.files(test.dir), c('test-Class.R', 'test-function.R'))
-    
+
     file <- file.path(test.dir, 'test-Class.R')
     expect_identical( readLines(file)[c(1:5)]
                     , c( "#! This file was automatically produced by the documentation package."
@@ -296,7 +404,7 @@ if(FALSE){#@TESTING
                        , "context('tests extracted from file `Class.R`')"
                        , "#line 4 \"R/Class.R\""
                        )
-                    )  
+                    )
 
     expect_equal( result, expected)
     expect_true(dir.exists(file.path(pkg, "tests", "testthat")))
@@ -324,8 +432,8 @@ if(FALSE){#@TESTING
                        , "#line 4 \"" %<<<% from %<<<%"\""
                        )
                     )
-    
-    
+
+
     expect_warning( result <- extract_tests(pkg, full.path = FALSE)
                   , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
     expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
@@ -336,7 +444,7 @@ if(FALSE){#@TESTING
                          , names = c('Class.R', 'function.R')
                          )
     expect_identical(result, expected)
-    
+
     file <- file.path(test.dir, 'test-Class.R')
     from <- normalizePath(file.path(pkg, "R", "Class.R"), '/')
     expect_identical( readLines(file)[c(1:5)]

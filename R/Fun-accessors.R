@@ -52,11 +52,8 @@ for (i in seq_along(all.documentation.slots)){
     .define_generic_doc_accessor(slot.name, slot.class)
 }
 
-# .define_generic_doc_accessor(slotNames(getClass('Documentation')))
-
 .define_generic_doc_accessor('name', 'character')
 .define_generic_doc_accessor('details', 'FormattedText')
-.define_generic_doc_accessor('usage', 'call')
 
 if(FALSE){#@testing generic accessors
     expect_is(doc <- documentation(doc_get_name), 'function-Documentation')

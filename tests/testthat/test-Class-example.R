@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-example.R`')
-#line 6 "R/Class-example.R"
+#line 7 "R/Class-example.R"
 test_that('setClass("example", ...)', {#@testing
     simple.text <- "
     # prints hello world.
@@ -20,7 +20,7 @@ test_that('setClass("example", ...)', {#@testing
     expect_is(ex2, 'Documentation-example')
     expect_null(getSrcref(ex2))
 })
-#line 35 "R/Class-example.R"
+#line 36 "R/Class-example.R"
 test_that('as(character, "example")', {#@testing
     txt <- "# example given as text" %\%
            "test(x,y)"
@@ -28,4 +28,17 @@ test_that('as(character, "example")', {#@testing
     expect_equal( S3Part(ex, TRUE)[[1]]
                 , expression(test(x,y))[[1]]
                 , check.attributes=FALSE)
+
+})
+#line 48 "R/Class-example.R"
+test_that('as(expression, "Documentation-Examples")', {#@testing
+    x <- expression(test(x,y))
+    val <- as(x, 'Documentation-Examples')
+    expect_is(val, 'Documentation-Examples')
+    expect_length(val, 1)
+
+    e <- as(x, 'example')
+    f <- as(e, 'Documentation-Examples')
+    expect_is(f, 'Documentation-Examples')
+    expect_identical( f[[1]], e)
 })
