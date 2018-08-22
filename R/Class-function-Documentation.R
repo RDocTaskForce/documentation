@@ -82,9 +82,16 @@ if(FALSE){#! @testing
 
 
     a <- arg('x', 'an object')
-    object <- function_documentation(name='testing args', arguments = arg('x', 'an object'))
-    object@arguments
+    object <- function_documentation(name='testing args', arguments = a)
+    expect_identical(object@arguments, AL(a))
 
+    docs2  <- function_documentation(name='testing args', arguments = list(a))
+    expect_identical(docs2@arguments, AL(a))
+    expect_identical(object, docs2)
+
+    docs3  <- function_documentation(name='testing args', arguments = object)
+    expect_identical(docs2@arguments, AL(a))
+    expect_identical(object, docs2)
 }
 if(FALSE){#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
@@ -96,3 +103,6 @@ if(FALSE){#@testing documentation<-,function,function-Documentation
     expect_true(.is_undefined(docs@name))
     expect_identical(docs@title, "the standard Hello world")
 }
+
+setAs('function-Documentation', 'ArgumentList', function(from)from@arguments)
+

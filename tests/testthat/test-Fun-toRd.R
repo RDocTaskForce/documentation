@@ -51,7 +51,7 @@ test_that('toRd@valueClass', {#@testing
     expect_error( toRd(cl(1L, 'test_class'))
                 , class = "documentation-error")
 })
-#line 125 "R/Fun-toRd.R"
+#line 126 "R/Fun-toRd.R"
 test_that('.Rd_indent', {#@testing
     x <- c("test strings", "second line")
 
@@ -88,8 +88,13 @@ test_that('.Rd_indent', {#@testing
     })
     expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
                   , class = "documentation-warning" )
+
+
+    expect_identical( .Rd_indent(c( "a", "", "b"), indent=TRUE, indent.with = "  ")
+                    , c("  a", "", "  b"))
+
 })
-#line 188 "R/Fun-toRd.R"
+#line 194 "R/Fun-toRd.R"
 test_that('.Rd_collapse', {#@testing
     expect_identical( .Rd_collapse(c("hello", "world"), collapse.lines=TRUE, collapse.with="\xE1")
                     , "hello\xE1world")
@@ -98,7 +103,7 @@ test_that('.Rd_collapse', {#@testing
     expect_identical(.Rd_collapse(x, collapse.lines=TRUE, collapse.with="\xE1")
                     , Rd("hello\xE1world"))
 })
-#line 218 "R/Fun-toRd.R"
+#line 224 "R/Fun-toRd.R"
 test_that('.Rd_strwrap', {#@testing
     x <- stringi::stri_rand_lipsum(1)
 
@@ -131,7 +136,7 @@ test_that('.Rd_strwrap', {#@testing
                     , c("   hello", "", "   world")
                     )
 })
-#line 270 "R/Fun-toRd.R"
+#line 276 "R/Fun-toRd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('test', NULL), "name is not a string")
     expect_error(Rd_tag('test', c('a', 'b')), "name is not a string")
@@ -163,7 +168,7 @@ test_that('Rd_tag', {#! @testing
                     , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
                     )
 })
-#line 316 "R/Fun-toRd.R"
+#line 322 "R/Fun-toRd.R"
 test_that('toRd.list', {#@testing
     l <- list('\\hello', '%world')
     expect_identical( toRd(l)
@@ -195,7 +200,7 @@ test_that('toRd.list', {#@testing
                     , c(author ="Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue")
                     )
 })
-#line 355 "R/Fun-toRd.R"
+#line 361 "R/Fun-toRd.R"
 test_that('toRd.Rd', {#@testing
     obj <- Rd("test")
     expect_identical(toRd(obj), obj)
@@ -206,7 +211,7 @@ test_that('toRd.Rd', {#@testing
 
     selectMethod('toRd', class(obj))
 })
-#line 378 "R/Fun-toRd.R"
+#line 384 "R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
     val <- toRd(object)
@@ -231,7 +236,7 @@ test_that('toRd.person', {#! @testing
                            , class='Rd')
                 )
 })
-#line 422 "R/Fun-toRd.R"
+#line 428 "R/Fun-toRd.R"
 test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     val <- toRd(obj)
@@ -239,7 +244,7 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( unclass(val)
                 , c('\\keyword{utilities}', '\\keyword{character}'))
 })
-#line 437 "R/Fun-toRd.R"
+#line 443 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/Rd-method', {#! @testing
     obj <- FT_Rd()
     expect_is(obj, 'FormattedText/Rd')
@@ -251,7 +256,7 @@ test_that('toRd,FormattedText/Rd-method', {#! @testing
     expect_identical(unclass(toRd(obj)), 'Hello world!')
     expect_false(identical(toRd(obj), obj))
 })
-#line 458 "R/Fun-toRd.R"
+#line 464 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/character-method', {#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)

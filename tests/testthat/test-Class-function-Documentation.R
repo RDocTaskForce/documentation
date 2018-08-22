@@ -43,11 +43,18 @@ test_that('initialize,function-Documentation-method', {#! @testing
 
 
     a <- arg('x', 'an object')
-    object <- function_documentation(name='testing args', arguments = arg('x', 'an object'))
-    object@arguments
+    object <- function_documentation(name='testing args', arguments = a)
+    expect_identical(object@arguments, AL(a))
 
+    docs2  <- function_documentation(name='testing args', arguments = list(a))
+    expect_identical(docs2@arguments, AL(a))
+    expect_identical(object, docs2)
+
+    docs3  <- function_documentation(name='testing args', arguments = object)
+    expect_identical(docs2@arguments, AL(a))
+    expect_identical(object, docs2)
 })
-#line 89 "R/Class-function-Documentation.R"
+#line 96 "R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")

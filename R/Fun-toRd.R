@@ -120,7 +120,8 @@ function( x, ...
         doc_warning( ._("Newlines detected for indentation;" %<<%
                         "Not all lines may be indented.")
                    )
-    s(paste0(indent.with, x), class=attr(x, 'class'))
+    s( paste0(ifelse(nchar(x)>0L, indent.with, ''), x)
+     , class=attr(x, 'class'))
 }
 if(FALSE){#@testing
     x <- c("test strings", "second line")
@@ -158,6 +159,11 @@ if(FALSE){#@testing
     })
     expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
                   , class = "documentation-warning" )
+
+
+    expect_identical( .Rd_indent(c( "a", "", "b"), indent=TRUE, indent.with = "  ")
+                    , c("  a", "", "  b"))
+
 }
 
 
@@ -453,7 +459,7 @@ function(obj, ...){
     if (length(txt)==0L) return(Rd(character(0)))
     if (length(txt)==1L) return(toRd(txt))
         paragraphs <- lapply(txt, toRd, ...)
-    cl( unlist(utils::head(interleave(paragraphs, as.list(rep('', length(paragraphs)))), -1L)), 'Rd')
+    cl( flatten_lines(paragraphs), 'Rd')
 })
 if(FALSE){#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))

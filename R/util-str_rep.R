@@ -16,3 +16,12 @@ if(FALSE){#@testing
     expect_identical(space(3), '   ')
 }
 
+is_whitespace <- function(x){
+    grepl("^\\s+$", x)
+}
+if(FALSE){#@testing
+    expect_true(is_whitespace(" "))
+    expect_true(is_whitespace("\t"))
+    expect_false(is_whitespace("t"))
+    expect_false(is_whitespace(""))
+}

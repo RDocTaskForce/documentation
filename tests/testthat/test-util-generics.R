@@ -76,7 +76,7 @@ test_that('is_S4_method_call', {#@testing
     expect_false(other_show(object))
     expect_false(is_S4_method_call())
 })
-#line 147 "R/util-generics.R"
+#line 145 "R/util-generics.R"
 test_that('get_S4_method_specialization', {#@testing
     setClass('test_class','list')
     setMethod('show', 'test_class', function(object){

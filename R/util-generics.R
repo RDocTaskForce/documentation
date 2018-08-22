@@ -134,13 +134,11 @@ get_S4_method_specialization <-
     function(which=-1){
         if (inherits(fun <- sys.function(which), "MethodDefinition"))
             return(fun@target[[1]])
-
-
         if(sys.call(which)[[1L]] == '.local'
            && sys.call(which-1L) == sys.call(which-2L)) {
-            name <- deparse(sys.call(which-1L)[[2]])
+            # name <- deparse(sys.call(which-1L)[[2]])
             frame <- sys.frame(which-1L)
-            return(class(get(name, envir=frame)))
+            return(as.character(get('.target', envir=frame)))
         } else
             stop("Could not determine target of S4 method.") # nocov
     }
