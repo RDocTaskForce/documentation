@@ -81,3 +81,10 @@ if(FALSE){#@testing
 
 clean_Rd <- tools:::toRd.default
 
+get_attr <- function(x, which, default=NULL, exact=TRUE)
+    attr(x, which=which, exact=exact) %||% default
+if(FALSE){#@testing
+    expect_identical(get_attr(s(list(), test='hello'), 'test'), 'hello')
+    expect_null     (get_attr(s(list(), test='hello'), 'test2'))
+    expect_identical(get_attr(s(list(), test='hello'), 'test3', 'world'), 'world')
+}

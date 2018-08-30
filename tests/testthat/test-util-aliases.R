@@ -36,3 +36,9 @@ test_that('.T', {#@testing
                 , c(a='._', s='s', cl='cl', .T='.T')
                 )
 })
+#line 86 "R/util-aliases.R"
+test_that('get_attr', {#@testing
+    expect_identical(get_attr(s(list(), test='hello'), 'test'), 'hello')
+    expect_null     (get_attr(s(list(), test='hello'), 'test2'))
+    expect_identical(get_attr(s(list(), test='hello'), 'test3', 'world'), 'world')
+})
