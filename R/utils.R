@@ -10,3 +10,4 @@
 #' @include  util-comma_list.R
 #' @include  util-postlogic.R
 #' @include  util-generics.R
+#' @include  util-testing.R
