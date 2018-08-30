@@ -266,7 +266,7 @@ expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
 expect_identical(x, character())
 expect_false (file.exists(tmp.out))
 })
-#line 402 "R/Fun-extract_tests.R"
+#line 410 "R/Fun-extract_tests.R"
 test_that('extract_tests', {#@testing
     tmp.dir <- tempdir()
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
@@ -347,5 +347,28 @@ test_that('extract_tests', {#@testing
                        )
                     )
 
-    unlink(tmp.dir, recursive=TRUE)
+    unlink(pkg, recursive=TRUE)
+})
+#line 492 "R/Fun-extract_tests.R"
+test_that('extract_tests', {#@testing
+    package.skeleton("testExtractionTest", path=tempdir()
+                    , code_files = list.files(system.file("testExtractionTest", "R", package='documentation'), full=TRUE)
+                    )
+    pkg <- file.path(tempdir(), "testExtractionTest")
+    test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/', mustWork = FALSE)
+
+    expect_identical(list.files(test.dir, full.names = TRUE),character())
+    expect_warning( result <- extract_tests(pkg, filter='Class', full.path = FALSE))
+
+    expect_identical( result
+                    , list("Class.R" = c( 'setClass("Test-Class", ...)'
+                                        , 'show,Test-Class-method'
+                                        , 'setGeneric("yolo", ...)'
+                                        )))
+
+    expect_true(dir.exists(test.dir))
+    expect_identical( list.files(test.dir, full.names = FALSE)
+                    , 'test-Class.R'
+                    )
+    unlink(pkg, recursive = TRUE)
 })

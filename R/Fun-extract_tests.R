@@ -343,6 +343,7 @@ expect_false (file.exists(tmp.out))
 #' @export
 extract_tests <-
 function( pkg = '.'     #< package to extract tests for.
+        , filter = NULL
         , verbose  = default(verbose, FALSE) #< print messages
         , full.path = default(full.path, NA)
         ){
@@ -390,6 +391,13 @@ function( pkg = '.'     #< package to extract tests for.
         old <- setwd(dir=file.path(pkg$path, 'R'))
         on.exit(setwd(old))
         list.files( ".", pattern="\\.r$", ignore.case=TRUE, full.names=FALSE)
+    }
+    if (!is.null(filter)) {
+        assert_that(is.string(filter))
+        which.files <- grepl(filter, basename(files))
+        if (!any(which.files))
+            doc_error("Filtered to no files to extract from.")
+        files <- files[which.files]
     }
     structure( lapply( files, extract_tests_to_file_
                      , test.dir=test.dir
@@ -479,8 +487,31 @@ if(FALSE){#@testing
                        )
                     )
 
-    unlink(tmp.dir, recursive=TRUE)
+    unlink(pkg, recursive=TRUE)
 }
+if(FALSE){#@testing
+    package.skeleton("testExtractionTest", path=tempdir()
+                    , code_files = list.files(system.file("testExtractionTest", "R", package='documentation'), full=TRUE)
+                    )
+    pkg <- file.path(tempdir(), "testExtractionTest")
+    test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/', mustWork = FALSE)
+
+    expect_identical(list.files(test.dir, full.names = TRUE),character())
+    expect_warning( result <- extract_tests(pkg, filter='Class', full.path = FALSE))
+
+    expect_identical( result
+                    , list("Class.R" = c( 'setClass("Test-Class", ...)'
+                                        , 'show,Test-Class-method'
+                                        , 'setGeneric("yolo", ...)'
+                                        )))
+
+    expect_true(dir.exists(test.dir))
+    expect_identical( list.files(test.dir, full.names = FALSE)
+                    , 'test-Class.R'
+                    )
+    unlink(pkg, recursive = TRUE)
+}
+
 
 # nocov start
 test <- function(...){
@@ -500,10 +531,10 @@ test <- function(...){
         filter <- ..2
         pkg <- ..1
     } else doc_error("too many arguments")
-    tests <- extract_tests(pkg)
+    tests <- extract_tests(pkg, filter=filter)
     doc_message(length(unlist(tests))%<<<%' tests extracted.')
     if (requireNamespace('devtools'))
-        devtools::test(pkg=pkg, filter=filter, ...)
+        devtools::test(pkg=pkg, filter=filter)
     else
         stop('devtools is required to run the tests.')
 }
