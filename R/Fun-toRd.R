@@ -1,69 +1,18 @@
 #' @include Classes.R
 #' @include Fun-default.R
+#' @importFrom tools toRd
 
-#' @export
-Rd <-
-function( x
-        , ... #< ignored.
-        , collapse.lines  = default(collapse.lines, FALSE)
-        , collapse.with   = default(collapse.with , "\n" )
-        , wrap.lines      = default(wrap.lines    , FALSE)
-        , wrap.at         = default(wrap.at       , 72L  )
-        ){
-    if (inherits(x, 'Rd')) return(x)
-    if (is.list(x)){
-        l <- lapply(x, Rd)
-        return(s(unlist(l), class='Rd'))
-    }
-    assert_that(is.character(x))
-    if (collapse.lines && wrap.lines)
-        doc_warning(._("Options 'collapse.lines' and 'wrap.lines'" %<<%
-                       "should not both be set as the combination is" %<<%
-                       "likely to produce undersireable effects."))
-
-    x <- .Rd_strwrap(x, wrap.lines=wrap.lines, wrap.at=wrap.at)
-    x <- .Rd_collapse(x, collapse.lines=collapse.lines, collapse.with=collapse.with)
-    s(x, class='Rd')
-}
-if(FALSE){#@testing
-    a <- "test"
-    b <- Rd(a)
-    expect_is(b, 'Rd')
-
-    a <- stringi::stri_rand_lipsum(3)
-    b <- Rd(a, wrap.lines=TRUE)
-    expect_true(length(b)>3)
-
-    c <- Rd(a, wrap.lines=FALSE)
-    expect_is(c, 'Rd')
-    d <- Rd(c, wrap.lines=TRUE)
-    expect_is(d, 'Rd')
-    expect_identical(c, d)
-
-    expect_warning(b <- Rd(a, wrap.lines = TRUE, collapse.lines = TRUE)
-                  , class="documentation-warning" )
-    expect_length(b, 1)
-
-    d <- Rd(c <- .Rd_indent(b, TRUE, with='        ')
-           , wrap.lines = TRUE, collapse.lines = FALSE) %>% unclass
-
-    expect_error(Rd(NULL))
-
-
-    val <- Rd(c(a="1", b="2"))
-    expect_equal(names(val), c('a','b'))
-}
 
 
 ### toRd #######################################################################
 #' @export
-#' @importFrom tools toRd
-# setGeneric('toRd', tools::toRd, valueClass=c('Rd', 'character', 'list'))
 setGeneric('toRd',
 function(obj, ...){
     ans <- standardGeneric("toRd")
-    if (is.character(ans))
-        return(Rd(ans))
+    if (is_exactly(ans, 'character')) ans <- Rd_canonize_text(Rd_text(ans))
+    if (is.character(ans)) ans <- Rd_canonize(Rd(ans))
+    if (is_exactly(ans, 'Rd')) return(ans)
+    if (is(ans, 'Rd')) return(s(list(ans), class='Rd'))
     else
         doc_error(._( "Method of generic function %1$s for class %2$s" %<<%
                       "returned a %4$s." %<<%
@@ -81,10 +30,17 @@ if(FALSE){#@testing
                  , "and '{}' to group."
                  ))
     expect_is(val, 'Rd')
-    expect_identical(unclass(val)
-                    , c( "use the \\\\backslash to escape."
-                       , "and '\\{\\}' to group."
-                       ) )
+    expect_identical( val
+                    , Rd(Rd_text("use the \\\\backslash to escape." %<<<%
+                                 "and '\\{\\}' to group."
+                                 )))
+    obj <-
+        c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
+                                  , person('Drew'  , 'Blue')
+                                  )
+    expect_identical( toRd(obj)
+                    , Rd(Rd_text("Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"))
+                    )
 }
 if(FALSE){#@testing
     toRd.test_class <- function(obj, ...)obj
@@ -103,67 +59,275 @@ set_option_documentation( "documentation::Rd::indent.with"
    )
 
 # Helpers ============================================
+.Rd.default.indent <- s(list(s( "    "
+                              , Rd_tag="TEXT"
+                              , class=c('Rd_indent', 'Rd_TEXT', 'Rd_tag', 'Rd')
+                              )), class= 'Rd')
+
+#' Canonize Rd Text/Code
+#' 
+#' Cannonical text and code are the forms that would come out from reading
+#' an Rd file via, <tools::parse_Rd>.
+#' Cannonical Rd Text has:
+#' 
+#' * One line per element, with `attr(., 'Rd_tag')=='TEXT'`
+#' * the line may not contain a newline within the content but may end the line.
+#' * new lines that are in an element by themselves are classed as an 'Rd_newline'.
+#' 
+#' Cannonical Rd code follows the following rules:
+#' 
+#' * One line per line of code.
+#' * newline is included at the end of the line string, 
+#'   not as a separate element.
+#' * if there are multiple lines they are bound together in an Rd or Rd_tag list.
+#' 
+Rd_canonize_text <- function(rd){
+    assert_that(is(rd, 'Rd'))
+    if (is.character(rd)) {
+        if (!is_exactly(rd, 'Rd_TEXT')) return(rd)
+        if (length(rd) > 1L) rd <- forward_attributes(collapse0(rd), rd)
+        if (!any(grepl('\\n(?!$)', rd, perl=TRUE))) return(rd)
+        rd <- Rd(rd)
+    }
+    assert_that(is.list(rd))
+    if (!Rd_is_all_text(rd)) {
+        i <- purrr::map_lgl(rd, is, 'Rd_TEXT')
+        if (!any(i))
+            return(forward_attributes(lapply(rd, Rd_canonize_text), rd))
+        group <- cumsum(abs(!i | c(FALSE, head(!i, -1))))
+        is.text <- purrr::map_lgl(split(i, group), all)
+        parts <- split(s(rd, class='Rd'), group)
+        
+        for (j in seq_along(parts))
+            parts[[j]] <- Recall(parts[[j]])
+        
+        return(forward_attributes( compact_Rd(parts, FALSE), rd))
+
+    }
+    type <- unique(purrr::map_chr(rd, get_attr, 'Rd_tag', ''))
+    assert_that(length(type)==1L)
+
+    lines <- unlist(stringi::stri_split(collapse0(unlist(rd)), regex="(?<=\\n)"))
+    lines <- lines[nchar(lines) > 0L]
+    
+    if (length(lines) == 1){
+        if (lines =='\n') return(.Rd.newline)
+        return(forward_attributes(list(Rd_text(lines)), rd))
+    }
+    lines <- ifelse( lines=='\n'
+                   , .Rd.newline
+                   , ifelse( is_whitespace(lines)
+                           , lapply(lines, structure
+                                   , Rd_tag="TEXT"
+                                   , class=c('Rd_indent', 'Rd_TEXT', 'Rd_tag', 'Rd'))
+                           , lapply(lines, Rd_text, type=type))
+                           )
+    return(forward_attributes(lines, rd))
+}
+Rd_canonize_code <- function(rd){
+    assert_that(is(rd, 'Rd'))
+    if (is.character(rd)) {
+        if (!is(rd, 'Rd_RCODE')) return(rd) 
+        if (length(rd) > 1L) rd <- forward_attributes(collapse0(rd), rd)
+        if (!any(grepl('\\n(?!$)', rd, perl=TRUE))) return(rd)
+        rd <- Rd(rd)
+    }
+    assert_that(is.list(rd))
+    if (!all_inherit(rd, c("Rd_RCODE", "NULL"))) {
+        return(forward_attributes( lapply(rd, Rd_canonize_text), rd))
+    }
+    type <- unique(purrr::map_chr(rd, get_attr, 'Rd_tag', ''))
+    assert_that(length(type)==1L)
+    
+    lines <- stringi::stri_split(collapse0(unlist(rd)), regex="(?<=\\n)")[[1]]
+    lines <- lines[nchar(lines)>0L]
+    lines <- ifelse( lines == '\n'
+                   , .Rd.code.newline
+                   , lapply(lines, Rd_text, type=type)
+                   )
+    return(forward_attributes(lines, rd))
+}
+Rd_canonize <- function(rd){Rd_canonize_code(Rd_canonize_text(rd))}
+if(FALSE){#@testing
+    rd <- Rd_text("a\nb\nc\n")
+    expect_is(rd, 'Rd_TEXT')
+    expect_true(is.character(rd))
+    expect_length(rd, 1)
+
+    val <- Rd_canonize_text(rd)
+    expect_is(rd, 'Rd')
+    expect_true(Rd_is_all_text(rd))
+    
+    rd <- Rd_examples(Rd( .Rd.code.newline
+                        , Rd_code("x<- rnorm(100)\n")
+                        , Rd_code("plot(x)\n")))
+    expect_identical(Rd_canonize_text(rd), rd)
+    expect_identical(Rd_canonize_code(rd), rd)
+    
+    Rd_canonize(Rd_canonize_text(rd))
+    
+    expect_identical(Rd_canonize_code(Rd_examples(Rd_code("\nx<- rnorm(100)\nplot(x)\n"))), rd)
+
+    rd <- Rd(c( "use the \\backslash to escape."
+                 , "and '{}' to group."
+                 ))
+    val <- Rd_canonize_text(rd)
+    expect_is_exactly(val, 'Rd')
+    expect_is_exactly(val[[1]], 'Rd_TEXT')
+    expect_length(val[[1]], 1L)
+    
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    txt <- Rd_rm_srcref(txt)
+    expect_identical( Rd_canonize_code(rd <- txt[['\\examples']])
+                    , txt[['\\examples']]
+                    )
+    
+    desc <- txt[['\\description']]
+    canonical <- Rd_canonize_text(desc)
+    expect_identical( as.character(desc)
+                    , as.character(canonical)
+                    )
+    
+    expect_identical(Rd_canonize_text(txt), txt)
+    expect_identical(Rd_canonize_code(txt), txt)
+    expect_identical(Rd_canonize(txt), txt)
+    
+    x <- Rd_text(c("test strings\n", "second line"))
+    val <- Rd_canonize(x)
+    expected <- Rd(Rd_text("test strings\n"), Rd_text("second line"))
+    expect_identical(val, expected)
+    
+    expect_identical(Rd_canonize_text(.Rd.newline), .Rd.newline)
+}
+
+Rd_clean_indent <-
+function(indent.with){
+    if (is_exactly(indent.with, 'character'))
+        indent.with <- Rd(cl(Rd_text(indent.with), 'Rd_indent'))
+    if (is_exactly(indent.with, c('Rd_text', 'Rd_code')))
+        indent.with <- cl(indent.with, 'Rd_indent')
+    if (is(indent.with, 'Rd_indent'))
+        indent.with <- Rd(indent.with)
+    if (is(indent.with, 'Rd')){
+        assert_that( length(indent.with) == 1L)
+        if (is_exactly(indent.with[[1L]], 'Rd_text'))
+            indent.with[[1L]] <- cl(indent.with[[1L]], 'Rd_indent')
+        assert_that(is(indent.with[[1L]], 'Rd_indent'))
+        if (grepl('\\t', indent.with))
+            doc_warning( type='guidelines_violation'
+                         , ._("Tabs are discouraged from being used for indentation" %<<%
+                              "as they may not be rendered properly on all possible pagers." %<<%
+                              "See https://developer.r-project.org/Rds.html for reference.")
+            )
+        if (any(grepl('\\n', as.character(indent.with))))
+            doc_error( ._("Newlines are not allowed in indent.with"))
+        return(indent.with)
+    }
+    doc_error("bad indent")
+}
+
 .Rd_indent <-
 function( x, ...
         , indent      = default_("indent"     , FALSE, fun='Rd')
-        , indent.with = default_("indent.with", '  ' , fun='Rd')
+        , indent.with = default_("indent.with", .Rd.default.indent, fun='Rd')
         ){
+    assert_that(is(x, 'Rd'), is.flag(indent))
     if (!indent) return(x)
-    assert_that(is.string(indent.with))
-    if (grepl('\\t', indent.with))
-        doc_warning(type='guidelines_violation'
-                   , ._("Tabs are discouraged from being used for indentation" %<<%
-                        "as they may not be rendered properly on all possible pagers." %<<%
-                        "See https://developer.r-project.org/Rds.html for reference.")
-                   )
-    if (any(grepl('\\n', x)))
-        doc_warning( ._("Newlines detected for indentation;" %<<%
-                        "Not all lines may be indented.")
-                   )
-    s( paste0(ifelse(nchar(x)>0L, indent.with, ''), x)
-     , class=attr(x, 'class'))
+    indent.with <- Rd_clean_indent(indent.with)
+    if (is.character(x)) {
+        if (is_exactly(x, 'Rd_TEXT') || is_exactly(x, 'Rd_RCODE') || is_exactly(x, 'Rd_indent'))
+            return(forward_attributes(paste0(indent.with, x),x))
+        else if (is_exactly(x, 'Rd_newline')) return(x)
+        else 
+            doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
+    }
+    assert_that(is.list(x))
+    if (is.list(x)) {
+        if (!Rd_spans_multiple_lines(x)) return(x)
+        p2 <- lapply(Rd_split(x), function(x, ...){
+            if (is.character(x)) .Rd_indent(x, ...) else
+            if (is(x, 'Rd_tag')){
+                if (Rd_spans_multiple_lines(x, TRUE)) {
+                    val <- .Rd_indent(x, ...)
+                    if (!is(val[[length(val)]], 'Rd_indent'))
+                        val <- forward_attributes(c(unclass(val), indent.with), x)
+                } else 
+                    val <- x
+                Rd(indent.with, val)
+            } else 
+            .Rd_indent(x)
+        }, indent=indent, indent.with = indent.with)
+        return(forward_attributes(compact_Rd(p2), x))
+        # indents <- rep(indent.with, length(parts))
+        # if (length(parts[[1]])==1 && is.character(parts[[1]]) && parts[[1]] == '\n') {
+        #     indents[1] <- list(NULL)
+        # }
+        # val <- compact_Rd(undim(rbind(indents, p2)))
+        # val <- Rd_canonize(forward_attributes(val, x))
+        # return(val)
+    } else
+        doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
 }
 if(FALSE){#@testing
-    x <- c("test strings", "second line")
+    x <- .Rd_strwrap( collapse(stringi::stri_rand_lipsum(3), '\n\n'), wrap.lines = TRUE)
+    expect_is(x, 'Rd')
+    expect_true(length(x)> 5)
 
-    expect_identical(.Rd_indent(c("test strings", "second line"))
-                    , c("test strings", "second line")
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    x <- txt[['\\examples']]
+
+    expect_identical(.Rd_indent(x, indent=FALSE), x)
+
+    val <- .Rd_indent(x, indent=TRUE)
+    expect_is(val, 'Rd')
+    expect_is(val, 'Rd_tag')
+    expect_identical( stringi::stri_split_lines1(collapse0(as.character(val)))
+                    , stringi::stri_split_lines1(collapse0(as.character(x))) %>% 
+                        ifelse(. %in% c('\\examples{', '}', ''), ., paste0(space(4), .))
                     )
+    expect_equal(length(val), length(x))
 
-    expect_identical(.Rd_indent(c("test strings", "second line"), indent=TRUE)
-                    , c("  test strings", "  second line"))
+    x <- txt[['\\arguments']]
+    val <- .Rd_indent(x, indent=TRUE, indent.with='  ')
+    
+    c(x, .Rd.default.indent) %>% length
+    
+    expect_error(.Rd_indent(c("test strings\n", "second line")))
 
+    x <- Rd_canonize(Rd(Rd_text(c("test strings\n", "second line"))))
+    
     withr::with_options(list( "documentation::Rd::indent" = TRUE
                             , "documentation::Rd::indent.with" = NULL), {
-        expect_identical(.Rd_indent(c("test strings", "second line"))
-                        , c("  test strings", "  second line"))
+        expect_identical( .Rd_indent(x)
+                        , Rd(Rd_text( .Rd.default.indent %<<<% "test strings\n")
+                            ,Rd_text( .Rd.default.indent %<<<% "second line")
+                            ))
     })
     withr::with_options(list( "documentation::indent" = TRUE), {
-        expect_identical(.Rd_indent(c("test strings", "second line"))
-                        , c("  test strings", "  second line"))
+        expect_identical( .Rd_indent(x)
+                        , Rd( Rd_text( .Rd.default.indent %<<<% "test strings\n")
+                            , Rd_text( .Rd.default.indent %<<<% "second line")
+                            ))
     })
     withr::with_options(list( "indent" = TRUE), {
-        expect_identical(.Rd_indent(c("test strings", "second line"))
-                        , c("  test strings", "  second line"))
+        expect_identical( .Rd_indent(x)
+                        , Rd( Rd_text( .Rd.default.indent %<<<% "test strings\n")
+                            , Rd_text( .Rd.default.indent %<<<% "second line")
+                            ))
     })
     withr::with_options(list( "documentation::Rd::indent" = TRUE
-                            , "documentation::Rd::indent.with" = "    "), {
-        expect_identical(.Rd_indent(c("test strings", "second line"))
-                        , c("    test strings", "    second line"))
+                            , "documentation::Rd::indent.with" = "   "), {
+        expect_identical( .Rd_indent(x)
+                        , Rd( Rd_text( "   test strings\n")
+                            , Rd_text( "   second line")
+                            ))
     })
     withr::with_options(list( "documentation::Rd::indent" = TRUE
                             , "documentation::Rd::indent.with" = "\t"), {
-        expect_warning(.Rd_indent(c("test strings", "second line"))
+        expect_warning( .Rd_indent(x)
                       , class= "documentation-warning-guidelines_violation"
                       )
     })
-    expect_warning(.Rd_indent(collapse_nl(x), indent=TRUE)
-                  , class = "documentation-warning" )
-
-
-    expect_identical( .Rd_indent(c( "a", "", "b"), indent=TRUE, indent.with = "  ")
-                    , c("  a", "", "  b"))
-
 }
 
 
@@ -180,153 +344,135 @@ set_option_documentation("documentation::Rd::collapse.with"
    , default = "\n"
    , constraints = list(~is.string(.))
    )
-.Rd_collapse <-
-function( x, ...
-        , collapse.lines  = default_("collapse.lines", FALSE, fun='Rd')
-        , collapse.with   = default_("collapse.with" , "\n" , fun='Rd')
-        ){
-    assert_that(is.flag(collapse.lines))
-    if (!collapse.lines) return(x)
 
-    assert_that(is.string(collapse.with))
-    s(collapse(x, with = collapse.with), class=attr(x, 'class'))
-}
-if(FALSE){#@testing
-    expect_identical( .Rd_collapse(c("hello", "world"), collapse.lines=TRUE, collapse.with="\xE1")
-                    , "hello\xE1world")
-
-    x <- Rd(c("hello", "world"))
-    expect_identical(.Rd_collapse(x, collapse.lines=TRUE, collapse.with="\xE1")
-                    , Rd("hello\xE1world"))
-}
-
-
-.Rd_get_indent <- function(x){
-    gsub("^( *)[^ ].*$", "\\1", x[[1]])
-}
-if(FALSE){
-    x <- "   hello world"
-    expect_equal(.Rd_get_indent(x), "   ")
-    expect_equal(.Rd_get_indent("hello world"), "")
-}
 .Rd_strwrap <-
 function( x, ...
         , wrap.lines = default_("wrap.lines", FALSE, fun='Rd')
         , wrap.at    = default_("wrap.at"   , 72L  , fun='Rd')
         ){
     assert_that(is.flag(wrap.lines))
-    if (!wrap.lines) return(x)
-    assert_that(is.count(wrap.at))
-    indent <- nchar(.Rd_get_indent(x))
-    s( base::strwrap(x, wrap.at, indent=indent, exdent=indent)
-     , class=attr(x, 'class'))
+    if (identical(class(x), 'character')) x <- Rd_text(x)
+    else assert_that(is(x, 'Rd'))
+    if (!wrap.lines) {
+        return(x)
+    } else
+    if (identical(class(x), 'Rd')) {
+        assert_that(is.list(x))
+        if (Rd_is_all_text(x)) {
+            lines <- base::strwrap( collapse0(unlist(x))
+                                  , width=wrap.at
+                                  , simplify = TRUE)
+            if (length(lines) <=1) return(x)
+            lines <- lapply(lines, Rd_text, type='TEXT')
+            if (length(lines) > 1L && !is.null(attr(x, 'Rd_tag'))) {
+                lines <- unname(rbind(lines, .Rd.newline))
+                lines <- c(unclass(.Rd.newline), as.vector(lines))
+                return(s( lines
+                        , class = attr(x, 'class')
+                        , Rd_tag = attr(x, 'Rd_tag')
+                        , Rd_option = attr(x, 'Rd_option')
+                        ))
+            } else {
+                return(s( unname(rbind(lines, .Rd.newline))
+                        , class = attr(x, 'class')
+                        , Rd_tag = attr(x, 'Rd_tag')
+                        , Rd_option = attr(x, 'Rd_option')
+                        ))
+            }
+        } else {
+            return(s( lapply(x, .Rd_strwrap, wrap.lines=wrap.lines, wrap.at=wrap.at)
+                    , class  = attr(x, 'class')
+                    , Rd_tag = attr(x, 'Rd_tag')
+                    , Rd_option = attr(x, 'Rd_option')
+                    ))
+        }
+    } else if (attr(x, 'Rd_tag') =="TEXT"){
+        assert_that( is.count(wrap.at)
+                   , is.character(x)
+                   , is.null(attr(x, 'Rd_option'))
+                   )
+        # indent <- nchar(.Rd_get_indent(x))
+
+        lines <- base::strwrap(x, width=wrap.at, simplify = TRUE)
+        if (length(lines) <=1) return(x)
+        lines <- lapply(lines, Rd_text, type='TEXT')
+        y <-
+
+        tag <- attr(x, 'Rd_tag') %unless% (attr(x, 'Rd_tag')=='TEXT') %then% 'Rd'
+        class <- attr(x, 'class') %unless% (attr(x, 'Rd_tag')=='TEXT') %then% 'Rd'
+        return(s( unname(rbind(lines, .Rd.newline))
+                , class = 'Rd'
+                ))
+    } else {
+        return(x)
+    }
 }
 if(FALSE){#@testing
     x <- stringi::stri_rand_lipsum(1)
 
-    expect_identical(.Rd_strwrap(x, wrap.lines=FALSE, wrap.at=72L), x)
-    expect_identical(.Rd_strwrap(x, wrap.lines=TRUE , wrap.at=72L)
-                    , base::strwrap(x, 72L)
-                    )
-    expect_identical(.Rd_strwrap(x, wrap.lines=TRUE, wrap.at=50)
+    expect_identical(.Rd_strwrap(x, wrap.lines=FALSE, wrap.at=72L)
+                    , Rd_text(x))
+    val <- .Rd_strwrap(x, wrap.lines=TRUE , wrap.at=72L)
+    expect_is(val, 'Rd')
+    expect_true(all_inherit(val, c('Rd_TEXT', 'Rd_newline')))
+    expect_equal( unlist(val[1,])
+                , base::strwrap(x, 72L)
+                )
+    expect_true( all(unlist(val[2,])=='\n'))
+    val <- .Rd_strwrap(x, wrap.lines=TRUE, wrap.at=50)
+    expect_identical( unlist(val[1,])
                     , base::strwrap(x, 50)
                     )
     withr::with_options(list( "documentation::Rd::wrap.lines" = TRUE
                             , "documentation::Rd::wrap.at"    = 50), {
-        expect_identical( .Rd_strwrap(x)
+        expect_identical( unlist(.Rd_strwrap(x)[1,])
                         , base::strwrap(x, 50)
                         )
     })
 
-    x <- c("Lorem ipsum"
-          , interleave( rep('', 3)
-                      , stringi::stri_rand_lipsum(3, start_lipsum = FALSE)
-                      )
-          )
-    expect_identical( .Rd_strwrap(x, wrap.lines=TRUE, wrap.at=72L)
-                    , unname(unlist(sapply(x, base::strwrap, 72)))
+    x <- c("Lorem ipsum", stringi::stri_rand_lipsum(3, start_lipsum = FALSE))
+    x <- collapse(x, '\n\n')
+
+    expect_identical( unlist(.Rd_strwrap(x, wrap.lines=TRUE, wrap.at=72L)[1,])
+                    , unname(unlist(base::strwrap(x, 72)))
                     )
     expect_equal(sum(.Rd_strwrap(x, wrap.lines=TRUE, wrap.at=72L) == ''), 3L)
 
-
-    expect_identical( .Rd_strwrap("   hello\n\nworld", wrap.lines=TRUE, wrap.at=72L)
-                    , c("   hello", "", "   world")
+    expect_identical( unlist(.Rd_strwrap("   hello\n\nworld", wrap.lines=TRUE, wrap.at=72L)[1,])
+                    , c("hello", "", "world")
                     )
 }
 
-Rd_tag  <-
-function( content
-        , name=deparse(substitute(content))
-        , opt=character(0)
-        , ...
-        ){
-    assert_that( is.string(name))
-    if (length(content)==0) return(character(0))
-    if (!inherits(content, 'Rd'))
-        content <- toRd(content, ...)
-    if (length(opt)>0L)
-        name <- name %<<<% '[' %<<<% comma_list(opt) %<<<% ']'
-    if (length(content) == 1)
-        s( sprintf("\\%s{%s}", name, content), class=c('Rd_tag', 'Rd'))
-    else
-        s(.Rd_collapse(c( sprintf("\\%s{", name)
-                        , .Rd_indent(content, ...)
-                        , "}"), ...), class=c('Rd_tag', 'Rd'))
-}
-if(FALSE){#! @testing
-    expect_error(Rd_tag('test', NULL), "name is not a string")
-    expect_error(Rd_tag('test', c('a', 'b')), "name is not a string")
-    expect_error(Rd_tag('test', 1), "name is not a string")
-    expect_is(Rd_tag('my name', 'name'), "Rd_tag")
-    expect_is(Rd_tag('my name', 'name'), "Rd")
-    expect_equal( unclass(Rd_tag('my name', 'name')), "\\name{my name}")
-    expect_equal( unclass(Rd_tag(c('line1', 'line2'), 'name'))
-                , c('\\name{', 'line1', 'line2', '}')
-                )
-    name <- 'testing'
-    expect_equal(unclass(Rd_tag(name)), '\\name{testing}')
-
-    obj <- FT(stringi::stri_rand_lipsum(3))
-    as.tag <- Rd_tag(obj)
-    expect_is(as.tag, 'Rd_tag')
-    expect_length(as.tag, 7)
-    expect_identical(as.tag[c(1,7)], c('\\obj{', '}'))
-
-    val <- Rd_tag('dest', 'link', opt='pkg')
-    expect_is(val, 'Rd')
-    expect_identical(unclass(val), "\\link[pkg]{dest}")
-
-    obj <-
-        c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-                                  , person('Drew'  , 'Blue')
-                                  )
-    expect_identical( unclass(toRd(obj))
-                    , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
-                    )
-}
 
 # S3 Methods ----------------------------------------------------------
 
+
+if (FALSE){#@testing toRd,character
+    expect_identical( toRd(c("\\hello\n", "%world"))
+                    , Rd(Rd_text("\\\\hello\n"), Rd_text("\\%world")))
+}
+
+toRd.NULL <- function(obj, ...){Rd()}
+if(FALSE){#@testing
+    expect_identical(toRd(NULL), Rd())
+}
+
 #' @S3method toRd list
 toRd.list <- function(obj, ...){
-    val <- lapply(obj, toRd)
-    assert_that( all(purrr::map_lgl(val, inherits, 'Rd'))
-               , all(purrr::map_lgl(val, is.character))
-               )
-    if (!is.null(names(obj))){
-        lens <- purrr::map_int(val, length)
-        new.names <- rep(names(obj), lens)
-        s(unlist(val), names=new.names)
-    } else return(unlist(val))
+    val <- lapply(obj, toRd, ...)
+    val <- compact_Rd(val)
+    assert_that( all_inherit(val, 'Rd'))
+    cl(val, 'Rd')
 }
 if(FALSE){#@testing
-    l <- list('\\hello', '%world')
+    l <- list('\\hello ', '%world')
     expect_identical( toRd(l)
-                    , s( c("\\\\hello", "\\%world")
+                    , s( list( Rd_text("\\\\hello ")
+                             , Rd_text("\\%world"))
                        , class='Rd')
                     )
 
-    l <- list( first = Rd("first text")
+    l <- list( first  = Rd("first text")
              , second = Rd(c("second", "text"))
              , third = NULL
              )
@@ -334,28 +480,18 @@ if(FALSE){#@testing
     val <- toRd(l)
 
     expect_is(val, 'Rd')
-    expect_true(is.character(val))
-    expect_equal(unclass(val)
-                , c( first  = "first text"
-                   , second = "second"
-                   , second = "text"
-                   )
-                )
-
-    obj <- list(author = c( person('Andrew', 'Redd'
-                                  , email='andrew.redd@hsc.utah.edu')
-                          , person('Drew'  , 'Blue')
-                          ))
-    expect_identical( unclass(toRd(obj))
-                    , c(author ="Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue")
-                    )
+    expect_is(val[[1]], 'Rd_TEXT')
 }
+
 
 
 #' @export
 #' @S3method toRd Rd
 toRd.Rd <- function(obj, ...){
-    assert_that(is.character(obj) && inherits(obj, 'Rd'))
+    assert_that( is(obj, 'Rd')
+               , is.character(obj)  %if% is(obj, c('Rd_TEXT', 'Rd_RCODE')) 
+                 %otherwise% is.list(obj) 
+               )
     obj
 }
 if(FALSE){#@testing
@@ -365,8 +501,6 @@ if(FALSE){#@testing
 
     obj <- Rd("\\rd")
     expect_identical(toRd(obj), obj)
-
-    selectMethod('toRd', class(obj))
 }
 
 
@@ -381,27 +515,41 @@ function( obj
                      , braces  = list(email = c('\\email{', '}'))
                      ))
 }
+if (FALSE) {#@testing toRd,author
+    obj <- list(author = c( person('Andrew', 'Redd'
+                                  , email='andrew.redd@hsc.utah.edu')
+                          , person('Drew'  , 'Blue')
+                          ))
+    val <- toRd(obj)
+    expect_is_exactly(val, 'Rd')
+    expect_length(val, 1L)
+    expect_is_exactly(val[[1]], 'Rd_TEXT')
+    expect_length(val[[1]], 1L)
+    expect_identical( as.character(toRd(obj))
+                    , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
+                    )
+}
 if(FALSE){#! @testing
-    object <- person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-    val <- toRd(object)
-    expect_is(val, 'Rd')
-    expect_equal(unclass(val), 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}')
-
     object <-c( person('First' , 'Author', email='me1@email.com')
               , person('Second', 'Author', email='me2@email.com')
               )
     val <- toRd(object)
-    expect_is(val, 'Rd')
-    expect_equal( unclass(val)
-                ,
-                  'First Author \\email{me1@email.com}' %<<% 'and' %<<%
+    expect_is_exactly(val, 'Rd')
+    expect_length(val, 1L)
+    expect_is_exactly(val[[1L]], 'Rd_TEXT')
+    expect_length(val[[1]], 1L)
+    
+    expect_equal( as.character(val)
+                , 'First Author \\email{me1@email.com}' %<<% 'and' %<<%
                   'Second Author \\email{me2@email.com}'
                   )
     expect_equal( toRd( c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
                          , person('Drew'  , 'Blue')
                          ) )
-                , structure( 'Andrew Redd \\email{andrew.redd@hsc.utah.edu}' %<<%
+                , s( list( s('Andrew Redd \\email{andrew.redd@hsc.utah.edu}' %<<%
                              'and Drew Blue'
+                            , Rd_tag = 'TEXT'
+                            , class = c('Rd_TEXT', 'Rd_tag', 'Rd')))
                            , class='Rd')
                 )
 }
@@ -424,13 +572,25 @@ if(FALSE){#! @testing
 # }
 
 ### toRd,Documentation-Keyword #####
-setMethod('toRd', 'Documentation-Keyword', function( obj, ...)sprintf("\\keyword{%s}", obj@.Data))
+setMethod('toRd', 'Documentation-Keyword', function( obj, ...){
+    if(length(obj) == 1 ) Rd_tag("keyword", obj@.Data)
+    cl(lapply(obj@.Data, Rd_tag, tag="keyword"), 'Rd')
+})
 if(FALSE){#! @testing
+    obj <- new('Documentation-Keyword', 'utilities')
+    val <- toRd(obj)
+    expect_is_exactly(val, 'Rd')
+    expect_is_exactly(val[[1]], 'Rd_tag')
+    expect_true(is_Rd_tag(val[[1]], '\\keyword'))
+    
     obj <- new('Documentation-Keyword', c('utilities', 'character'))
     val <- toRd(obj)
-    expect_is(val, 'Rd')
-    expect_equal( unclass(val)
-                , c('\\keyword{utilities}', '\\keyword{character}'))
+    expect_is_exactly(val, 'Rd')
+    expect_length(val, 2)
+    expect_is_exactly(val[[1]], 'Rd_tag')
+    expect_true(is_Rd_tag(val[[1]], '\\keyword'))
+    expect_equal( collapse0(as.character(val))
+                , '\\keyword{utilities}\\keyword{character}')
 }
 
 
@@ -438,17 +598,23 @@ if(FALSE){#! @testing
 setMethod('toRd', 'FormattedText/Rd',
 function( obj, ...){
     #! Convert formatted text into Rd lines.
-    S3Part(obj, strictS3 =TRUE)
+    s(S3Part(obj, strictS3 =TRUE), class='Rd')
 })
 if(FALSE){#! @testing
-    obj <- FT_Rd()
+    obj <- FT_Rd( Rd_text("A description of ")
+                , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                , .Rd.newline
+                )
     expect_is(obj, 'FormattedText/Rd')
     val <- toRd(obj)
-    attr(class(val), 'package') <- NULL
-    expect_identical(val, Rd(character(0)))
-
+    expect_is_exactly(val, 'Rd')
+    expect_identical(val
+                    , Rd( Rd_text("A description of ")
+                        , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                        , .Rd.newline
+                        ))
     obj <- FT_Rd('Hello world!')
-    expect_identical(unclass(toRd(obj)), 'Hello world!')
+    expect_identical( toRd(obj), Rd('Hello world!'))
     expect_false(identical(toRd(obj), obj))
 }
 
@@ -456,19 +622,26 @@ if(FALSE){#! @testing
 setMethod('toRd', 'FormattedText/character',
 function(obj, ...){
     txt <- S3Part(obj, strictS3 =TRUE)
-    if (length(txt)==0L) return(Rd(character(0)))
+    if (length(txt)==0L) return(Rd())
     if (length(txt)==1L) return(toRd(txt))
-        paragraphs <- lapply(txt, toRd, ...)
-    cl( flatten_lines(paragraphs), 'Rd')
+    paragraphs <- lapply(txt, toRd, ...)
+    paragraphs <- compact_Rd(paragraphs)
+    val <- cl(unname(head(undim(rbind(paragraphs, .Rd.break)), -1L)), 'Rd')
+    val <- .Rd_strwrap(val, ...)
+    Rd_canonize(val)
 })
 if(FALSE){#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)
-    expect_equal(length(as.rd), 5 )
-    expect_is(as.rd, 'Rd')
-    expect_identical(mode(as.rd), 'character')
+    expect_length(as.rd, 5 )
+    expect_length(as.character(as.rd), 5 )
+    expect_is_exactly(as.rd, 'Rd')
 
-    expect_true(all(as.rd[c(2,4)]==''))
+    expect_true(all(as.rd[c(2,4)]=='\n'))
 
-    expect_identical(toRd(FT()), Rd(character(0)))
+    expect_identical(toRd(FT()), Rd())
+    
+    wrapped <- toRd(obj, wrap.lines=TRUE, wrap.at=50)
+    expect_true(length(as.character(wrapped)) > 5L)
+    expect_identical(wrapped, Rd_canonize(wrapped))
 }
