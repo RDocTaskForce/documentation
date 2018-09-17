@@ -199,8 +199,8 @@ if(FALSE){#@testing
                     )
 }
 
-Rd_spans_multiple_lines <- function(x, keep.class=FALSE){
-    grepl('\\n(?!$)', collapse0(as.character(if (keep.class) x else unclass(x))), perl=TRUE)
+Rd_spans_multiple_lines <- function(x){
+    grepl('\\n(?!$)', collapse0(as.character(x)), perl=TRUE)
 }
 if(FALSE){#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
@@ -212,8 +212,13 @@ if(FALSE){#@testing
     expect_true(Rd_spans_multiple_lines(Rd_text("hello\nworld\n")))
 
     x <- txt[[38]][2]
-    expect_true(Rd_spans_multiple_lines(x, TRUE))
-    expect_false(Rd_spans_multiple_lines(x))
+    expect_true(Rd_spans_multiple_lines(x))
+    expect_false(Rd_spans_multiple_lines(unclass(x)))
+
+    x <- c(.Rd.code.newline
+          , Rd_code('value \\%if\\% proposition')
+          , .Rd.code.newline)
+    expect_true(Rd_spans_multiple_lines(x))
 }
 
 Rd_ends_with_newline <- function(x, keep.class=FALSE){
@@ -246,7 +251,7 @@ if(FALSE){#@testing
 #' Split a rd object into relevant lines.
 Rd_split <-
 function(x){
-    
+
     assert_that(is(x, 'Rd'))
     has.newline <- purrr::map_lgl(x, Rd_ends_with_newline)
     group <- rev(cumsum(rev(has.newline)))
@@ -422,7 +427,7 @@ Rd_get_element <- function(x, ..., drop=TRUE){
     if (is.null(tag)){
         if (is.list(val))
             return(s(val, class='Rd'))
-        if (is_Rd_tag(x)) 
+        if (is_Rd_tag(x))
             return(val)
     }
     if (!is.null(tag)) {
@@ -430,8 +435,8 @@ Rd_get_element <- function(x, ..., drop=TRUE){
             class = c('Rd_' %<<<% tag, 'Rd_tag', 'Rd')
             if (val == '\n')
                 return(s(val, class=c( 'Rd_newline', class)))
-            else if ( is_whitespace(val) 
-                   && ( tail(i,1) == 1 
+            else if ( is_whitespace(val)
+                   && ( tail(i,1) == 1
                      || Rd_ends_with_newline(x[[c(head(i, -1), tail(i, 1)-1L)]])
                       ))
                 return(s(val, class=c( 'Rd_indent', class)))
@@ -462,7 +467,7 @@ if(FALSE){#@testing [[.Rd & [.Rd
 
     expect_is_exactly(txt[['\\arguments']][[3L]], 'Rd_tag')
     expect_is_exactly(txt[['\\arguments']][[3L]][[1L]], 'Rd')
-    
+
     expect_is_exactly(txt[[2]], "Rd_newline")
     expect_is_exactly(txt[[c(48, 11)]], "Rd_TEXT")
 }
