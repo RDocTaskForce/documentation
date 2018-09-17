@@ -124,23 +124,26 @@ if(FALSE){#@testing
 
 }
 
+# toRd,example #################################################################
 setMethod('toRd', "example",
 function( obj, ...
         , use.source = default(use.source, TRUE) #< use source lines over reconstructed.
+        , trimws = TRUE  #< Trim whitespace from sourcelines.
         ){
-    if (length(obj)==0) return(Rd(character(0))) else
-    if (use.source) {
-        if (!is.null(src <- attr(obj, 'wholeSrcref'))) {
-            txt <- trimws_example(doc_example_get_src_lines(src))
-            return(Rd(txt, ...))
+    if (length(obj)==0) return(Rd(character(0)))
+    lines <-
+        if (use.source && !is.null(src <- attr(obj, 'wholeSrcref'))) {
+            doc_example_get_src_lines(src)
         } else
-        if (!is.null(src <- attr(obj, 'srcref'))) {
-            txt <- trimws_example(doc_example_get_src_lines(src))
-            return(Rd(txt, ...))
+        if (use.source && !is.null(src <- attr(obj, 'srcref'))) {
+            doc_example_get_src_lines(src)
+        } else {
+            as.character(S3Part(obj, TRUE))
         }
-    }
-    txt <- as.character(S3Part(obj, TRUE))
-    return(Rd(txt, ...))
+    if (trimws)
+        lines <- trimws_example(lines)
+    lines <- undim(paste0(lines, ifelse(grepl("\n$", lines), '', '\n')))
+    return(Rd_canonize_code(Rd_code(lines)))
 })
 if(FALSE){#@testing
     simple.text <- "
@@ -151,25 +154,24 @@ if(FALSE){#@testing
     ex <- new('example', p)
 
     expect_equal( toRd(ex, use.source=TRUE)
-                , Rd(c( "# prints hello world."
-                      , "hw()"
-                      )))
+                , Rd( Rd_code( "# prints hello world.\n")
+                    , Rd_code( "hw()\n")
+                    ))
 
     ex2 <- new('example', expression(test(x,y)))
     expect_is(ex2, 'Documentation-example')
     expect_null(getSrcref(ex2))
-    expect_identical(toRd(ex2), Rd("test(x, y)"))
+    expect_identical(toRd(ex2), Rd(Rd_code(c("test(x, y)\n"))))
 
     ex3 <- new('example', expression( a <- "test"
                                     , b <- Rd(a)
                                     , expect_is(b, 'Rd')
                                     ))
     expect_equal( toRd(ex3)
-                , Rd(c( 'a <- "test"'
-                      , 'b <- Rd(a)'
-                      , 'expect_is(b, "Rd")'
-                      ))
-                )
+                , Rd(Rd_code( 'a <- "test"\n')
+                    ,Rd_code( 'b <- Rd(a)\n')
+                    ,Rd_code( 'expect_is(b, "Rd")\n')
+                    ))
 }
 if(FALSE){#@testing
     ex.blank <- new('example')
@@ -180,24 +182,29 @@ if(FALSE){#@testing
     obj <- new('example', parse(ex.file, keep.source=TRUE))
 
     lines <- readLines(ex.file)
-    expect_identical( toRd(obj), Rd(lines[nchar(lines)>0L]))
+    expect_identical( toRd(obj)
+                    , Rd_canonize(Rd_code(paste0(lines[nchar(lines)>0L], '\n')))
+                    )
 
     whole.src <- attr(obj, 'wholeSrcref')
-    class(whole.src)
-
     attr(obj, 'wholeSrcref') <- NULL
     expect_true( is.null(src <- attr(obj, 'wholeSrcref')))
     expect_true(!is.null(src <- attr(obj, 'srcref')))
-    expect_identical( toRd(obj), Rd(lines[nchar(lines)>0L]))
+    expect_identical( toRd(obj)
+                    , Rd_canonize(Rd_code(paste0(lines[nchar(lines)>0L], '\n')))
+                    )
 }
 
-
+# toRd,Documentation-Examples ##################################################
 setMethod('toRd', "Documentation-Examples",
-function( obj, ...){
-    if (length(obj)==0) return(Rd(character(0)))
+function( obj, ..., indent=default(indent, FALSE)){
+    if (length(obj)==0) return(Rd())
     content <- lapply(obj, toRd, ...)
-    content <- flatten_lines(content)
-    Rd_tag(content, 'examples', ...)
+    if (length(content) > 1L)
+        content <- compact_Rd(interleave(rep(list(.Rd.code.newline), length(content)), content))
+    if (indent)
+        content <- .Rd_indent(cl(content, 'Rd'), indent = TRUE, ...)
+    Rd_examples(content=compact_Rd(content), ...)
 })
 if(FALSE){#@testing
     simple.text <- "
@@ -211,44 +218,40 @@ if(FALSE){#@testing
                                     , b <- Rd(a)
                                     , expect_is(b, 'Rd')
                                     ))
-    obj <- examples <- new('Documentation-Examples', list(ex, ex2, ex3))
+    examples <- new('Documentation-Examples', list(ex, ex2, ex3))
 
-    expect_identical( toRd(examples)
-                    , cl(Rd(c( "\\examples{"
-                             , "# prints hello world."
-                             , "hw()"
-                             , ''
-                             , "test(x, y)"
-                             , ''
-                             , 'a <- "test"'
-                             , 'b <- Rd(a)'
-                             , 'expect_is(b, "Rd")'
-                             , "}"
-                             )), 'Rd_tag'))
-    expect_identical( toRd(examples, indent=TRUE, indent.with=space(4))
-                    , cl(Rd(c( "\\examples{"
-                             , "    # prints hello world."
-                             , "    hw()"
-                             , ''
-                             , "    test(x, y)"
-                             , ''
-                             , '    a <- "test"'
-                             , '    b <- Rd(a)'
-                             , '    expect_is(b, "Rd")'
-                             , "}"
-                             )), 'Rd_tag'))
+    rd <- toRd(examples)
+    expect_is_exactly(rd, 'Rd')
+    expect_true(is_Rd_tag(rd[[1]], "\\examples"))
+    expect_identical( collapse0(as.character(rd))
+                    , "\\examples{" %\%
+                      "# prints hello world." %\%
+                      "hw()" %\%
+                      '' %\%
+                      "test(x, y)" %\%
+                      '' %\%
+                      'a <- "test"' %\%
+                      'b <- Rd(a)' %\%
+                      'expect_is(b, "Rd")' %\%
+                      "}")
+
+    rd <- toRd(examples, indent=TRUE, indent.with=space(4))
+    expect_is_exactly(rd, 'Rd')
+    expect_true(is_Rd_tag(rd[[1]], "\\examples"))
+    expect_identical( as.character(collapse0(rd))
+                    , "\\examples{" %\%
+                      "    # prints hello world." %\%
+                      "    hw()" %\%
+                      '' %\%
+                      "    test(x, y)" %\%
+                      '' %\%
+                      '    a <- "test"' %\%
+                      '    b <- Rd(a)' %\%
+                      '    expect_is(b, "Rd")' %\%
+                      "}"
+                    )
 
     ex.blank <- new('Documentation-Examples')
-    expect_identical(toRd(ex.blank), Rd(character(0)))
+    expect_identical(toRd(ex.blank), Rd())
 }
-if(FALSE){#@testing
-    txt <- "# example given as text" %\%
-           "test(x,y)"
-    ex <- as(txt, 'example')
-    expect_identical( toRd(ex)
-                    , Rd(c( "# example given as text"
-                          , "test(x,y)"
-                          )))
-}
-
 
