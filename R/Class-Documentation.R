@@ -7,16 +7,6 @@
 #' @import methods
 
 
-#TODO
-#' @title contains formatted text and code chunks
-setClass( "Prose", contains = 'list')
-#TODO: expand prose with validator and possibly initializer to check for
-#^ valid code.
-
-setVector( element = "Prose"
-         , Class   = "SectionList"
-         )
-
 setClass('Documentation', contains='VIRTUAL')
 
 ### BaseDocumentation-class #####

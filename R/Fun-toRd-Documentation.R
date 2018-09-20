@@ -9,19 +9,21 @@ function( obj
         ){
     "Convert Documentation to Rd format."
     to_tag <- function(name)
-        Rd_tag( getElement(obj, name) , name)
-
+        Rd_tag(tag=name, getElement(obj, name))
+    .exclude <- c('author', 'keywords', 'aliases', 'concepts', 'sections')
+    
     slots <- setdiff(slotNames(obj), exclude)
     Rd <- structure(lapply(slots, to_tag), names = slots)
     Rd <- Filter(length, Rd)
     if (length(obj@author))
-        Rd[['author']]   <- Rd_tag(toRd(obj@author), 'author')
+        Rd[['author']]   <- Rd_author(obj@author)
     if (!rlang::is_empty(obj@keywords) && !('keywords' %in% exclude))
         Rd[['keywords']] <- toRd(doc_get_keywords(obj))
     if (!rlang::is_empty(obj@aliases) && !('aliases' %in% exclude))
-        Rd[['aliases']]  <- Rd_tag(doc_get_aliases(obj), 'alias')
+        Rd[['aliases']]  <- cl(lapply(doc_get_aliases(obj), Rd_alias), 'Rd')
     if (!rlang::is_empty(obj@concepts) && !('concepts' %in% exclude))
         Rd[['concepts']] <- Rd_tag(doc_get_concepts(obj), 'concept')
+
     toRd(Rd, ...)
 })
 if(FALSE){#! @testing

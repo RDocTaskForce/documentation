@@ -83,6 +83,7 @@ set_option_documentation( "documentation::Rd::indent.with"
 #'
 Rd_canonize_text <- function(rd){
     assert_that(is(rd, 'Rd'))
+    if (length(rd)==0) return(rd)
     if (is.character(rd)) {
         if (!is_exactly(rd, 'Rd_TEXT')) return(rd)
         if (length(rd) > 1L) rd <- forward_attributes(collapse0(rd), rd)
@@ -105,7 +106,7 @@ Rd_canonize_text <- function(rd){
 
     }
     type <- unique(purrr::map_chr(rd, get_attr, 'Rd_tag', ''))
-    assert_that(length(type)==1L)
+    assert_that(length(type)<=1L)
 
     lines <- unlist(stringi::stri_split(collapse0(unlist(rd)), regex="(?<=\\n)"))
     lines <- lines[nchar(lines) > 0L]
@@ -126,6 +127,7 @@ Rd_canonize_text <- function(rd){
 }
 Rd_canonize_code <- function(rd){
     assert_that(is(rd, 'Rd'))
+    if (length(rd)==0) return(rd)
     if (is.character(rd)) {
         if (!is(rd, 'Rd_RCODE')) return(rd)
         if (length(rd) > 1L) rd <- forward_attributes(collapse0(rd), rd)
@@ -134,7 +136,7 @@ Rd_canonize_code <- function(rd){
     }
     assert_that(is.list(rd))
     if (!all_inherit(rd, c("Rd_RCODE", "NULL"))) {
-        return(forward_attributes( lapply(rd, Rd_canonize_text), rd))
+        return(forward_attributes( lapply(rd, Rd_canonize_code), rd))
     }
     type <- unique(purrr::map_chr(rd, get_attr, 'Rd_tag', ''))
     assert_that(length(type)==1L)
@@ -146,58 +148,6 @@ Rd_canonize_code <- function(rd){
                    , lapply(lines, Rd_text, type=type)
                    )
     return(forward_attributes(lines, rd))
-}
-Rd_canonize <- function(rd){Rd_canonize_code(Rd_canonize_text(rd))}
-if(FALSE){#@testing
-    rd <- Rd_text("a\nb\nc\n")
-    expect_is(rd, 'Rd_TEXT')
-    expect_true(is.character(rd))
-    expect_length(rd, 1)
-
-    val <- Rd_canonize_text(rd)
-    expect_is(rd, 'Rd')
-    expect_true(Rd_is_all_text(rd))
-
-    rd <- Rd_examples(Rd( .Rd.code.newline
-                        , Rd_code("x<- rnorm(100)\n")
-                        , Rd_code("plot(x)\n")))
-    expect_identical(Rd_canonize_text(rd), rd)
-    expect_identical(Rd_canonize_code(rd), rd)
-
-    Rd_canonize(Rd_canonize_text(rd))
-
-    expect_identical(Rd_canonize_code(Rd_examples(Rd_code("\nx<- rnorm(100)\nplot(x)\n"))), rd)
-
-    rd <- Rd(c( "use the \\backslash to escape."
-                 , "and '{}' to group."
-                 ))
-    val <- Rd_canonize_text(rd)
-    expect_is_exactly(val, 'Rd')
-    expect_is_exactly(val[[1]], 'Rd_TEXT')
-    expect_length(val[[1]], 1L)
-
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-    txt <- Rd_rm_srcref(txt)
-    expect_identical( Rd_canonize_code(rd <- txt[['\\examples']])
-                    , txt[['\\examples']]
-                    )
-
-    desc <- txt[['\\description']]
-    canonical <- Rd_canonize_text(desc)
-    expect_identical( as.character(desc)
-                    , as.character(canonical)
-                    )
-
-    expect_identical(Rd_canonize_text(txt), txt)
-    expect_identical(Rd_canonize_code(txt), txt)
-    expect_identical(Rd_canonize(txt), txt)
-
-    x <- Rd_text(c("test strings\n", "second line"))
-    val <- Rd_canonize(x)
-    expected <- Rd(Rd_text("test strings\n"), Rd_text("second line"))
-    expect_identical(val, expected)
-
-    expect_identical(Rd_canonize_text(.Rd.newline), .Rd.newline)
 }
 
 Rd_clean_indent <-
@@ -244,7 +194,7 @@ function( x, ...
     assert_that(is.list(x))
     if (is.list(x)) {
         if (!Rd_spans_multiple_lines(x)) return(x)
-        p2 <- lapply(Rd_split(x), function(x, ...){
+        p2 <- lapply(parts <- Rd_split(x), function(x, ...){
             if (is.character(x)) .Rd_indent(x, ...) else
             if (is(x, 'Rd_tag')){
                 if (Rd_spans_multiple_lines(x)) {
@@ -257,14 +207,14 @@ function( x, ...
             } else
             .Rd_indent(x)
         }, indent=indent, indent.with = indent.with)
-        return(forward_attributes(compact_Rd(p2), x))
-        # indents <- rep(indent.with, length(parts))
-        # if (length(parts[[1]])==1 && is.character(parts[[1]]) && parts[[1]] == '\n') {
-        #     indents[1] <- list(NULL)
-        # }
-        # val <- compact_Rd(undim(rbind(indents, p2)))
-        # val <- Rd_canonize(forward_attributes(val, x))
-        # return(val)
+        # return(forward_attributes(compact_Rd(p2), x))
+        indents <- rep(indent.with, length(parts))
+        if (length(parts[[1]])==1 && is.character(parts[[1]]) && parts[[1]] == '\n') {
+            indents[1] <- list(NULL)
+        }
+        val <- compact_Rd(undim(rbind(indents, p2)))
+        val <- Rd_canonize(forward_attributes(val, x))
+        return(val)
     } else
         doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
 }
@@ -449,6 +399,75 @@ if(FALSE){#@testing
                     , c("hello", "", "world")
                     )
 }
+
+Rd_canonize <- function(rd, ...){
+    if (is_exactly(rd, 'list'))
+        rd <- cl(rd, 'Rd')
+    else if(is.character(rd) && assert_that(is(rd, 'Rd')))
+        rd <- Rd(rd)
+    rd <- Rd_canonize_text(rd)
+    rd <- Rd_canonize_code(rd)
+    rd <- .Rd_strwrap(rd, ...)
+    rd <- .Rd_indent(rd, ...)
+    return(rd)
+}
+if(FALSE){#@testing
+    rd <- Rd_text("a\nb\nc\n")
+    expect_is(rd, 'Rd_TEXT')
+    expect_true(is.character(rd))
+    expect_length(rd, 1)
+
+    val <- Rd_canonize_text(rd)
+    expect_is(rd, 'Rd')
+    expect_true(Rd_is_all_text(rd))
+
+    rd <- Rd_examples(Rd( .Rd.code.newline
+                        , Rd_code("x<- rnorm(100)\n")
+                        , Rd_code("plot(x)\n")))
+    expect_identical(Rd_canonize_text(rd), rd)
+    expect_identical(Rd_canonize_code(rd), rd)
+
+    Rd_canonize(Rd_canonize_text(rd))
+
+    expect_identical(Rd_canonize_code(Rd_examples(Rd_code("\nx<- rnorm(100)\nplot(x)\n"))), rd)
+
+    rd <- Rd(c( "use the \\backslash to escape."
+                 , "and '{}' to group."
+                 ))
+    val <- Rd_canonize_text(rd)
+    expect_is_exactly(val, 'Rd')
+    expect_is_exactly(val[[1]], 'Rd_TEXT')
+    expect_length(val[[1]], 1L)
+
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    txt <- Rd_rm_srcref(txt)
+    expect_identical( Rd_canonize_code(rd <- txt[['\\examples']])
+                    , txt[['\\examples']]
+                    )
+
+    desc <- txt[['\\description']]
+    canonical <- Rd_canonize_text(desc)
+    expect_identical( as.character(desc)
+                    , as.character(canonical)
+                    )
+
+    expect_identical(Rd_canonize_text(txt), txt)
+    expect_identical(Rd_canonize_code(txt), txt)
+    expect_identical(Rd_canonize(txt), txt)
+
+    x <- Rd_text(c("test strings\n", "second line"))
+    val <- Rd_canonize(x)
+    expected <- Rd(Rd_text("test strings\n"), Rd_text("second line"))
+    expect_identical(val, expected)
+
+    expect_identical(Rd_canonize_text(.Rd.newline), .Rd.newline)
+
+
+    x <- c( Rd_tag("item"), Rd_text(space(1)), Rd_text("content"))
+    expect_identical(Rd_canonize_text(x)[[1]], Rd_tag('item'))
+}
+
+
 
 
 # S3 Methods ----------------------------------------------------------

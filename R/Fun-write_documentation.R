@@ -85,7 +85,7 @@ if(FALSE){
               , arguments = ArgumentList()
               )
 
-    Rd_tag(toRd(doc@description), 'description')
+    Rd_description(toRd(doc@description))
 
     write_documentation(doc, fmt='Rd', file = textConnection('test_documentation', 'w'))
 

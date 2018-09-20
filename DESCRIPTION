@@ -28,6 +28,7 @@ Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
+    'util-testing.R'
     'util-generics.R'
     'util-postlogic.R'
     'util-comma_list.R'
@@ -48,6 +49,7 @@ Collate:
     'Class-example.R'
     'Class-FormattedText.R'
     'Class-Documentation.R'
+    'Class-Rd.R'
     'Class-usage.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
@@ -56,6 +58,7 @@ Collate:
     'Class-data.frame-Documentation.R'
     'Class-option-Documentation.R'
     'Classes.R'
+    'Conversion-Rd.R'
     'Conversion-roxy_block.R'
     'Fun-documentation.R'
     'Fun-accessors.R'
@@ -70,6 +73,7 @@ Collate:
     'Fun-toRd.R'
     'Fun-format.R'
     'Fun-toRd-Documentation.R'
+    'Fun-toRd-SectionList.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-example.R'
     'Fun-toRd-function.R'

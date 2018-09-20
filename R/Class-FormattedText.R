@@ -49,7 +49,6 @@ if(FALSE){#@testing FormattedText/Rd
     expect_equal(val, Rd('1'))
 }
 
-
 #' Plain Text
 #'
 #' Plain text can be used for documentation when no special formatting is needed.
@@ -103,3 +102,8 @@ if(FALSE){
     expect_is(y, 'shiny.tag')
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 }
+
+setVector( element = "FormattedText"
+         , Class   = "SectionList"
+         )
+

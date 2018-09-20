@@ -92,10 +92,15 @@ test_that('Rd_spans_multiple_lines', {#@testing
     expect_true(Rd_spans_multiple_lines(Rd_text("hello\nworld\n")))
 
     x <- txt[[38]][2]
-    expect_true(Rd_spans_multiple_lines(x, TRUE))
-    expect_false(Rd_spans_multiple_lines(x))
+    expect_true(Rd_spans_multiple_lines(x))
+    expect_false(Rd_spans_multiple_lines(unclass(x)))
+
+    x <- c(.Rd.code.newline
+          , Rd_code('value \\%if\\% proposition')
+          , .Rd.code.newline)
+    expect_true(Rd_spans_multiple_lines(x))
 })
-#line 222 "R/Class-Rd.R"
+#line 227 "R/Class-Rd.R"
 test_that('Rd_ends_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_true(Rd_ends_with_newline(txt))
@@ -109,14 +114,14 @@ test_that('Rd_ends_with_newline', {#@testing
     expect_true(Rd_ends_with_newline(x))
     expect_false(Rd_ends_with_newline(x, TRUE))
 })
-#line 239 "R/Class-Rd.R"
+#line 244 "R/Class-Rd.R"
 test_that('Rd_starts_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_false(Rd_starts_with_newline(txt))
     expect_true(Rd_starts_with_newline(txt[['\\arguments']]))
     expect_false(Rd_starts_with_newline(txt[['\\arguments']], TRUE))
 })
-#line 261 "R/Class-Rd.R"
+#line 266 "R/Class-Rd.R"
 test_that('Rd_split', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
 
@@ -133,7 +138,7 @@ test_that('Rd_split', {#@testing
     expect_identical(y[[1]], x[[1]])
     expect_length(y, 29L)
 })
-#line 299 "R/Class-Rd.R"
+#line 304 "R/Class-Rd.R"
 test_that('compact_Rd', {#@testing
     l <- s(list( .Rd.newline
                , Rd_text('text')
@@ -155,7 +160,7 @@ test_that('compact_Rd', {#@testing
     expect_is(m[[4L]], 'Rd_tag')
     expect_is(m[[5L]], 'Rd_newline')
 })
-#line 344 "R/Class-Rd.R"
+#line 349 "R/Class-Rd.R"
 test_that('Rd', {#@testing
     a <- "test"
     b <- Rd(a)
@@ -189,7 +194,7 @@ test_that('Rd', {#@testing
     expect_is_exactly(x, 'Rd')
     expect_is_exactly(x[[1]], 'Rd_TEXT')
 })
-#line 377 "R/Class-Rd.R"
+#line 382 "R/Class-Rd.R"
 test_that('Class-Rd', {#@testing Class-Rd
     x <- cl('text', 'Rd')
     expect_is(x, 'Rd')
@@ -198,7 +203,7 @@ test_that('Class-Rd', {#@testing Class-Rd
     expect_is(txt, 'Rd')
     expect_true(validObject(txt))
 })
-#line 446 "R/Class-Rd.R"
+#line 451 "R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'documentation')
     txt <- tools::parse_Rd(test.file)
@@ -218,11 +223,11 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
 
     expect_is_exactly(txt[['\\arguments']][[3L]], 'Rd_tag')
     expect_is_exactly(txt[['\\arguments']][[3L]][[1L]], 'Rd')
-    
+
     expect_is_exactly(txt[[2]], "Rd_newline")
     expect_is_exactly(txt[[c(48, 11)]], "Rd_TEXT")
 })
-#line 482 "R/Class-Rd.R"
+#line 487 "R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_valid(txt)
@@ -269,7 +274,7 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
                     , c('Rd_newline', 'Rd_TEXT', 'Rd_tag', 'Rd')
                     )
 })
-#line 533 "R/Class-Rd.R"
+#line 538 "R/Class-Rd.R"
 test_that('`[.Rd_tag`', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
 
@@ -280,7 +285,7 @@ test_that('`[.Rd_tag`', {#@testing
     expect_is(y, 'Rd_tag')
     expect_identical(attr(y, 'Rd_tag'), '\\arguments')
 })
-#line 633 "R/Class-Rd.R"
+#line 638 "R/Class-Rd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -312,7 +317,7 @@ test_that('Rd_tag', {#! @testing
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
 })
-#line 702 "R/Class-Rd.R"
+#line 707 "R/Class-Rd.R"
 test_that('Rd_* tags', {#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)

@@ -614,7 +614,7 @@ all_are_tag <- function(x, tag=NULL){
 Rd_tag  <-
 function( tag
         , ...
-        , content=list(...)
+        , content=.Rd(...)
         , opt = Rd()
         , wrap.lines     = default(wrap.lines    , FALSE)
         , wrap.at        = default(wrap.at       , 72L  )

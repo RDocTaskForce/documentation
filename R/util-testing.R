@@ -52,7 +52,7 @@ all_inherit <- function(lst, what, label=NULL){
           , dQuote(bad.class)
           )
           }
-    return(s(FALSE, msg))
+    return(s(FALSE, msg, bad.elements = which(!.)))
 }
 if(FALSE){#@ testing
     l <- list( 'a', 'b', 'c'
@@ -152,4 +152,47 @@ if(FALSE){#@testing
                       dQuote("numeric") %<<<% '.')
     expect_true(all_are(list(1L, 2L), 'integer'))
 }
+
+
+is_exactly <- function(x, what){any(inherits(x, what=what, which=TRUE)==1)}
+if(FALSE){
+    x <- Rd_text("text")
+    expect_true(is_exactly(x, 'Rd_TEXT'))
+    expect_true(is_exactly(x, c('Rd_RCODE', 'Rd_TEXT')))
+    expect_false(is_exactly(Rd(x), c('Rd_RCODE', 'Rd_TEXT')))
+
+    docs <- function_documentation()
+
+    expect_true(is_exactly(docs, 'function-Documentation'))
+    expect_false(is_exactly(docs, 'Documentation'))
+}
+
+expect_is_exactly <-
+function (object, class, info = NULL, label = NULL){
+    stopifnot(is.character(class))
+    act <- testthat::quasi_label(rlang::enquo(object), label)
+    act$class <- collapse(class(object), "/")
+    exp_lab <- comma_list(class, sep2 = ' or ', sep.last = ', or a')
+    testthat::expect( is_exactly(act$val, class)
+                    , sprintf("%s is a %s; should be exactly a `%s`."
+                             , act$lab, act$class, exp_lab)
+                    , info = info)
+    invisible(act$val)
+}
+if(FALSE){#@testing
+    x <- list(1:3)
+
+    expect_identical(expect_is_exactly(x, 'list'), x)
+
+    class(x) <- c('class', 'super1', 'super2')
+
+    expect_is_exactly(x, 'class')
+
+    expect_is(x, 'super1')
+    expect_error( expect_is_exactly(x, 'super1')
+                , "`x` is a class/super1/super2; should be exactly a `super1`."
+                )
+}
+
+
 

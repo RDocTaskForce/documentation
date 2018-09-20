@@ -88,3 +88,30 @@ if(FALSE){#@testing
     expect_null     (get_attr(s(list(), test='hello'), 'test2'))
     expect_identical(get_attr(s(list(), test='hello'), 'test3', 'world'), 'world')
 }
+
+
+forward_attributes <- function(value, object){
+    mostattributes(value) <- attributes(object)
+    return(value)
+}
+if(FALSE){
+    a <- s( list(Rd_symb("some"))
+          , Rd_tag="\\keyword"
+          , class=c("Rd_tag", 'Rd'))
+    b <- forward_attributes(list, a)
+    expect_identical(attributes(a), attributes(b))
+
+    a <- s( matrix(1:6, 2, 3)
+          , class = 'rectangle'
+          , another='shape'
+          )
+    b <- forward_attributes(list(), a)
+    expect_true('dim' %in% names(attributes(a)))
+    expect_false('dim' %in% names(attributes(b)))
+    expect_identical( attributes(a)[names(attributes(b))]
+                    , attributes(b)
+                    )
+}
+
+
+

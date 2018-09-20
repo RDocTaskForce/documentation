@@ -394,7 +394,7 @@ function( pkg = '.'     #< package to extract tests for.
     }
     if (!is.null(filter)) {
         assert_that(is.string(filter))
-        which.files <- grepl(filter, basename(files))
+        which.files <- grepl(filter, sub("\\.[rR]$", "", basename(files)))
         if (!any(which.files))
             doc_error("Filtered to no files to extract from.")
         files <- files[which.files]
@@ -532,7 +532,7 @@ test <- function(...){
         pkg <- ..1
     } else doc_error("too many arguments")
     tests <- extract_tests(pkg, filter=filter)
-    doc_message(length(unlist(tests))%<<<%' tests extracted.')
+    doc_message(length(unlist(tests))%<<<%' test blocks extracted.\n')
     if (requireNamespace('devtools'))
         devtools::test(pkg=pkg, filter=filter)
     else

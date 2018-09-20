@@ -12,7 +12,7 @@
 #'   \item \code{\%<<\%} is an infix replacement for \code{\link{paste}}
 #'   \item \code{\%<<<\%} is paste with no space and no break."
 #' }
-#' @aliases %\\%
+#' @aliases %\%
 #' @export %\% %<<% %<<<%
 `%<<%` <- function(lhs, rhs){
     if (is.null(rhs)) return(collapse(lhs))

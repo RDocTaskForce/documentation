@@ -31,7 +31,7 @@ test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     attr(class(val), 'package') <- NULL
     expect_equal(val, Rd('1'))
 })
-#line 76 "R/Class-FormattedText.R"
+#line 75 "R/Class-FormattedText.R"
 test_that('FormattedText/character', {#@testing FormattedText/character
     x <- "just plain text"
     obj <- FT_character(x)

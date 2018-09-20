@@ -12,7 +12,7 @@ test_that('expect_valid', {#@testing
     good <- s(list(), class='Rd')
     expect_valid(good)
 })
-#line 101 "R/util-testing.R"
+#line 134 "R/util-testing.R"
 test_that('all_are', {#@testing
     l <- list( 'a', 'b', 'c'
              , 1, 2)

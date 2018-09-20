@@ -45,3 +45,7 @@ if(FALSE){#!@testing
     expect_identical(flatten_lines(l, FALSE), unlist(l))
     expect_true( sum(flatten_lines(l)=='') == length(l) -1L)
 }
+
+
+undim <- function(x)s(x, dim=NULL, dimnames=NULL)
+

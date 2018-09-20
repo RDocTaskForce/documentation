@@ -22,8 +22,8 @@ setMethod("doc_get_aliases", 'option-Documentation', function(doc){
 })
 
 setMethod("toRd", 'option-Documentation', function(obj){
-    c( name  = Rd_tag(doc_get_name(obj), 'name')
-     , title = Rd_tag(doc_get_title(obj), 'title')
+    c( name  = Rd_name(doc_get_name(obj))
+     , title = Rd_title(doc_get_title(obj))
      , description =  Rd_tag(doc_get_description(obj), 'description')
      , aliases = purrr::map_chr(doc_get_aliases(obj), Rd_tag, 'alias')
      )

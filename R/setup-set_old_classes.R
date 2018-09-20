@@ -9,13 +9,6 @@ setOldClass('roxy_block')
 
 # from htmltools
 setOldClass(c("shiny.tag", 'list'))
+setOldClass(c('Rd', 'list'))
+setOldClass(c('Rd_tag', 'Rd'))
 
-setOldClass(c('Rd', 'character'))
-if(FALSE){
-    x <- cl('text', 'Rd')
-    expect_is(x, 'Rd')
-    
-    
-    
-    
-}

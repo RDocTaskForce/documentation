@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Conversion-roxy_block.R`')
-#line 68 "R/Conversion-roxy_block.R"
+#line 69 "R/Conversion-roxy_block.R"
 test_that('setAs,roxy_block,function-Documentation', {#@testing setAs,roxy_block,function-Documentation
     test.file <- system.file("examples", "example_function1.R", package='documentation')
 
@@ -21,7 +21,7 @@ test_that('setAs,roxy_block,function-Documentation', {#@testing setAs,roxy_block
     expect_null(docs@arguments$x)
     expect_equal(docs@arguments$y, arg(y, "explicit documentation for y"))
 })
-#line 86 "R/Conversion-roxy_block.R"
+#line 87 "R/Conversion-roxy_block.R"
 test_that('as(roxy_block, "function-Documentation")', {#@testing
     text <- "
     #' Testing name mismatch
