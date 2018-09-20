@@ -639,9 +639,9 @@ if(FALSE){#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
     expect_error(Rd_tag(1, 'test'), "tag is not a string")
-    expect_is(Rd_tag('name', 'my name'), "Rd_tag")
-    expect_is(Rd_tag('name', 'my name'), "Rd")
-    expect_identical( Rd_tag('name', 'my name')
+    expect_is(Rd_tag('name', Rd_text('my name')), "Rd_tag")
+    expect_is(Rd_tag('name', Rd_text('my name')), "Rd")
+    expect_identical( Rd_tag('name', Rd_text('my name'))
                     , s( list(Rd_text("my name"))
                        , Rd_tag = "\\name"
                        , class  = c('Rd_tag', 'Rd')
@@ -658,11 +658,11 @@ if(FALSE){#! @testing
     x <- Rd_tag('item', Rd(Rd_text('arg')), Rd(Rd_text("an agrument")))
     expect_length(x, 2L)
 
-    expect_equal( as.character(x <- Rd_tag('name', c('line1', 'line2')))
+    expect_equal( as.character(x <- Rd_tag('name', Rd_text(c('line1', 'line2'))))
                 , c('\\name', '{', 'line1', 'line2', '}')
                 )
 
-    val <- Rd_tag('link', 'dest', opt=Rd_text('pkg'))
+    val <- Rd_tag('link', Rd_text('dest'), opt=Rd_text('pkg'))
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
 }
