@@ -149,6 +149,26 @@ Rd_canonize_code <- function(rd){
                    )
     return(forward_attributes(lines, rd))
 }
+if(FALSE){#@testing
+    x <- Rd_usage( .Rd.code.newline
+                 , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
+                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                 )
+    y <- x[2:3]
+
+    expect_identical( Rd_canonize_code(y)
+                    , Rd_usage(Rd_code("value \\%if\\% proposition\n"))
+                    )
+    expect_identical(Rd_canonize_text(y), y)
+
+
+    expect_identical( val<-Rd_canonize_code(x)
+                    , Rd_usage( .Rd.code.newline
+                              , Rd_code("value \\%if\\% proposition\n")
+                              , Rd_code("value \\%if\\% proposition \\%otherwise\\% alternate\n")
+                              ) )
+
+}
 
 Rd_clean_indent <-
 function(indent.with){
@@ -180,6 +200,7 @@ function(indent.with){
 function( x, ...
         , indent      = default_("indent"     , FALSE, fun='Rd')
         , indent.with = default_("indent.with", .Rd.default.indent, fun='Rd')
+        , indent.first = !is(x, 'Rd_tag')
         ){
     assert_that(is(x, 'Rd'), is.flag(indent))
     if (!indent) return(x)
@@ -192,31 +213,37 @@ function( x, ...
             doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
     }
     assert_that(is.list(x))
-    if (is.list(x)) {
-        if (!Rd_spans_multiple_lines(x)) return(x)
-        p2 <- lapply(parts <- Rd_split(x), function(x, ...){
-            if (is.character(x)) .Rd_indent(x, ...) else
-            if (is(x, 'Rd_tag')){
-                if (Rd_spans_multiple_lines(x)) {
-                    val <- .Rd_indent(x, ...)
-                    if (!is(val[[length(val)]], 'Rd_indent'))
-                        val <- forward_attributes(c(unclass(val), indent.with), x)
-                } else
-                    val <- x
-                Rd(indent.with, val)
-            } else
-            .Rd_indent(x)
-        }, indent=indent, indent.with = indent.with)
-        # return(forward_attributes(compact_Rd(p2), x))
-        indents <- rep(indent.with, length(parts))
-        if (length(parts[[1]])==1 && is.character(parts[[1]]) && parts[[1]] == '\n') {
-            indents[1] <- list(NULL)
-        }
-        val <- compact_Rd(undim(rbind(indents, p2)))
-        val <- Rd_canonize(forward_attributes(val, x))
-        return(val)
-    } else
-        doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
+    if (!Rd_spans_multiple_lines(x)) return(x)
+    parts <- Rd_split(Rd_untag(x))
+    if (length(parts) == 1L){
+        parts <- lapply( if (indent.first) Rd_untag(x)
+                         else tail(Rd_untag(x), -1L)
+                       , .Rd_indent
+                       , indent=indent
+                       , indent.with=indent.with
+                       , indent.first = indent.first && !is(x, 'Rd_tag'))
+        if (!indent.first)
+            parts <- c(unclass(x)[1], parts)
+        return(forward_attributes(parts, x))
+    }
+    for (i in seq_along(parts)) if (Rd_spans_multiple_lines(parts[[i]]))
+        parts[[i]] <- .Rd_indent(parts[[i]]
+                                , indent=indent
+                                , indent.with=indent.with
+                                , indent.first = indent.first && !is(x, 'Rd_tag'))
+    is.nl <- purrr::map_lgl(parts, is_Rd_newline)
+    is.code <- purrr::map_lgl(parts, is, 'Rd_RCODE')
+    indent.code <- .Rd(cl(Rd_code(as.character(indent.with)), 'Rd_indent'))
+    indents <- ifelse(is.nl, Rd(), ifelse(is.code, indent.code, indent.with))
+    if (!indent.first)
+        indents[[1]] <- Rd()
+    val <- rbind(indents, parts)
+    val <- purrr::compact(undim(val))
+    val <- compact_Rd(cl(val, 'Rd'))
+    val <- forward_attributes(val, x)
+    val <- Rd_canonize_text(val)
+    val <- Rd_canonize_code(val)
+    return(val)
 }
 if(FALSE){#@testing
     x <- .Rd_strwrap( collapse(stringi::stri_rand_lipsum(3), '\n\n'), wrap.lines = TRUE)
@@ -224,6 +251,7 @@ if(FALSE){#@testing
     expect_true(length(x)> 5)
 
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    txt <- Rd_rm_srcref(txt)
     x <- txt[['\\examples']]
 
     expect_identical(.Rd_indent(x, indent=FALSE), x)
@@ -237,15 +265,37 @@ if(FALSE){#@testing
                     )
     expect_equal(length(val), length(x))
 
+    x <- txt[['\\arguments']][[9]]
+    val <- .Rd_indent(x, indent=TRUE, indent.with='  ')
+    exp <- Rd_item('n', Rd( x[[2]][1:3]
+                          , Rd_text(paste0('  ', x[[2]][[4]]))
+                          ))
+    expect_identical(val, exp)
+
+    x <- Rd_untag(txt[['\\arguments']][8:10])
+    val <- .Rd_indent(x, indent=TRUE, indent.with='  ', indent.first=FALSE)
+    expect_equal(collapse0(val)
+                , "  \\item{n}{number of observations. If \\code{length(n) > 1}, the length" %\%
+                  "      is taken to be the number required.}\n" )
+
     x <- txt[['\\arguments']]
     val <- .Rd_indent(x, indent=TRUE, indent.with='  ')
-
-    c(x, .Rd.default.indent) %>% length
-
-    expect_error(.Rd_indent(c("test strings\n", "second line")))
-
+    expect_equal( collapse0(val)
+                , "\\arguments{" %\%
+                  "    \\item{x, q}{vector of quantiles.}" %\%
+                  "    \\item{p}{vector of probabilities.}" %\%
+                  "    \\item{n}{number of observations. If \\code{length(n) > 1}, the length" %\%
+                  "      is taken to be the number required.}" %\%
+                  "    \\item{mean}{vector of means.}" %\%
+                  "    \\item{sd}{vector of standard deviations.}" %\%
+                  "    \\item{log, log.p}{logical; if TRUE, probabilities p are given as log(p).}" %\%
+                  "    \\item{lower.tail}{logical; if TRUE (default), probabilities are" %\%
+                  "      \\eqn{P[X \\le x]} otherwise, \\eqn{P[X > x]}.}" %\%
+                  "}"
+                )
+}
+if(FALSE){#@testing .Rd_indent specification by options
     x <- Rd_canonize(Rd(Rd_text(c("test strings\n", "second line"))))
-
     withr::with_options(list( "documentation::Rd::indent" = TRUE
                             , "documentation::Rd::indent.with" = NULL), {
         expect_identical( .Rd_indent(x)
@@ -280,11 +330,18 @@ if(FALSE){#@testing
     })
 }
 if(FALSE){#@testing
-    x <- Rd(Rd_usage( .Rd.code.newline
-                    , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                    , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
-                    ))
-    .Rd_indent(x=x, indent=indent, indent.with = '  ')
+    expect_error(.Rd_indent(c('test strings')))
+
+    x <- Rd_usage( .Rd.code.newline
+                 , Rd_code('value \\%if\\% proposition\n')
+                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                 )
+    val<- .Rd_indent(x=x, indent=TRUE, indent.with = '  ')
+    expect_identical( val
+                    , Rd_usage( .Rd.code.newline
+                              , Rd_code('  value \\%if\\% proposition\n')
+                              , Rd_code('  value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                              ))
 }
 
 
@@ -599,8 +656,8 @@ if(FALSE){#! @testing
 
 ### toRd,Documentation-Keyword #####
 setMethod('toRd', 'Documentation-Keyword', function( obj, ...){
-    if(length(obj) == 1 ) Rd_tag("keyword", obj@.Data)
-    cl(lapply(obj@.Data, Rd_tag, tag="keyword"), 'Rd')
+    if(length(obj) == 1 ) Rd_keyword(obj@.Data)
+    cl(lapply(obj@.Data, Rd_keyword), 'Rd')
 })
 if(FALSE){#! @testing
     obj <- new('Documentation-Keyword', 'utilities')

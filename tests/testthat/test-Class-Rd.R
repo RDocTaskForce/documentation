@@ -285,7 +285,17 @@ test_that('`[.Rd_tag`', {#@testing
     expect_is(y, 'Rd_tag')
     expect_identical(attr(y, 'Rd_tag'), '\\arguments')
 })
-#line 638 "R/Class-Rd.R"
+#line 618 "R/Class-Rd.R"
+test_that('is_Rd_newline', {#@testing
+    expect_true(is_Rd_newline(.Rd.newline))
+    expect_true(is_Rd_newline(.Rd.newline[[1]]))
+    expect_false(is_Rd_newline(.Rd.newline[[1]][[1]]))
+    expect_true(is_Rd_newline(.Rd.code.newline))
+    expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
+    expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
+    expect_false(is_Rd_newline(.Rd(.Rd.newline)))
+})
+#line 652 "R/Class-Rd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -317,7 +327,7 @@ test_that('Rd_tag', {#! @testing
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
 })
-#line 707 "R/Class-Rd.R"
+#line 724 "R/Class-Rd.R"
 test_that('Rd_* tags', {#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)

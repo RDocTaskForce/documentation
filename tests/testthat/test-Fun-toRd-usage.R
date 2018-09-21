@@ -21,10 +21,7 @@ test_that('toRd,usage-method', {#@testing
                                  , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
                                  )))
 
-    .Rd_indent(rd, indent=TRUE, indent.with=.Rd.default.indent)
-
-    rd <- toRd(obj, indent=TRUE, indent.with=.Rd.default.indent)
-    expect_identical( rd
+    expect_identical( toRd(obj, indent=TRUE, indent.with=.Rd.default.indent)
                     , Rd(Rd_usage( .Rd.code.newline
                                  , .Rd.default.indent, Rd_code('value \\%if\\% proposition'), .Rd.code.newline
                                  , .Rd.default.indent, Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline

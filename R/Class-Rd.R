@@ -611,6 +611,20 @@ all_are_tag <- function(x, tag=NULL){
     all(purrr::map_lgl(x, is_Rd_tag, tag=tag))
 }
 
+is_Rd_newline <- function(x){
+    is(x, 'Rd_newline') ||
+    ( is_exactly(x, 'Rd') && length(x) == 1L && is(x[[1L]], 'Rd_newline'))
+}
+if(FALSE){#@testing
+    expect_true(is_Rd_newline(.Rd.newline))
+    expect_true(is_Rd_newline(.Rd.newline[[1]]))
+    expect_false(is_Rd_newline(.Rd.newline[[1]][[1]]))
+    expect_true(is_Rd_newline(.Rd.code.newline))
+    expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
+    expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
+    expect_false(is_Rd_newline(.Rd(.Rd.newline)))
+}
+
 Rd_tag  <-
 function( tag
         , ...
@@ -667,7 +681,6 @@ if(FALSE){#! @testing
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
 }
 
-
 Rd_alias <- function(alias){Rd_tag('alias', Rd_symb(alias)) %if% assert_that(length(alias)==1)}
 Rd_author <- function(author){
     if (is(author, 'person'))
@@ -695,7 +708,11 @@ Rd_description <- function(...) {Rd_tag("description", content=compact_Rd(Rd(...
 Rd_examples <- function(..., content=compact_Rd(Rd(...)), opt=NULL) {
     Rd_tag('examples', content=content, opt=opt, wrap.lines=FALSE)
 }
-Rd_item <- function(arg, description) {Rd_tag("item", Rd(arg), Rd(description))}
+Rd_item <- function(arg, description) {
+    s( list(Rd(arg), Rd(description))
+     , Rd_tag = "\\item"
+     , class = c('Rd_tag', 'Rd'))
+}
 Rd_keyword <- function(name){Rd_tag('keyword', Rd_text(name))}
 Rd_name <- function(name){Rd_tag('name', Rd_symb(name))}
 Rd_title <- function(title){Rd_tag('title', Rd_text(title))}
@@ -776,4 +793,6 @@ Rd_unclass <- function(rd){
         rd[[i]] <- Recall(rd[[i]])
     return(rd)
 }
+Rd_untag <- function(x)s(x, Rd_tag=NULL, class='Rd')
+get_Rd_tag <- function(x)get_attr(x, 'Rd_tag')
 #nocov end
