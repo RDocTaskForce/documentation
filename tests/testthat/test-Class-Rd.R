@@ -2,208 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Rd.R`')
-#line 86 "R/Class-Rd.R"
-test_that('Rd_text', {#@testing
-    val <- Rd_text('testing')
-    expect_is(val, 'Rd')
-    expect_is(val, 'Rd_tag')
-    expect_is(val, 'Rd_TEXT')
-
-    expect_true(is.character(val))
-    expect_false(is.list(val))
-
-    val <- Rd_text('some(code)', 'RCODE')
-    expect_is(val, 'Rd_RCODE')
-    val <- Rd_text('some(code)', 'R')
-    expect_is(val, 'Rd_RCODE')
-
-    x <- Rd_text(collapse(stringi::stri_rand_lipsum(3), '\n\n'))
-    expect_is(x, 'Rd')
-    expect_is(x, 'Rd_tag')
-    expect_is(x, 'Rd_TEXT')
-
-    x <- Rd_text(c( 'hello', '\n', ' big', '\n', '  wide', '\n', '   world'))
-    expect_is(x, 'Rd')
-    expect_is(x, 'Rd_TEXT')
-
-    expect_length(x, 7L)
-    # expect_all_inherit(x[c(3,6,9,12)], 'Rd_newline')
-    # expect_all_inherit(x[c(4,7,10)], 'Rd_indent')
-    # expect_all_inherit(x[-1], c('Rd_TEXT', 'Rd_newline'))
-
-    x <- Rd_text("     hello world")
-    expect_is(x, 'Rd')
-    expect_is(x, 'Rd_TEXT')
-    expect_length(x, 1L)
-    # expect_is(x[[1]], 'Rd_indent')
-    # expect_is(x[[2]], 'Rd_TEXT')
-    # expect_is(x[[3]], 'Rd_newline')
-})
-#line 137 "R/Class-Rd.R"
-test_that('Rd_code, Rd_symb, and Rd_comment', {#@testing Rd_code, Rd_symb, and Rd_comment
-    expect_error(Rd_comment("testing"))
-    expect_is(Rd_comment("% comment"), "Rd_COMMENT")
-    expect_equal(attr(Rd_comment("% comment"), 'Rd_tag'), "COMMENT")
-    expect_is(Rd_code("some(code)"), "Rd_RCODE")
-    expect_equal(attr(Rd_code("some(code)"), 'Rd_tag'), "RCODE")
-    expect_is(Rd_symb("name"), "Rd_VERB")
-    expect_equal(attr(Rd_symb("name"), 'Rd_tag'), "VERB")
-
-    a <- Rd_code("require(graphics)\n")
-    expect_is_exactly(a, 'Rd_RCODE')
-    expect_length(a, 1L)
-})
-#line 174 "R/Class-Rd.R"
-test_that('Rd_is_all_text', {#@testing
-    x <- c("Lorem ipsum", stringi::stri_rand_lipsum(3, start_lipsum = FALSE))
-    x <- .Rd_strwrap(collapse(x, '\n\n'), wrap.lines = TRUE, wrap.at = 50)
-    expect_is(x, "Rd")
-    expect_is_not(x, "Rd_TEXT")
-
-    expect_true(Rd_is_all_text(x))
-    expect_true(Rd_is_all_text(x[[1]]))
-
-    y <- s(list(x), Rd_tag='test', class=c('Rd_tag', 'Rd'))
-
-    expect_false(Rd_is_all_text(y))
-    expect_identical( validate_that(Rd_is_all_text(y))
-                    , "`y` has a bad element at position 1 which is not a `TEXT`" %<<%
-                      "type for Rd. It is a" %<<%
-                      dQuote('Rd')
-                    )
-    y <- s(list( Rd_code('some(code)')
-               , s( list(Rd_symb("some"))
-                  , Rd_tag="\\keyword"
-                  , class=c("Rd_tag", 'Rd'))
-               ), class='Rd')
-    expect_identical( validate_that(Rd_is_all_text(y))
-                    , "`y` has bad elements at positions 1 and 2 which are not a `TEXT`" %<<%
-                      "type for Rd"
-                    )
-})
-#line 205 "R/Class-Rd.R"
-test_that('Rd_spans_multiple_lines', {#@testing
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-    expect_true(Rd_spans_multiple_lines(txt))
-    expect_true(Rd_spans_multiple_lines(txt[['\\arguments']]))
-    expect_false(Rd_spans_multiple_lines(txt[['\\arguments']][[3L]]))
-
-    expect_false(Rd_spans_multiple_lines(Rd_text("hello world\n")))
-    expect_true(Rd_spans_multiple_lines(Rd_text("hello\nworld\n")))
-
-    x <- txt[[38]][2]
-    expect_true(Rd_spans_multiple_lines(x))
-    expect_false(Rd_spans_multiple_lines(unclass(x)))
-
-    x <- c(.Rd.code.newline
-          , Rd_code('value \\%if\\% proposition')
-          , .Rd.code.newline)
-    expect_true(Rd_spans_multiple_lines(x))
-})
-#line 227 "R/Class-Rd.R"
-test_that('Rd_ends_with_newline', {#@testing
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-    expect_true(Rd_ends_with_newline(txt))
-
-    # ends.with.newline <- purrr::map_lgl(txt, Rd_ends_with_newline)
-    # spans.multiple.lines <- purrr::map_lgl(txt, Rd_spans_multiple_lines)
-    # expect_false(any(ends.with.newline & !spans.multiple.lines))
-
-    x <- txt[[38]]
-
-    expect_true(Rd_ends_with_newline(x))
-    expect_false(Rd_ends_with_newline(x, TRUE))
-})
-#line 244 "R/Class-Rd.R"
-test_that('Rd_starts_with_newline', {#@testing
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-    expect_false(Rd_starts_with_newline(txt))
-    expect_true(Rd_starts_with_newline(txt[['\\arguments']]))
-    expect_false(Rd_starts_with_newline(txt[['\\arguments']], TRUE))
-})
-#line 266 "R/Class-Rd.R"
-test_that('Rd_split', {#@testing
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-
-    val <- Rd_split(txt)
-    expect_is(val, 'list')
-    expect_is_not(val, 'Rd')
-
-    expect_all_inherit(val, 'Rd')
-    expect_false(all_are(val, 'Rd'))
-
-
-    x <- txt['\\examples'][[1]]
-    y <- Rd_split(x)
-    expect_identical(y[[1]], x[[1]])
-    expect_length(y, 29L)
-})
-#line 304 "R/Class-Rd.R"
-test_that('compact_Rd', {#@testing
-    l <- s(list( .Rd.newline
-               , Rd_text('text')
-               , .Rd.newline
-               , s(list(s(list(Rd_symb('symb')), Rd_tag='tag'
-                         , class=c('Rd_tag', 'Rd'))
-                       , .Rd.newline
-                       ), class='Rd')
-               ), class='Rd')
-    m <-  compact_Rd(l, recurse=TRUE)
-
-    expect_length(l, 4L)
-    expect_length(m, 5L)
-
-    expect_is(m, 'Rd')
-    expect_is(m[[1L]], 'Rd_newline')
-    expect_is(m[[2L]], 'Rd_TEXT')
-    expect_is(m[[3L]], 'Rd_newline')
-    expect_is(m[[4L]], 'Rd_tag')
-    expect_is(m[[5L]], 'Rd_newline')
-})
-#line 349 "R/Class-Rd.R"
-test_that('Rd', {#@testing
-    a <- "test"
-    b <- Rd(a)
-    expect_is_exactly(b, 'Rd')
-    expect_is(b[[1]], 'Rd_TEXT')
-
-    a <- stringi::stri_rand_lipsum(3)
-    b <- Rd(collapse(a, '\n\n'), wrap.lines=TRUE)
-    expect_is_exactly(b, 'Rd')
-    expect_identical(mode(b), 'list')
-    expect_true(length(b) > 5)
-
-    c <- Rd(a, wrap.lines=FALSE)
-    expect_is_exactly(c, 'Rd')
-    d <- Rd(c, wrap.lines=TRUE)
-    expect_is_exactly(d, 'Rd')
-    expect_identical(c, d)
-
-    expect_error(Rd(NULL))
-
-    expect_is(Rd(), 'Rd')
-    expect_length(Rd(), 0L)
-
-    x <- Rd(collapse(stringi::stri_rand_lipsum(3), '\n\n'), wrap.lines=TRUE)
-    expect_is_exactly(x, 'Rd')
-    expect_is_exactly(x[[1L]], 'Rd_TEXT')
-    expect_true(all_inherit(x, c('Rd_TEXT', 'Rd_newline')))
-
-
-    x <- Rd(Rd_text('text'))
-    expect_is_exactly(x, 'Rd')
-    expect_is_exactly(x[[1]], 'Rd_TEXT')
-})
-#line 382 "R/Class-Rd.R"
-test_that('Class-Rd', {#@testing Class-Rd
-    x <- cl('text', 'Rd')
-    expect_is(x, 'Rd')
-
-    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
-    expect_is(txt, 'Rd')
-    expect_true(validObject(txt))
-})
-#line 451 "R/Class-Rd.R"
+#line 66 "R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'documentation')
     txt <- tools::parse_Rd(test.file)
@@ -227,7 +26,7 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     expect_is_exactly(txt[[2]], "Rd_newline")
     expect_is_exactly(txt[[c(48, 11)]], "Rd_TEXT")
 })
-#line 487 "R/Class-Rd.R"
+#line 102 "R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_valid(txt)
@@ -274,7 +73,7 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
                     , c('Rd_newline', 'Rd_TEXT', 'Rd_tag', 'Rd')
                     )
 })
-#line 538 "R/Class-Rd.R"
+#line 153 "R/Class-Rd.R"
 test_that('`[.Rd_tag`', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
 
@@ -285,7 +84,7 @@ test_that('`[.Rd_tag`', {#@testing
     expect_is(y, 'Rd_tag')
     expect_identical(attr(y, 'Rd_tag'), '\\arguments')
 })
-#line 618 "R/Class-Rd.R"
+#line 234 "R/Class-Rd.R"
 test_that('is_Rd_newline', {#@testing
     expect_true(is_Rd_newline(.Rd.newline))
     expect_true(is_Rd_newline(.Rd.newline[[1]]))
@@ -295,7 +94,208 @@ test_that('is_Rd_newline', {#@testing
     expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
     expect_false(is_Rd_newline(.Rd(.Rd.newline)))
 })
-#line 652 "R/Class-Rd.R"
+#line 266 "R/Class-Rd.R"
+test_that('Rd_is_all_text', {#@testing
+    x <- c("Lorem ipsum", stringi::stri_rand_lipsum(3, start_lipsum = FALSE))
+    x <- .Rd_strwrap(collapse(x, '\n\n'), wrap.lines = TRUE, wrap.at = 50)
+    expect_is(x, "Rd")
+    expect_is_not(x, "Rd_TEXT")
+
+    expect_true(Rd_is_all_text(x))
+    expect_true(Rd_is_all_text(x[[1]]))
+
+    y <- s(list(x), Rd_tag='test', class=c('Rd_tag', 'Rd'))
+
+    expect_false(Rd_is_all_text(y))
+    expect_identical( validate_that(Rd_is_all_text(y))
+                    , "`y` has a bad element at position 1 which is not a `TEXT`" %<<%
+                      "type for Rd. It is a" %<<%
+                      dQuote('Rd')
+                    )
+    y <- s(list( Rd_code('some(code)')
+               , s( list(Rd_symb("some"))
+                  , Rd_tag="\\keyword"
+                  , class=c("Rd_tag", 'Rd'))
+               ), class='Rd')
+    expect_identical( validate_that(Rd_is_all_text(y))
+                    , "`y` has bad elements at positions 1 and 2 which are not a `TEXT`" %<<%
+                      "type for Rd"
+                    )
+})
+#line 297 "R/Class-Rd.R"
+test_that('Rd_spans_multiple_lines', {#@testing
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    expect_true(Rd_spans_multiple_lines(txt))
+    expect_true(Rd_spans_multiple_lines(txt[['\\arguments']]))
+    expect_false(Rd_spans_multiple_lines(txt[['\\arguments']][[3L]]))
+
+    expect_false(Rd_spans_multiple_lines(Rd_text("hello world\n")))
+    expect_true(Rd_spans_multiple_lines(Rd_text("hello\nworld\n")))
+
+    x <- txt[[38]][2]
+    expect_true(Rd_spans_multiple_lines(x))
+    expect_false(Rd_spans_multiple_lines(unclass(x)))
+
+    x <- c(.Rd.code.newline
+          , Rd_code('value \\%if\\% proposition')
+          , .Rd.code.newline)
+    expect_true(Rd_spans_multiple_lines(x))
+})
+#line 319 "R/Class-Rd.R"
+test_that('Rd_ends_with_newline', {#@testing
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    expect_true(Rd_ends_with_newline(txt))
+
+    # ends.with.newline <- purrr::map_lgl(txt, Rd_ends_with_newline)
+    # spans.multiple.lines <- purrr::map_lgl(txt, Rd_spans_multiple_lines)
+    # expect_false(any(ends.with.newline & !spans.multiple.lines))
+
+    x <- txt[[38]]
+
+    expect_true(Rd_ends_with_newline(x))
+    expect_false(Rd_ends_with_newline(x, TRUE))
+})
+#line 336 "R/Class-Rd.R"
+test_that('Rd_starts_with_newline', {#@testing
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    expect_false(Rd_starts_with_newline(txt))
+    expect_true(Rd_starts_with_newline(txt[['\\arguments']]))
+    expect_false(Rd_starts_with_newline(txt[['\\arguments']], TRUE))
+})
+#line 361 "R/Class-Rd.R"
+test_that('Rd_split', {#@testing
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+
+    val <- Rd_split(txt)
+    expect_is(val, 'list')
+    expect_is_not(val, 'Rd')
+
+    expect_all_inherit(val, 'Rd')
+    expect_false(all_are(val, 'Rd'))
+
+
+    x <- txt['\\examples'][[1]]
+    y <- Rd_split(x)
+    expect_identical(y[[1]], x[[1]])
+    expect_length(y, 29L)
+})
+#line 399 "R/Class-Rd.R"
+test_that('compact_Rd', {#@testing
+    l <- s(list( .Rd.newline
+               , Rd_text('text')
+               , .Rd.newline
+               , s(list(s(list(Rd_symb('symb')), Rd_tag='tag'
+                         , class=c('Rd_tag', 'Rd'))
+                       , .Rd.newline
+                       ), class='Rd')
+               ), class='Rd')
+    m <-  compact_Rd(l, recurse=TRUE)
+
+    expect_length(l, 4L)
+    expect_length(m, 5L)
+
+    expect_is(m, 'Rd')
+    expect_is(m[[1L]], 'Rd_newline')
+    expect_is(m[[2L]], 'Rd_TEXT')
+    expect_is(m[[3L]], 'Rd_newline')
+    expect_is(m[[4L]], 'Rd_tag')
+    expect_is(m[[5L]], 'Rd_newline')
+})
+#line 443 "R/Class-Rd.R"
+test_that('Rd', {#@testing
+    a <- "test"
+    b <- Rd(a)
+    expect_is_exactly(b, 'Rd')
+    expect_is(b[[1]], 'Rd_TEXT')
+
+    a <- stringi::stri_rand_lipsum(3)
+    b <- Rd(collapse(a, '\n\n'), wrap.lines=TRUE)
+    expect_is_exactly(b, 'Rd')
+    expect_identical(mode(b), 'list')
+    expect_true(length(b) > 5)
+
+    c <- Rd(a, wrap.lines=FALSE)
+    expect_is_exactly(c, 'Rd')
+    d <- Rd(c, wrap.lines=TRUE)
+    expect_is_exactly(d, 'Rd')
+    expect_identical(c, d)
+
+    expect_error(Rd(NULL))
+
+    expect_is(Rd(), 'Rd')
+    expect_length(Rd(), 0L)
+
+    x <- Rd(collapse(stringi::stri_rand_lipsum(3), '\n\n'), wrap.lines=TRUE)
+    expect_is_exactly(x, 'Rd')
+    expect_is_exactly(x[[1L]], 'Rd_TEXT')
+    expect_true(all_inherit(x, c('Rd_TEXT', 'Rd_newline')))
+
+
+    x <- Rd(Rd_text('text'))
+    expect_is_exactly(x, 'Rd')
+    expect_is_exactly(x[[1]], 'Rd_TEXT')
+})
+#line 476 "R/Class-Rd.R"
+test_that('Class-Rd', {#@testing Class-Rd
+    x <- cl('text', 'Rd')
+    expect_is(x, 'Rd')
+
+    txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
+    expect_is(txt, 'Rd')
+    expect_true(validObject(txt))
+})
+#line 516 "R/Class-Rd.R"
+test_that('Rd_text', {#@testing
+    val <- Rd_text('testing')
+    expect_is(val, 'Rd')
+    expect_is(val, 'Rd_tag')
+    expect_is(val, 'Rd_TEXT')
+
+    expect_true(is.character(val))
+    expect_false(is.list(val))
+
+    val <- Rd_text('some(code)', 'RCODE')
+    expect_is(val, 'Rd_RCODE')
+    val <- Rd_text('some(code)', 'R')
+    expect_is(val, 'Rd_RCODE')
+
+    x <- Rd_text(collapse(stringi::stri_rand_lipsum(3), '\n\n'))
+    expect_is(x, 'Rd')
+    expect_is(x, 'Rd_tag')
+    expect_is(x, 'Rd_TEXT')
+
+    x <- Rd_text(c( 'hello', '\n', ' big', '\n', '  wide', '\n', '   world'))
+    expect_is(x, 'Rd')
+    expect_is(x, 'Rd_TEXT')
+
+    expect_length(x, 7L)
+    # expect_all_inherit(x[c(3,6,9,12)], 'Rd_newline')
+    # expect_all_inherit(x[c(4,7,10)], 'Rd_indent')
+    # expect_all_inherit(x[-1], c('Rd_TEXT', 'Rd_newline'))
+
+    x <- Rd_text("     hello world")
+    expect_is(x, 'Rd')
+    expect_is(x, 'Rd_TEXT')
+    expect_length(x, 1L)
+    # expect_is(x[[1]], 'Rd_indent')
+    # expect_is(x[[2]], 'Rd_TEXT')
+    # expect_is(x[[3]], 'Rd_newline')
+})
+#line 567 "R/Class-Rd.R"
+test_that('Rd_code, Rd_symb, and Rd_comment', {#@testing Rd_code, Rd_symb, and Rd_comment
+    expect_error(Rd_comment("testing"))
+    expect_is(Rd_comment("% comment"), "Rd_COMMENT")
+    expect_equal(attr(Rd_comment("% comment"), 'Rd_tag'), "COMMENT")
+    expect_is(Rd_code("some(code)"), "Rd_RCODE")
+    expect_equal(attr(Rd_code("some(code)"), 'Rd_tag'), "RCODE")
+    expect_is(Rd_symb("name"), "Rd_VERB")
+    expect_equal(attr(Rd_symb("name"), 'Rd_tag'), "VERB")
+
+    a <- Rd_code("require(graphics)\n")
+    expect_is_exactly(a, 'Rd_RCODE')
+    expect_length(a, 1L)
+})
+#line 605 "R/Class-Rd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -327,7 +327,7 @@ test_that('Rd_tag', {#! @testing
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
 })
-#line 724 "R/Class-Rd.R"
+#line 681 "R/Class-Rd.R"
 test_that('Rd_* tags', {#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)
