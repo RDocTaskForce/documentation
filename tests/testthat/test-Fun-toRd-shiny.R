@@ -429,7 +429,7 @@ test_that('html_to_Rd.* table functions', {#@testing html_to_Rd.* table function
                   "R2 \\tab X \\tab X \\tab O\\cr" %\%
                   "R3 \\tab O \\tab X \\tab X\\cr" %\%
                   "Count \\tab 1 \\tab 3 \\tab 1" %\%
-                  "}"  
+                  "}"
                 )
 
     html <-
@@ -552,7 +552,7 @@ test_that('toRd,shiny.tag-method', {#@testing
     rd <- toRd(html, warn.info.loss='none')
     expect_is_exactly(rd, 'Rd')
     expect_is_exactly(rd[[1]], 'Rd_tag')
-    
+
     expect_identical( rd[[1]]
                     , html_to_Rd(html, warn.info.loss='none')
                     )

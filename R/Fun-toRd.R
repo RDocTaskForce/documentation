@@ -151,21 +151,21 @@ Rd_canonize_code <- function(rd){
 }
 if(FALSE){#@testing
     x <- Rd_usage( .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                 , Rd_rcode('value \\%if\\% proposition'), .Rd.code.newline
+                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
                  )
     y <- x[2:3]
 
     expect_identical( Rd_canonize_code(y)
-                    , Rd_usage(Rd_code("value \\%if\\% proposition\n"))
+                    , Rd_usage(Rd_rcode("value \\%if\\% proposition\n"))
                     )
     expect_identical(Rd_canonize_text(y), y)
 
 
     expect_identical( val<-Rd_canonize_code(x)
                     , Rd_usage( .Rd.code.newline
-                              , Rd_code("value \\%if\\% proposition\n")
-                              , Rd_code("value \\%if\\% proposition \\%otherwise\\% alternate\n")
+                              , Rd_rcode("value \\%if\\% proposition\n")
+                              , Rd_rcode("value \\%if\\% proposition \\%otherwise\\% alternate\n")
                               ) )
 
 }
@@ -174,7 +174,7 @@ Rd_clean_indent <-
 function(indent.with){
     if (is_exactly(indent.with, 'character'))
         indent.with <- Rd(cl(Rd_text(indent.with), 'Rd_indent'))
-    if (is_exactly(indent.with, c('Rd_text', 'Rd_code')))
+    if (is_exactly(indent.with, c('Rd_text', 'Rd_rcode')))
         indent.with <- cl(indent.with, 'Rd_indent')
     if (is(indent.with, 'Rd_indent'))
         indent.with <- Rd(indent.with)
@@ -233,7 +233,7 @@ function( x, ...
                                 , indent.first = indent.first && !is(x, 'Rd_tag'))
     is.nl <- purrr::map_lgl(parts, is_Rd_newline)
     is.code <- purrr::map_lgl(parts, is, 'Rd_RCODE')
-    indent.code <- .Rd(cl(Rd_code(as.character(indent.with)), 'Rd_indent'))
+    indent.code <- .Rd(cl(Rd_rcode(as.character(indent.with)), 'Rd_indent'))
     indents <- ifelse(is.nl, Rd(), ifelse(is.code, indent.code, indent.with))
     if (!indent.first)
         indents[[1]] <- Rd()
@@ -333,14 +333,14 @@ if(FALSE){#@testing
     expect_error(.Rd_indent(c('test strings')))
 
     x <- Rd_usage( .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition\n')
-                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                 , Rd_rcode('value \\%if\\% proposition\n')
+                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
                  )
     val<- .Rd_indent(x=x, indent=TRUE, indent.with = '  ')
     expect_identical( val
                     , Rd_usage( .Rd.code.newline
-                              , Rd_code('  value \\%if\\% proposition\n')
-                              , Rd_code('  value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                              , Rd_rcode('  value \\%if\\% proposition\n')
+                              , Rd_rcode('  value \\%if\\% proposition \\%otherwise\\% alternate\n')
                               ))
 }
 
@@ -370,37 +370,7 @@ function( x, ...
     if (!wrap.lines) {
         return(x)
     } else
-    if (identical(class(x), 'Rd')) {
-        assert_that(is.list(x))
-        if (Rd_is_all_text(x)) {
-            lines <- base::strwrap( collapse0(unlist(x))
-                                  , width=wrap.at
-                                  , simplify = TRUE)
-            if (length(lines) <=1) return(x)
-            lines <- lapply(lines, Rd_text, type='TEXT')
-            if (length(lines) > 1L && !is.null(attr(x, 'Rd_tag'))) {
-                lines <- unname(rbind(lines, .Rd.newline))
-                lines <- c(unclass(.Rd.newline), as.vector(lines))
-                return(s( lines
-                        , class = attr(x, 'class')
-                        , Rd_tag = attr(x, 'Rd_tag')
-                        , Rd_option = attr(x, 'Rd_option')
-                        ))
-            } else {
-                return(s( unname(rbind(lines, .Rd.newline))
-                        , class = attr(x, 'class')
-                        , Rd_tag = attr(x, 'Rd_tag')
-                        , Rd_option = attr(x, 'Rd_option')
-                        ))
-            }
-        } else {
-            return(s( lapply(x, .Rd_strwrap, wrap.lines=wrap.lines, wrap.at=wrap.at)
-                    , class  = attr(x, 'class')
-                    , Rd_tag = attr(x, 'Rd_tag')
-                    , Rd_option = attr(x, 'Rd_option')
-                    ))
-        }
-    } else if (attr(x, 'Rd_tag') =="TEXT"){
+    if (is.character(x) && attr(x, 'Rd_tag') =="TEXT") {
         assert_that( is.count(wrap.at)
                    , is.character(x)
                    , is.null(attr(x, 'Rd_option'))
@@ -417,6 +387,31 @@ function( x, ...
         return(s( unname(rbind(lines, .Rd.newline))
                 , class = 'Rd'
                 ))
+    } else
+    if (is.list(x) && Rd_is_all_text(x)) {
+        lines <- base::strwrap( collapse0(unlist(x))
+                              , width=wrap.at
+                              , simplify = TRUE)
+        if (length(lines) <=1) return(x)
+        lines <- lapply(lines, Rd_text, type='TEXT')
+        if (length(lines) > 1L && !is.null(attr(x, 'Rd_tag'))) {
+            lines <- unname(rbind(lines, .Rd.newline))
+            lines <- c(unclass(.Rd.newline), as.vector(lines))
+            return(s( lines
+                    , class = attr(x, 'class')
+                    , Rd_tag = attr(x, 'Rd_tag')
+                    , Rd_option = attr(x, 'Rd_option')
+                    ))
+        } else {
+            return(s( unname(rbind(lines, .Rd.newline))
+                    , class = attr(x, 'class')
+                    , Rd_tag = attr(x, 'Rd_tag')
+                    , Rd_option = attr(x, 'Rd_option')
+                    ))
+        }
+    } else
+    if (is.list(x)) {
+        return(forward_attributes(lapply(x, .Rd_strwrap, wrap.lines=wrap.lines, wrap.at=wrap.at)))
     } else {
         return(x)
     }
@@ -479,14 +474,14 @@ if(FALSE){#@testing
     expect_true(Rd_is_all_text(rd))
 
     rd <- Rd_examples(Rd( .Rd.code.newline
-                        , Rd_code("x<- rnorm(100)\n")
-                        , Rd_code("plot(x)\n")))
+                        , Rd_rcode("x<- rnorm(100)\n")
+                        , Rd_rcode("plot(x)\n")))
     expect_identical(Rd_canonize_text(rd), rd)
     expect_identical(Rd_canonize_code(rd), rd)
 
     Rd_canonize(Rd_canonize_text(rd))
 
-    expect_identical(Rd_canonize_code(Rd_examples(Rd_code("\nx<- rnorm(100)\nplot(x)\n"))), rd)
+    expect_identical(Rd_canonize_code(Rd_examples(Rd_rcode("\nx<- rnorm(100)\nplot(x)\n"))), rd)
 
     rd <- Rd(c( "use the \\backslash to escape."
                  , "and '{}' to group."
@@ -525,10 +520,7 @@ if(FALSE){#@testing
 }
 
 
-
-
 # S3 Methods ----------------------------------------------------------
-
 
 if (FALSE){#@testing toRd,character
     expect_identical( toRd(c("\\hello\n", "%world"))
@@ -685,7 +677,7 @@ function( obj, ...){
 })
 if(FALSE){#! @testing
     obj <- FT_Rd( Rd_text("A description of ")
-                , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
                 , .Rd.newline
                 )
     expect_is(obj, 'FormattedText/Rd')
@@ -693,7 +685,7 @@ if(FALSE){#! @testing
     expect_is_exactly(val, 'Rd')
     expect_identical(val
                     , Rd( Rd_text("A description of ")
-                        , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                        , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
                         , .Rd.newline
                         ))
     obj <- FT_Rd('Hello world!')

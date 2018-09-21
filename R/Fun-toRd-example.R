@@ -143,7 +143,7 @@ function( obj, ...
     if (trimws)
         lines <- trimws_example(lines)
     lines <- undim(paste0(lines, ifelse(grepl("\n$", lines), '', '\n')))
-    return(Rd_canonize_code(Rd_code(lines)))
+    return(Rd_canonize_code(Rd_rcode(lines)))
 })
 if(FALSE){#@testing
     simple.text <- "
@@ -154,23 +154,23 @@ if(FALSE){#@testing
     ex <- new('example', p)
 
     expect_equal( toRd(ex, use.source=TRUE)
-                , Rd( Rd_code( "# prints hello world.\n")
-                    , Rd_code( "hw()\n")
+                , Rd( Rd_rcode( "# prints hello world.\n")
+                    , Rd_rcode( "hw()\n")
                     ))
 
     ex2 <- new('example', expression(test(x,y)))
     expect_is(ex2, 'Documentation-example')
     expect_null(getSrcref(ex2))
-    expect_identical(toRd(ex2), Rd(Rd_code(c("test(x, y)\n"))))
+    expect_identical(toRd(ex2), Rd(Rd_rcode(c("test(x, y)\n"))))
 
     ex3 <- new('example', expression( a <- "test"
                                     , b <- Rd(a)
                                     , expect_is(b, 'Rd')
                                     ))
     expect_equal( toRd(ex3)
-                , Rd(Rd_code( 'a <- "test"\n')
-                    ,Rd_code( 'b <- Rd(a)\n')
-                    ,Rd_code( 'expect_is(b, "Rd")\n')
+                , Rd(Rd_rcode( 'a <- "test"\n')
+                    ,Rd_rcode( 'b <- Rd(a)\n')
+                    ,Rd_rcode( 'expect_is(b, "Rd")\n')
                     ))
 }
 if(FALSE){#@testing
@@ -183,7 +183,7 @@ if(FALSE){#@testing
 
     lines <- readLines(ex.file)
     expect_identical( toRd(obj)
-                    , Rd_canonize(Rd_code(paste0(lines[nchar(lines)>0L], '\n')))
+                    , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
                     )
 
     whole.src <- attr(obj, 'wholeSrcref')
@@ -191,7 +191,7 @@ if(FALSE){#@testing
     expect_true( is.null(src <- attr(obj, 'wholeSrcref')))
     expect_true(!is.null(src <- attr(obj, 'srcref')))
     expect_identical( toRd(obj)
-                    , Rd_canonize(Rd_code(paste0(lines[nchar(lines)>0L], '\n')))
+                    , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
                     )
 }
 

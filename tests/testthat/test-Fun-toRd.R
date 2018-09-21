@@ -32,21 +32,21 @@ test_that('toRd@valueClass', {#@testing
 #line 152 "R/Fun-toRd.R"
 test_that('Rd_canonize_code', {#@testing
     x <- Rd_usage( .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                 , Rd_rcode('value \\%if\\% proposition'), .Rd.code.newline
+                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
                  )
     y <- x[2:3]
 
     expect_identical( Rd_canonize_code(y)
-                    , Rd_usage(Rd_code("value \\%if\\% proposition\n"))
+                    , Rd_usage(Rd_rcode("value \\%if\\% proposition\n"))
                     )
     expect_identical(Rd_canonize_text(y), y)
 
 
     expect_identical( val<-Rd_canonize_code(x)
                     , Rd_usage( .Rd.code.newline
-                              , Rd_code("value \\%if\\% proposition\n")
-                              , Rd_code("value \\%if\\% proposition \\%otherwise\\% alternate\n")
+                              , Rd_rcode("value \\%if\\% proposition\n")
+                              , Rd_rcode("value \\%if\\% proposition \\%otherwise\\% alternate\n")
                               ) )
 
 })
@@ -138,18 +138,20 @@ test_that('.Rd_indent specification by options', {#@testing .Rd_indent specifica
 })
 #line 332 "R/Fun-toRd.R"
 test_that('.Rd_indent', {#@testing
+    expect_error(.Rd_indent(c('test strings')))
+
     x <- Rd_usage( .Rd.code.newline
-                 , Rd_code('value \\%if\\% proposition\n')
-                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                 , Rd_rcode('value \\%if\\% proposition\n')
+                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
                  )
     val<- .Rd_indent(x=x, indent=TRUE, indent.with = '  ')
     expect_identical( val
                     , Rd_usage( .Rd.code.newline
-                              , Rd_code('  value \\%if\\% proposition\n')
-                              , Rd_code('  value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                              , Rd_rcode('  value \\%if\\% proposition\n')
+                              , Rd_rcode('  value \\%if\\% proposition \\%otherwise\\% alternate\n')
                               ))
 })
-#line 422 "R/Fun-toRd.R"
+#line 419 "R/Fun-toRd.R"
 test_that('.Rd_strwrap', {#@testing
     x <- stringi::stri_rand_lipsum(1)
 
@@ -185,7 +187,7 @@ test_that('.Rd_strwrap', {#@testing
                     , c("hello", "", "world")
                     )
 })
-#line 469 "R/Fun-toRd.R"
+#line 466 "R/Fun-toRd.R"
 test_that('Rd_canonize', {#@testing
     rd <- Rd_text("a\nb\nc\n")
     expect_is(rd, 'Rd_TEXT')
@@ -197,14 +199,14 @@ test_that('Rd_canonize', {#@testing
     expect_true(Rd_is_all_text(rd))
 
     rd <- Rd_examples(Rd( .Rd.code.newline
-                        , Rd_code("x<- rnorm(100)\n")
-                        , Rd_code("plot(x)\n")))
+                        , Rd_rcode("x<- rnorm(100)\n")
+                        , Rd_rcode("plot(x)\n")))
     expect_identical(Rd_canonize_text(rd), rd)
     expect_identical(Rd_canonize_code(rd), rd)
 
     Rd_canonize(Rd_canonize_text(rd))
 
-    expect_identical(Rd_canonize_code(Rd_examples(Rd_code("\nx<- rnorm(100)\nplot(x)\n"))), rd)
+    expect_identical(Rd_canonize_code(Rd_examples(Rd_rcode("\nx<- rnorm(100)\nplot(x)\n"))), rd)
 
     rd <- Rd(c( "use the \\backslash to escape."
                  , "and '{}' to group."
@@ -241,16 +243,16 @@ test_that('Rd_canonize', {#@testing
     x <- c( Rd_tag("item"), Rd_text(space(1)), Rd_text("content"))
     expect_identical(Rd_canonize_text(x)[[1]], Rd_tag('item'))
 })
-#line 531 "R/Fun-toRd.R"
+#line 525 "R/Fun-toRd.R"
 test_that('toRd,character', {#@testing toRd,character
     expect_identical( toRd(c("\\hello\n", "%world"))
                     , Rd(Rd_text("\\\\hello\n"), Rd_text("\\%world")))
 })
-#line 537 "R/Fun-toRd.R"
+#line 531 "R/Fun-toRd.R"
 test_that('toRd.NULL', {#@testing
     expect_identical(toRd(NULL), Rd())
 })
-#line 548 "R/Fun-toRd.R"
+#line 542 "R/Fun-toRd.R"
 test_that('toRd.list', {#@testing
     l <- list('\\hello ', '%world')
     expect_identical( toRd(l)
@@ -269,7 +271,7 @@ test_that('toRd.list', {#@testing
     expect_is(val, 'Rd')
     expect_is(val[[1]], 'Rd_TEXT')
 })
-#line 578 "R/Fun-toRd.R"
+#line 572 "R/Fun-toRd.R"
 test_that('toRd.Rd', {#@testing
     obj <- Rd("test")
     expect_identical(toRd(obj), obj)
@@ -278,7 +280,7 @@ test_that('toRd.Rd', {#@testing
     obj <- Rd("\\rd")
     expect_identical(toRd(obj), obj)
 })
-#line 599 "R/Fun-toRd.R"
+#line 593 "R/Fun-toRd.R"
 test_that('toRd,author', {#@testing toRd,author
     obj <- list(author = c( person('Andrew', 'Redd'
                                   , email='andrew.redd@hsc.utah.edu')
@@ -293,7 +295,7 @@ test_that('toRd,author', {#@testing toRd,author
                     , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
                     )
 })
-#line 613 "R/Fun-toRd.R"
+#line 607 "R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <-c( person('First' , 'Author', email='me1@email.com')
               , person('Second', 'Author', email='me2@email.com')
@@ -318,7 +320,7 @@ test_that('toRd.person', {#! @testing
                            , class='Rd')
                 )
 })
-#line 660 "R/Fun-toRd.R"
+#line 654 "R/Fun-toRd.R"
 test_that('toRd,Documentation-Keyword-method', {#! @testing
     obj <- new('Documentation-Keyword', 'utilities')
     val <- toRd(obj)
@@ -335,10 +337,10 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( collapse0(as.character(val))
                 , '\\keyword{utilities}\\keyword{character}')
 })
-#line 684 "R/Fun-toRd.R"
+#line 678 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/Rd-method', {#! @testing
     obj <- FT_Rd( Rd_text("A description of ")
-                , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
                 , .Rd.newline
                 )
     expect_is(obj, 'FormattedText/Rd')
@@ -346,14 +348,14 @@ test_that('toRd,FormattedText/Rd-method', {#! @testing
     expect_is_exactly(val, 'Rd')
     expect_identical(val
                     , Rd( Rd_text("A description of ")
-                        , Rd_tag('code', Rd_tag('link', Rd_code("toRd")))
+                        , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
                         , .Rd.newline
                         ))
     obj <- FT_Rd('Hello world!')
     expect_identical( toRd(obj), Rd('Hello world!'))
     expect_false(identical(toRd(obj), obj))
 })
-#line 714 "R/Fun-toRd.R"
+#line 708 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/character-method', {#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)

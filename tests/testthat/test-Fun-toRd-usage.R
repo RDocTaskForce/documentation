@@ -6,7 +6,7 @@ context('tests extracted from file `Fun-toRd-usage.R`')
 test_that('toRd,usage-method', {#@testing
     obj <- as(expression(function_documentation(name, arguments, usage, ...)), 'usage')
     expect_identical( toRd(obj)
-                    , Rd(Rd_usage(Rd_code("function_documentation(name, arguments, usage, ...)")))
+                    , Rd(Rd_usage(Rd_rcode("function_documentation(name, arguments, usage, ...)")))
                     )
 
     obj <- as(expression( value %if% proposition
@@ -17,13 +17,13 @@ test_that('toRd,usage-method', {#@testing
     expect_true(is_Rd_tag(rd[[1]], '\\usage'))
     expect_identical( rd
                     , Rd(Rd_usage( .Rd.code.newline
-                                 , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                                 , Rd_rcode('value \\%if\\% proposition\n')
+                                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
                                  )))
 
     expect_identical( toRd(obj, indent=TRUE, indent.with=.Rd.default.indent)
                     , Rd(Rd_usage( .Rd.code.newline
-                                 , .Rd.default.indent, Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                                 , .Rd.default.indent, Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                                 , Rd_rcode('    value \\%if\\% proposition\n')
+                                 , Rd_rcode('    value \\%if\\% proposition \\%otherwise\\% alternate\n')
                                  )))
 })

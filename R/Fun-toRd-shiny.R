@@ -565,7 +565,7 @@ html_to_Rd.code <- function(html, ...){
     assert_that( is.list(html$children)
                , all(purrr::map_lgl(html$children, is.character))
                )
-    Rd_canonize(Rd_tag("code", Rd_code(clean_Rd(as.character(html$children)))))
+    Rd_canonize(Rd_tag("code", Rd_rcode(clean_Rd(as.character(html$children)))))
 }
 if(FALSE){#@testing
     html <- htmltools::code("plot(rnorm(100))")
@@ -602,7 +602,7 @@ html_to_Rd.div <- function(html, sub.section=FALSE, ...){
     s( list(title=title, content=content)
      , Rd_tag=ifelse(sub.section, "\\subsection", "\\section")
      , class =c('Rd_tag', 'Rd')
-     )  
+     )
 }
 if(FALSE){#@testing
     txt <- lapply(stringi::stri_rand_lipsum(3), htmltools::tags$p)
@@ -998,7 +998,7 @@ if(FALSE){#@testing html_to_Rd.* table functions
                   "R2 \\tab X \\tab X \\tab O\\cr" %\%
                   "R3 \\tab O \\tab X \\tab X\\cr" %\%
                   "Count \\tab 1 \\tab 3 \\tab 1" %\%
-                  "}"  
+                  "}"
                 )
 
     html <-
@@ -1139,7 +1139,7 @@ if(FALSE){#@testing
     rd <- toRd(html, warn.info.loss='none')
     expect_is_exactly(rd, 'Rd')
     expect_is_exactly(rd[[1]], 'Rd_tag')
-    
+
     expect_identical( rd[[1]]
                     , html_to_Rd(html, warn.info.loss='none')
                     )

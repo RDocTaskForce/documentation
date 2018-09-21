@@ -112,7 +112,7 @@ test_that('Rd_is_all_text', {#@testing
                       "type for Rd. It is a" %<<%
                       dQuote('Rd')
                     )
-    y <- s(list( Rd_code('some(code)')
+    y <- s(list( Rd_rcode('some(code)')
                , s( list(Rd_symb("some"))
                   , Rd_tag="\\keyword"
                   , class=c("Rd_tag", 'Rd'))
@@ -137,7 +137,7 @@ test_that('Rd_spans_multiple_lines', {#@testing
     expect_false(Rd_spans_multiple_lines(unclass(x)))
 
     x <- c(.Rd.code.newline
-          , Rd_code('value \\%if\\% proposition')
+          , Rd_rcode('value \\%if\\% proposition')
           , .Rd.code.newline)
     expect_true(Rd_spans_multiple_lines(x))
 })
@@ -282,16 +282,16 @@ test_that('Rd_text', {#@testing
     # expect_is(x[[3]], 'Rd_newline')
 })
 #line 567 "R/Class-Rd.R"
-test_that('Rd_code, Rd_symb, and Rd_comment', {#@testing Rd_code, Rd_symb, and Rd_comment
+test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and Rd_comment
     expect_error(Rd_comment("testing"))
     expect_is(Rd_comment("% comment"), "Rd_COMMENT")
     expect_equal(attr(Rd_comment("% comment"), 'Rd_tag'), "COMMENT")
-    expect_is(Rd_code("some(code)"), "Rd_RCODE")
-    expect_equal(attr(Rd_code("some(code)"), 'Rd_tag'), "RCODE")
+    expect_is(Rd_rcode("some(code)"), "Rd_RCODE")
+    expect_equal(attr(Rd_rcode("some(code)"), 'Rd_tag'), "RCODE")
     expect_is(Rd_symb("name"), "Rd_VERB")
     expect_equal(attr(Rd_symb("name"), 'Rd_tag'), "VERB")
 
-    a <- Rd_code("require(graphics)\n")
+    a <- Rd_rcode("require(graphics)\n")
     expect_is_exactly(a, 'Rd_RCODE')
     expect_length(a, 1L)
 })
@@ -345,28 +345,28 @@ test_that('Rd_* tags', {#@testing Rd_* tags
     desc <- Rd_description( .Rd.newline
                           , Rd_text("  Density, distribution function, quantile function and random\n")
                           , Rd_text("  generation for the normal distribution with mean equal to ")
-                            ,  Rd_tag('code', Rd_code('mean')), .Rd.newline
+                            ,  Rd_tag('code', Rd_rcode('mean')), .Rd.newline
                           , Rd_text("  and standard deviation equal to ")
-                            , Rd_tag('code', Rd_code('sd'))
+                            , Rd_tag('code', Rd_rcode('sd'))
                           , Rd_text(".\n")
                           )
     expect_identical( collapse0(as.character(desc))
                     , collapse0(as.character(txt[['\\description']])))
 
     expect_identical( Rd_examples( .Rd.code.newline
-                                 , Rd_code("require(graphics)\n")
+                                 , Rd_rcode("require(graphics)\n")
                                  , .Rd.code.newline
-                                 , Rd_code("dnorm(0) == 1/sqrt(2*pi)\n")
-                                 , Rd_code("dnorm(1) == exp(-1/2)/sqrt(2*pi)\n")
-                                 , Rd_code("dnorm(1) == 1/sqrt(2*pi*exp(1))\n")
+                                 , Rd_rcode("dnorm(0) == 1/sqrt(2*pi)\n")
+                                 , Rd_rcode("dnorm(1) == exp(-1/2)/sqrt(2*pi)\n")
+                                 , Rd_rcode("dnorm(1) == 1/sqrt(2*pi*exp(1))\n")
                                  )
                       , txt[[52]][1:6] )
     expect_identical( Rd_examples( content=Rd( .Rd.code.newline
-                                             , Rd_code("require(graphics)\n")
+                                             , Rd_rcode("require(graphics)\n")
                                              , .Rd.code.newline
-                                             , Rd_code("dnorm(0) == 1/sqrt(2*pi)\n")
-                                             , Rd_code("dnorm(1) == exp(-1/2)/sqrt(2*pi)\n")
-                                             , Rd_code("dnorm(1) == 1/sqrt(2*pi*exp(1))\n")
+                                             , Rd_rcode("dnorm(0) == 1/sqrt(2*pi)\n")
+                                             , Rd_rcode("dnorm(1) == exp(-1/2)/sqrt(2*pi)\n")
+                                             , Rd_rcode("dnorm(1) == 1/sqrt(2*pi*exp(1))\n")
                                              ))
                       , txt[[52]][1:6] )
 
@@ -379,9 +379,9 @@ test_that('Rd_* tags', {#@testing Rd_* tags
     expect_identical(Rd_title('The Normal Distribution'), txt[['\\title']])
 
     expect_identical(Rd_usage( .Rd.code.newline
-                               , Rd_code("dnorm(x, mean = 0, sd = 1, log = FALSE)\n")
-                               , Rd_code("pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\n")
-                               , Rd_code("qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\n")
-                               , Rd_code("rnorm(n, mean = 0, sd = 1)\n")
+                               , Rd_rcode("dnorm(x, mean = 0, sd = 1, log = FALSE)\n")
+                               , Rd_rcode("pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\n")
+                               , Rd_rcode("qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\n")
+                               , Rd_rcode("rnorm(n, mean = 0, sd = 1)\n")
     ), txt[['\\usage']])
 })

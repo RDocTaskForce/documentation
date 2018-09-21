@@ -5,17 +5,17 @@ setMethod('toRd', 'usage',
 function(obj, ...){
     content <- lapply(obj, deparse)
     content <- lapply(content, clean_Rd)
-    content <- lapply(content, Rd_code)
+    content <- lapply(content, Rd_rcode)
     if (length(content)>1L) {
-        content <- rbind( c(list(NULL), content), .Rd.code.newline)[-1]
+        content <- c(.Rd.code.newline, Rd_lines(content))
         content <- .Rd_indent(cl(content, 'Rd'), ...)
     }
-    Rd_usage(content=purrr::compact(content))
+    Rd_usage(content=content)
 })
 if(FALSE){#@testing
     obj <- as(expression(function_documentation(name, arguments, usage, ...)), 'usage')
     expect_identical( toRd(obj)
-                    , Rd(Rd_usage(Rd_code("function_documentation(name, arguments, usage, ...)")))
+                    , Rd(Rd_usage(Rd_rcode("function_documentation(name, arguments, usage, ...)")))
                     )
 
     obj <- as(expression( value %if% proposition
@@ -26,14 +26,14 @@ if(FALSE){#@testing
     expect_true(is_Rd_tag(rd[[1]], '\\usage'))
     expect_identical( rd
                     , Rd(Rd_usage( .Rd.code.newline
-                                 , Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                                 , Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                                 , Rd_rcode('value \\%if\\% proposition\n')
+                                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
                                  )))
 
     expect_identical( toRd(obj, indent=TRUE, indent.with=.Rd.default.indent)
                     , Rd(Rd_usage( .Rd.code.newline
-                                 , .Rd.default.indent, Rd_code('value \\%if\\% proposition'), .Rd.code.newline
-                                 , .Rd.default.indent, Rd_code('value \\%if\\% proposition \\%otherwise\\% alternate'), .Rd.code.newline
+                                 , Rd_rcode('    value \\%if\\% proposition\n')
+                                 , Rd_rcode('    value \\%if\\% proposition \\%otherwise\\% alternate\n')
                                  )))
 }
 
