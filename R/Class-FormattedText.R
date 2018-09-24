@@ -19,18 +19,19 @@ if(FALSE){#@testing FormattedText/html
 #' @export
 FT_Rd <- setClass("FormattedText/Rd", list('FormattedText', 'Rd'))
 setMethod('initialize', "FormattedText/Rd",
-function( .Object, value=character(0), ...){
-    if(!is.character(value))
-        value <- as.character(value)
-    assert_that(is.character(value))
-    S3Part(.Object) <- Rd(value, ...)
+function( .Object, value=list(), ...){
+    if (is.character(value))
+        value <- Rd_text(value)
+    if (is(value, 'Rd') && !is_exactly(value, 'Rd'))
+        value <- Rd(value)
+    S3Part(.Object) <- Rd_canonize(value, ...)
     .Object
 })
 setValidity('FormattedText/Rd', function(object){
     assert_that(inherits(S3Part(object, strictS3 = TRUE), 'Rd'))
 })
 if(FALSE){#@testing FormattedText/Rd
-    x <- Rd("\\note{Rd format text}")
+    x <- Rd_tag("note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
     expect_is(obj, 'Rd')
     expect_is(obj, 'FormattedText/Rd')
@@ -39,14 +40,18 @@ if(FALSE){#@testing FormattedText/Rd
     y <- S3Part(x, strictS3 = TRUE)
     expect_identical(x, y)
 
-    z <- S3Part(FT_Rd("\\note{Rd format text}"), strictS3 = TRUE)
+    description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
+    description <- Rd_canonize( Rd(collapse(description, '\n\n'))
+                              , wrap.lines = TRUE, wrap.at=72)
+    expect_is(description, 'Rd')
+    expect_true(length(description)>5L)
+
+    x <- FT_Rd(Rd(description))
+    z <- S3Part(x, strictS3 = TRUE)
     attr(class(z), 'package') <- NULL
-    expect_identical(z, x)
+    expect_identical(z, description)
 
-
-    val <- S3Part(FT_Rd(1L))
-    attr(class(val), 'package') <- NULL
-    expect_equal(val, Rd('1'))
+    expect_error(val <- S3Part(FT_Rd(1L)))
 }
 
 #' Plain Text

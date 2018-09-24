@@ -674,23 +674,31 @@ if(FALSE){#! @testing
 setMethod('toRd', 'FormattedText/Rd',
 function( obj, ...){
     #! Convert formatted text into Rd lines.
-    s(S3Part(obj, strictS3 =TRUE), class='Rd')
+    S3Part(obj, strictS3 =TRUE)
 })
 if(FALSE){#! @testing
-    obj <- FT_Rd( Rd_text("A description of ")
-                , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
-                , .Rd.newline
-                )
+    obj <- FT_Rd(rd <- Rd( Rd_text("A description of ")
+                         , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
+                         , .Rd.newline
+                         ))
+    class(rd) <- s('Rd', package='documentation')
+
+    val <- toRd(obj)
+    identical(S3Part(obj, strictS3 =TRUE), rd)
+    identical(S3Part(obj, strictS3 =TRUE)[[1]], rd[[1]])
+    identical(S3Part(obj, strictS3 =TRUE)[[2]], rd[[2]])
+    identical(S3Part(obj, strictS3 =TRUE)[[3]], rd[[3]])
+
     expect_is(obj, 'FormattedText/Rd')
     val <- toRd(obj)
     expect_is_exactly(val, 'Rd')
-    expect_identical(val
-                    , Rd( Rd_text("A description of ")
-                        , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
-                        , .Rd.newline
-                        ))
+    expect_identical( val, rd)
+
     obj <- FT_Rd('Hello world!')
-    expect_identical( toRd(obj), Rd('Hello world!'))
+    val <- toRd(obj)
+    expect_is_exactly(val, 'Rd')
+    attr(class(val), 'package') <- NULL
+    expect_equal( val, Rd('Hello world!'))
     expect_false(identical(toRd(obj), obj))
 }
 
