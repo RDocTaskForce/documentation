@@ -27,6 +27,7 @@ function( obj                     #< Documentation Object.
         , ...                     #< Currently Ignored, but included for compatability.
         , exclude = character(0)  #< Specific slots in `obj` to exclude from output.
         , control = list()        #< Formatting control parameters.
+        , raw.list = FALSE        #< for internal use.
         ){
     "Convert Documentation to Rd format."
     to_tag <- function(name)
@@ -44,6 +45,7 @@ function( obj                     #< Documentation Object.
     if (!rlang::is_empty(. <- obj@concepts) && !('concepts' %in% exclude)) {
         rd[['concepts']] <- Rd_lines(lapply(., Rd_concept))
     }
+    if (raw.list) return(rd)
     order <- get_option( "Documentation::BaseDocumentation::documentation-order"
                        , .default.basedocumentation.order
                        )

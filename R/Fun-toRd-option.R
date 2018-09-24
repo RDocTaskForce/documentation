@@ -21,12 +21,14 @@ setMethod("doc_get_aliases", 'option-Documentation', function(doc){
     c(doc@key, doc_get_name(doc))
 })
 
-setMethod("toRd", 'option-Documentation', function(obj){
-    c( Rd_name(doc_get_name(obj))
-     , Rd_title(doc_get_title(obj))
-     , Rd_description(toRd(doc_get_description(obj)))
-     , Rd_aliases(doc_get_aliases(obj))
-     )
+setMethod("toRd", 'option-Documentation', function(obj, ..., raw.list=FALSE){
+    l <- list( name        = Rd_name(doc_get_name(obj))
+             , aliases     = Rd_aliases(doc_get_aliases(obj))
+             , title       = Rd_title(doc_get_title(obj))
+             , description = Rd_description(toRd(doc_get_description(obj)))
+             )
+    if (raw.list) return(l)
+    Rd_lines(l)
 })
 if(FALSE){ #@testing
     obj <- doc <- new('option-Documentation', 'anOption', 'a description')
@@ -36,10 +38,10 @@ if(FALSE){ #@testing
 
     option.rd <- toRd(doc)
 
-
-
     expect_identical(option.rd[['\\name']], Rd_name('anOption-option'))
     expect_identical(option.rd[['\\title']], Rd_title("Documentation for Option 'anOption'"))
     expect_identical(option.rd[['\\description']], Rd_description('a description'))
     expect_identical(option.rd['\\alias'], Rd(Rd_alias('anOption'), Rd_alias('anOption-option')))
+
+    expect_rd_output(option.rd, "Fun-toRd-option.Rd", 'toRd,option-Documenation')
 }

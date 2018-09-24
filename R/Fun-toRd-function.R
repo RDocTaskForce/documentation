@@ -16,20 +16,29 @@ setMethod('toRd', 'function-Documentation',
 function( obj
         , ...
         , control = list()
+        , raw.list = FALSE
         ){
     #' format the function documentation obj to Rd format.
-    rd <- callNextMethod(obj, exclude=c('usage','arguments'), ...)
-    rd <- c(rd, toRd(doc_get_arguments(obj), ...))
-    rd <- c(rd, toRd(doc_get_usage(obj), ...))
 
     order <- get_option( "Documentation::function-Documentation::documentation-order"
                        , .default.functiondocumentation.order
                        )
-    if (is.na(obj@value))
-        rd[['value']] <- ''
+    order <- unique(c(order, slotNames(obj)))
+    order <- setdiff(order, 'exclude')
+
+    rd <- callNextMethod(obj, exclude=c('usage','arguments'), ..., raw.list=TRUE)
+    rd$name      <- Rd_name(doc_get_name(obj))
+    rd$arguments <- toRd(doc_get_arguments(obj))
+    rd$usage     <- toRd(doc_get_usage(obj))
+    rd$value     <- Rd_value(toRd(doc_get_value(obj))) %if% !is.na(doc_get_value(obj))
+
+    order <- intersect(order, names(rd))
+    rd <- rd[order]
     rd <- rd[nchar(rd)>0]
 
-    return(rd)
+    if (raw.list) return(rd)
+
+    Rd_lines(rd)
 })
 if(FALSE){#! @testing
     obj <- new( "function-Documentation"
@@ -59,4 +68,6 @@ if(FALSE){#! @testing
                               , Rd_item('...'    , "other arguments to contruct the Documentation obj.")
                               ))
     expect_false(any(nchar(rd) == 0))
+
+    expect_rd_output(rd, "Fun-toRd-function.Rd", 'toRd,function-Documenation')
 }

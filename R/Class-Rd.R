@@ -691,6 +691,7 @@ function( ...
 }
 Rd_code <- function(x){Rd_tag('code', Rd_rcode(x))}
 Rd_concept <- function(name){Rd_tag('concept', Rd_text(name))}
+Rd_concepts <- function(concepts){Rd_lines(lapply(concepts, Rd_concept), 'Rd')}
 Rd_description <- function(...) {Rd_tag("description", content=compact_Rd(Rd(...)))}
 Rd_examples <- function(..., content=compact_Rd(Rd(...)), opt=NULL) {
     Rd_tag('examples', content=content, opt=opt, wrap.lines=FALSE)
@@ -709,6 +710,7 @@ Rd_usage <- function(..., content=compact_Rd(Rd(...))){
     assert_that(all_inherit(val, c('Rd_RCODE', 'Rd_indent', 'Rd_newline')))
     return(val)
 }
+Rd_value <- function(value){Rd_tag('value', content=value)}
 if(FALSE){#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)
