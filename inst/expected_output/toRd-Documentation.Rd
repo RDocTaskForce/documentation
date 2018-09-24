@@ -1,9 +1,7 @@
 \alias{test-alias}
-
 \concept{test concept}
 \concept{testing}
 \concept{debugging}
-
 \title{Create function documentation}
 \author{Andrew Redd \email{andrew.redd@hsc.utah.edu} and Drew Blue}
 \description{
@@ -39,7 +37,7 @@ euismod vestibulum per. At arcu sociosqu leo fermentum. Commodo
 accumsan mattis sed elementum himenaeos eleifend primis convallis
 maecenas turpis.
 }
-\seealso{\\link\{documentation-package\}}
+\seealso{\link{documentation-package}}
 \references{
 R Core Team (2018).
 \emph{R: A Language and Environment for Statistical Computing}.

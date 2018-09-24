@@ -66,7 +66,7 @@ if(FALSE){#! @testing
                                   )
                  , title       = 'Create function documentation'
                  , description = description
-                 , seealso     = '\\link{documentation-package}'
+                 , seealso     = Rd_tag('link', Rd_text('documentation-package'))
                  , keywords    = 'internal'
                  , aliases     = 'test-alias'
                  , concepts    = c('test concept', 'testing', 'debugging')
@@ -75,7 +75,7 @@ if(FALSE){#! @testing
     rd <- toRd(object)
 
     val <- stringi::stri_split_lines1(collapse0(rd))
-    expected <- readLines(system.file("examples", "expected-output_toRd-Documentation.Rd", package="documentation"))
+    expected <- readLines(system.file("expected_output", "toRd-Documentation.Rd", package='documentation'))
     expect_identical(val , expected)
 
     expect_equal(collapse0(rd[['\\author']]), "\\author{Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue}")
