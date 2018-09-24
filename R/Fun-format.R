@@ -155,10 +155,10 @@ function( x  #< Documentation object
 }
 if(FALSE){#@testing
     docs <- function_documentation('test', arguments = arg_('x', 'argument'))
-    rd <- format(docs, fmt='Rd')
-    expect_identical( rd
-                    , c( '\\name{test}'
-                       , '\\arguments{\\item{x}{argument}}'
-                       , '\\usage{test(x)}'
-                       ))
+    frd <- format(docs, fmt='Rd')
+    expect_identical( collapse0(frd)
+                    , '\\name{test}' %\%
+                      '\\usage{test(x)}' %\%
+                      '\\arguments{\\item{x}{argument}}'
+                    )
 }

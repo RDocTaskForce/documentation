@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-option.R`')
-#line 31 "R/Fun-toRd-option.R"
+#line 33 "R/Fun-toRd-option.R"
 test_that('toRd,option-Documentation-method', { #@testing
     obj <- doc <- new('option-Documentation', 'anOption', 'a description')
 
@@ -11,10 +11,10 @@ test_that('toRd,option-Documentation-method', { #@testing
 
     option.rd <- toRd(doc)
 
-
-
     expect_identical(option.rd[['\\name']], Rd_name('anOption-option'))
     expect_identical(option.rd[['\\title']], Rd_title("Documentation for Option 'anOption'"))
     expect_identical(option.rd[['\\description']], Rd_description('a description'))
     expect_identical(option.rd['\\alias'], Rd(Rd_alias('anOption'), Rd_alias('anOption-option')))
+
+    expect_rd_output(option.rd, "Fun-toRd-option.Rd", 'toRd,option-Documenation')
 })

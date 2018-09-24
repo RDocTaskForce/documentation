@@ -21,10 +21,11 @@ test_that('toRd,ArgumentList-method', {#! @testing
 
     expect_equal( toRd(obj)
                 , Rd(Rd_arguments( Rd_item("x", "an argument")
-                                 , Rd_item("y", "another argument") )) )
+                                 , Rd_item("y", "another argument")
+                                 , indent=FALSE)))
     expect_equal( toRd(obj, indent = TRUE)
                 , Rd(Rd_arguments( Rd_item("x", "an argument")
-                                 , Rd_item("y", "another argument"), indent=TRUE )) 
+                                 , Rd_item("y", "another argument"), indent=TRUE ))
                 )
     expect_equal( suppressWarnings(collapse0(as.character(toRd( obj, indent = TRUE, indent.with = '\t'))))
                 , '\\arguments{' %\%

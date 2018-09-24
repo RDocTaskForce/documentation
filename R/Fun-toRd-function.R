@@ -28,8 +28,8 @@ function( obj
 
     rd <- callNextMethod(obj, exclude=c('usage','arguments'), ..., raw.list=TRUE)
     rd$name      <- Rd_name(doc_get_name(obj))
-    rd$arguments <- toRd(doc_get_arguments(obj))
-    rd$usage     <- toRd(doc_get_usage(obj))
+    rd$arguments <- toRd(doc_get_arguments(obj), ..., control=control)
+    rd$usage     <- toRd(doc_get_usage(obj), ..., control=control)
     rd$value     <- Rd_value(toRd(doc_get_value(obj))) %if% !is.na(doc_get_value(obj))
 
     order <- intersect(order, names(rd))
@@ -66,7 +66,7 @@ if(FALSE){#! @testing
                               , Rd_item('value'    , "Return value of the function")
                               , Rd_item('usage'    , "Usage string to override default, constructed from the name and arguments.")
                               , Rd_item('...'    , "other arguments to contruct the Documentation obj.")
-                              ))
+                              , indent=FALSE))
     expect_false(any(nchar(rd) == 0))
 
     expect_rd_output(rd, "Fun-toRd-function.Rd", 'toRd,function-Documenation')

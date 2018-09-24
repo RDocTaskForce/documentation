@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-function.R`')
-#line 34 "R/Fun-toRd-function.R"
+#line 43 "R/Fun-toRd-function.R"
 test_that('toRd,function-Documentation-method', {#! @testing
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')
@@ -29,6 +29,8 @@ test_that('toRd,function-Documentation-method', {#! @testing
                               , Rd_item('value'    , "Return value of the function")
                               , Rd_item('usage'    , "Usage string to override default, constructed from the name and arguments.")
                               , Rd_item('...'    , "other arguments to contruct the Documentation obj.")
-                              ))
+                              , indent=FALSE))
     expect_false(any(nchar(rd) == 0))
+
+    expect_rd_output(rd, "Fun-toRd-function.Rd", 'toRd,function-Documenation')
 })
