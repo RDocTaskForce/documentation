@@ -411,7 +411,8 @@ function( x, ...
         }
     } else
     if (is.list(x)) {
-        return(forward_attributes(lapply(x, .Rd_strwrap, wrap.lines=wrap.lines, wrap.at=wrap.at)))
+        val <- lapply(x, .Rd_strwrap, wrap.lines=wrap.lines, wrap.at=wrap.at)
+        return(fwd(val, x))
     } else {
         return(x)
     }
@@ -457,9 +458,9 @@ Rd_canonize <- function(rd, ...){
         rd <- cl(rd, 'Rd')
     else if(is.character(rd) && assert_that(is(rd, 'Rd')))
         rd <- Rd(rd)
+    rd <- .Rd_strwrap(rd, ...)
     rd <- Rd_canonize_text(rd)
     rd <- Rd_canonize_code(rd)
-    rd <- .Rd_strwrap(rd, ...)
     rd <- .Rd_indent(rd, ...)
     return(rd)
 }

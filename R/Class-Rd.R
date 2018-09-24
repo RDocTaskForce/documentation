@@ -437,6 +437,9 @@ function( ... #< elements of Rd.
     }
     l <- list(...)
 
+    for (i in seq_along(l)) if (is_exactly(l[[i]], 'character'))
+        l[[i]] <- Rd_text(l[[i]])
+
     assert_that(all_inherit(l, 'Rd', '`...`'))
     compact_Rd(s(l, class='Rd'))
 }
@@ -583,18 +586,23 @@ function( tag
         , ...
         , content=.Rd(...)
         , opt = Rd()
+        , indent         = default(indent, FALSE)
+        , indent.with    = default(indent.with, .Rd.default.indent)
         , wrap.lines     = default(wrap.lines    , FALSE)
         , wrap.at        = default(wrap.at       , 72L  )
         ){
     assert_that( is.string(tag)
                , length(opt) == 0L || inherits(opt, 'Rd')
                )
-    for (i in seq_along(content)) if (is_exactly(content[[i]], 'character'))
-        content[[i]] <- .Rd_strwrap(content[[i]], wrap.lines=wrap.lines, wrap.at=wrap.at)
+    for (i in seq_along(content))
+        if (is_exactly(content[[i]], c('character', 'Rd_TEXT')))
+            content[[i]] <- .Rd_strwrap(content[[i]], wrap.lines=wrap.lines, wrap.at=wrap.at)
     assert_that(all_inherit(content, 'Rd', '`...`'))
-    if ( Rd_spans_multiple_lines(content) ){
-        if ( !Rd_starts_with_newline(content)) content <- c(.Rd.newline, content)
-        if ( !Rd_ends_with_newline(content)) content <- c(content, .Rd.newline)
+    if (Rd_spans_multiple_lines(content)) {
+        if (!Rd_starts_with_newline(content)) content <- c(.Rd.newline, content)
+        if (!Rd_ends_with_newline(content)) content <- c(content, .Rd.newline)
+        if (indent)
+            content <- .Rd_indent(content, indent=indent, indent.with = indent.with)
     }
     return(s( content
             , Rd_tag = "\\" %<<<% tag
@@ -632,6 +640,16 @@ if(FALSE){#! @testing
     val <- Rd_tag('link', Rd_text('dest'), opt=Rd_text('pkg'))
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
+
+
+    content <- Rd_canonize(Rd(collapse(stringi::stri_rand_lipsum(3), '\n\n')))
+    tag <- Rd_tag( 'description', content=content
+                 , wrap.lines = TRUE, wrap.at = 72
+                 , indent=TRUE, indent.with = ' '
+                 )
+    expect_true(is_Rd_tag(tag, '\\description'))
+    expect_true(length(tag) > 5L)
+    expect_equal(substr(tag[[2]], 1, 13)[[1]], '  Lorem ipsum')
 }
 
 
@@ -660,6 +678,7 @@ function( ...
                     )
     Rd_tag(tag='arguments', content=content, opt=NULL, wrap.lines = FALSE)
 }
+Rd_code <- function(x){Rd_tag('code', Rd_rcode(x))}
 Rd_concept <- function(name){Rd_tag('concept', Rd_text(name))}
 Rd_description <- function(...) {Rd_tag("description", content=compact_Rd(Rd(...)))}
 Rd_examples <- function(..., content=compact_Rd(Rd(...)), opt=NULL) {
@@ -815,5 +834,8 @@ Rd_lines <- function(l, ...){
 if(FALSE){#@testing
     l <- list( Rd_rcode("value \\%if\\% proposition")
              , Rd_rcode("proposition \\%otherwise\\% alternate"))
+    exp <- Rd( Rd_rcode("value \\%if\\% proposition\n")
+             , Rd_rcode("proposition \\%otherwise\\% alternate\n"))
     val <- Rd_lines(l)
+    expect_identical(val, exp)
 }

@@ -90,6 +90,7 @@ if(FALSE){#@testing
 }
 
 
+fwd <-
 forward_attributes <- function(value, object){
     mostattributes(value) <- attributes(object)
     return(value)

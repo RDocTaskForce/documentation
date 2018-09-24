@@ -201,7 +201,7 @@ test_that('compact_Rd', {#@testing
     expect_is(m[[4L]], 'Rd_tag')
     expect_is(m[[5L]], 'Rd_newline')
 })
-#line 443 "R/Class-Rd.R"
+#line 446 "R/Class-Rd.R"
 test_that('Rd', {#@testing
     a <- "test"
     b <- Rd(a)
@@ -235,7 +235,7 @@ test_that('Rd', {#@testing
     expect_is_exactly(x, 'Rd')
     expect_is_exactly(x[[1]], 'Rd_TEXT')
 })
-#line 476 "R/Class-Rd.R"
+#line 479 "R/Class-Rd.R"
 test_that('Class-Rd', {#@testing Class-Rd
     x <- cl('text', 'Rd')
     expect_is(x, 'Rd')
@@ -244,7 +244,7 @@ test_that('Class-Rd', {#@testing Class-Rd
     expect_is(txt, 'Rd')
     expect_true(validObject(txt))
 })
-#line 516 "R/Class-Rd.R"
+#line 519 "R/Class-Rd.R"
 test_that('Rd_text', {#@testing
     val <- Rd_text('testing')
     expect_is(val, 'Rd')
@@ -281,7 +281,7 @@ test_that('Rd_text', {#@testing
     # expect_is(x[[2]], 'Rd_TEXT')
     # expect_is(x[[3]], 'Rd_newline')
 })
-#line 567 "R/Class-Rd.R"
+#line 570 "R/Class-Rd.R"
 test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and Rd_comment
     expect_error(Rd_comment("testing"))
     expect_is(Rd_comment("% comment"), "Rd_COMMENT")
@@ -295,7 +295,7 @@ test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and
     expect_is_exactly(a, 'Rd_RCODE')
     expect_length(a, 1L)
 })
-#line 605 "R/Class-Rd.R"
+#line 613 "R/Class-Rd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -326,8 +326,18 @@ test_that('Rd_tag', {#! @testing
     val <- Rd_tag('link', Rd_text('dest'), opt=Rd_text('pkg'))
     expect_is(val, 'Rd')
     expect_identical(collapse0(as.character(val)), "\\link[pkg]{dest}")
+
+
+    content <- Rd_canonize(Rd(collapse(stringi::stri_rand_lipsum(3), '\n\n')))
+    tag <- Rd_tag( 'description', content=content
+                 , wrap.lines = TRUE, wrap.at = 72
+                 , indent=TRUE, indent.with = ' '
+                 )
+    expect_true(is_Rd_tag(tag, '\\description'))
+    expect_true(length(tag) > 5L)
+    expect_equal(substr(tag[[2]], 1, 13)[[1]], '  Lorem ipsum')
 })
-#line 681 "R/Class-Rd.R"
+#line 700 "R/Class-Rd.R"
 test_that('Rd_* tags', {#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)
@@ -384,4 +394,13 @@ test_that('Rd_* tags', {#@testing Rd_* tags
                                , Rd_rcode("qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\n")
                                , Rd_rcode("rnorm(n, mean = 0, sd = 1)\n")
     ), txt[['\\usage']])
+})
+#line 834 "R/Class-Rd.R"
+test_that('Rd_lines', {#@testing
+    l <- list( Rd_rcode("value \\%if\\% proposition")
+             , Rd_rcode("proposition \\%otherwise\\% alternate"))
+    exp <- Rd( Rd_rcode("value \\%if\\% proposition\n")
+             , Rd_rcode("proposition \\%otherwise\\% alternate\n"))
+    val <- Rd_lines(l)
+    expect_identical(val, exp)
 })
