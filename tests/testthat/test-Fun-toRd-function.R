@@ -20,10 +20,10 @@ test_that('toRd,function-Documentation-method', {#! @testing
     rd <- toRd(obj)
     expect_is_exactly(rd, 'Rd')
 
-    expect_equal(Rd[['name']], '\\name{function_documentation}')
-    expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
-    expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
-    expect_equal(length(Rd[['arguments']]), 1)
+    expect_equal(rd[['\\name']], Rd_name('function_documentation'))
+    expect_equal(rd[['\\value']], '\\value{A function-Documentation obj.}')
+    expect_equal(rd[['\\usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
+    expect_equal(length(rd[['\\arguments']]), 1)
 
     expect_false(any(nchar(Rd) == 0))
 

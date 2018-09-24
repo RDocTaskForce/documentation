@@ -22,6 +22,7 @@ Imports:
 Suggests:
     covr,
     htmltools,
+    rmarkdown (>= 1.8),
     rstudioapi,
     testthat
 Description: This package provides infrastructure for containing
@@ -90,3 +91,4 @@ Remotes:
     klutometis/roxygen,
     r-lib/pkgload
 KeepSource: TRUE
+VignetteBuilder: knitr

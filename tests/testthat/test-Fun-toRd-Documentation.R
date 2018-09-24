@@ -8,7 +8,8 @@ test_that('toRd,BaseDocumentation-method', {#! @testing
 
     description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
     description <- Rd_canonize( Rd(collapse(description, '\n\n'))
-                              , wrap.lines = TRUE, wrap.at=72)
+                              , control=list(wrap.lines = TRUE, wrap.at=72)
+                              )
     obj <-
     object <- new( "BaseDocumentation"
                  , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')

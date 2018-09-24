@@ -1,0 +1,54 @@
+---
+title: "toRd Coding Conventions"
+author: "Andrew Redd"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{toRd Coding Conventions Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Rules for creating a `toRd` method.
+
+* All toRd accepts an `obj` argument, the argument to be converted
+* The method must accept the variadic argument '`...`'.  Which is either
+  ignored or passed on.  It is exclusively for arguments of non toRd methods 
+  called in the course of conversion.
+* Control for formatting is maintained through the control parameter, which must
+  appear after the `...` argument. 
+  It is expected to be passed onto any other toRd methods.
+  The control parameter may be passed in the `...` arguments if there are no 
+  options for formatting that specific block.
+  Control arguments when not present are pulled from the heirarchical options
+  of the form "`documentation::Rd::toRd::class::param", where class is the 
+  class of the object being converted and the param is the formatting parameter
+  being referenced. The following control parameters are defined and have the
+  defined meaning.
+  
+    + **`indent`**, a logical flag to indicate if indentation of *content* 
+      should be performed. Defaults to `FALSE`.
+    + **`indent.with`** used what to indent with.  Only used if indent is true.
+      Defaults to 4 spaces.
+    + **`wrap.lines`**, a logical flag to indicate if long `Rd_TEXT` (freeform 
+      text) should be wrapped to multiple lines when formatted.
+      Defaults to `FALSE`.
+    + **`wrap.at`**, an integer indicating the number of characters at which 
+      to wrap the lines.  Used only if wrap.lines is true.
+      Defaults to 72 characters.
+  
+  toRd methods should not perform indentation or line wrapping themselves but 
+  call Rd_canonize to perform these tasks and to ensure that the formatted Rd 
+  conforms to an expected class.
+  
+* Each toRd method is expected to return cannonical Rd formatted lists.
+  Call `Rd_canonize()` to ensure this happens.
+
+
