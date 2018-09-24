@@ -49,18 +49,14 @@ if(FALSE){#! @testing
     expect_is_exactly(rd, 'Rd')
 
     expect_equal(rd[['\\name']], Rd_name('function_documentation'))
-    expect_equal(rd[['\\value']], '\\value{A function-Documentation obj.}')
-    expect_equal(rd[['\\usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
-    expect_equal(length(rd[['\\arguments']]), 1)
-
-    expect_false(any(nchar(Rd) == 0))
-
-
-    doc <- function_documentation( name = 'test'
-                                 , title = "test title"
-                                 , description = "A description for my test function"
-                                 , arguments = ArgumentList( arg_('x', 'the x argument'))
-                                 )
-    Rd <- toRd(doc)
-    expect_false(any(nchar(Rd) == 0))
+    expect_equal(rd[['\\value']], Rd_tag('value', Rd_text('A function-Documentation obj.')))
+    expect_equal(rd[['\\usage']], Rd_usage(Rd_rcode('function_documentation(name, arguments, usage, ...)')))
+    expect_equal(rd[['\\arguments']]
+                , Rd_arguments( Rd_item('name', "Name of the function")
+                              , Rd_item('arguments', "Argument list")
+                              , Rd_item('value'    , "Return value of the function")
+                              , Rd_item('usage'    , "Usage string to override default, constructed from the name and arguments.")
+                              , Rd_item('...'    , "other arguments to contruct the Documentation obj.")
+                              ))
+    expect_false(any(nchar(rd) == 0))
 }
