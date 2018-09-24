@@ -34,3 +34,18 @@ test_that('all_are', {#@testing
                       dQuote("numeric") %<<<% '.')
     expect_true(all_are(list(1L, 2L), 'integer'))
 })
+#line 182 "R/util-testing.R"
+test_that('expect_is_exactly', {#@testing
+    x <- list(1:3)
+
+    expect_identical(expect_is_exactly(x, 'list'), x)
+
+    class(x) <- c('class', 'super1', 'super2')
+
+    expect_is_exactly(x, 'class')
+
+    expect_is(x, 'super1')
+    expect_error( expect_is_exactly(x, 'super1')
+                , "`x` is a class/super1/super2; should be exactly a `super1`."
+                )
+})

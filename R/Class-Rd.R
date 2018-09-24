@@ -581,6 +581,16 @@ if(FALSE){#@testing Rd_rcode, Rd_symb, and Rd_comment
     expect_length(a, 1L)
 }
 
+Rd_tag_ <- function(tag, content, opt=Rd(), control=list()){
+    indent      <- control$indent      %||% default(indent      , FALSE, fun = 'Rd', suffix = c('Rd_tag', 'Rd_tag_'))
+    indent.with <- control$indent.with %||% default(indent.with , FALSE, fun = 'Rd', suffix = c('Rd_tag', 'Rd_tag_'))
+    wrap.lines  <- control$wrap.lines  %||% default(wrap.lines  , FALSE, fun = 'Rd', suffix = c('Rd_tag', 'Rd_tag_'))
+    wrap.at     <- control$wrap.at     %||% default(wrap.at     , FALSE, fun = 'Rd', suffix = c('Rd_tag', 'Rd_tag_'))
+
+    Rd_tag( tag=tag, content=content, opt=opt
+          , indent=indent, indent.with=indent.with
+          , wrap.lines = wrap.lines, wrap.at = wrap.at)
+}
 Rd_tag  <-
 function( tag
         , ...
@@ -826,10 +836,13 @@ if(FALSE){
 
 Rd_lines <- function(l, ...){
     assert_that(is.list(l), all_inherit(l, 'Rd'))
-    if (all_are_tag(l, 'RCODE'))
-        Rd_canonize(cl(undim(rbind(l, .Rd.code.newline)), 'Rd'), ...)
-    else
-        Rd_canonize(cl(undim(rbind(l, .Rd.newline)), 'Rd'), ...)
+    val <- if (all_are_tag(l, 'RCODE'))
+            Rd_canonize(cl(undim(rbind(l, .Rd.code.newline)), 'Rd'), ...)
+        else
+            Rd_canonize(cl(undim(rbind(l, .Rd.newline)), 'Rd'), ...)
+    if (tail(val, 1L)=='\n')
+        val <- head(val, -1L)
+    return(val)
 }
 if(FALSE){#@testing
     l <- list( Rd_rcode("value \\%if\\% proposition")
