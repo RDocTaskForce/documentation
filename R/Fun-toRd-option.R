@@ -22,10 +22,10 @@ setMethod("doc_get_aliases", 'option-Documentation', function(doc){
 })
 
 setMethod("toRd", 'option-Documentation', function(obj){
-    c( name  = Rd_name(doc_get_name(obj))
-     , title = Rd_title(doc_get_title(obj))
-     , description =  Rd_tag(doc_get_description(obj), 'description')
-     , aliases = purrr::map_chr(doc_get_aliases(obj), Rd_tag, 'alias')
+    c( Rd_name(doc_get_name(obj))
+     , Rd_title(doc_get_title(obj))
+     , Rd_description(toRd(doc_get_description(obj)))
+     , Rd_aliases(doc_get_aliases(obj))
      )
 })
 if(FALSE){ #@testing
@@ -36,21 +36,10 @@ if(FALSE){ #@testing
 
     option.rd <- toRd(doc)
 
-    expect_true(!anyDuplicated(names(option.rd)))
-
-    expect_identical(option.rd[['name']], '\\name{anOption-option}')
-    expect_identical(option.rd[['title']], "\\title{Documentation for Option 'anOption'}")
-    expect_identical(option.rd[['description']], '\\description{a description}')
 
 
-    # tmp2 <- tempfile('docs', fileext = '.Rd')
-    # write_documentation(doc, fmt='Rd', file = textConnection('my_txt', 'w'))
-
-
-
-    # expect_identical( my_txt
-    #                 , c( "\\name{option-myOption)"
-    #                    )
-    #                 )
-
+    expect_identical(option.rd[['\\name']], Rd_name('anOption-option'))
+    expect_identical(option.rd[['\\title']], Rd_title("Documentation for Option 'anOption'"))
+    expect_identical(option.rd[['\\description']], Rd_description('a description'))
+    expect_identical(option.rd['\\alias'], Rd(Rd_alias('anOption'), Rd_alias('anOption-option')))
 }

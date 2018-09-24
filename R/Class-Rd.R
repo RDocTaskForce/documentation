@@ -666,6 +666,7 @@ if(FALSE){#! @testing
 ### Tag Convenience Functions #####
 
 Rd_alias <- function(alias){Rd_tag('alias', Rd_symb(alias)) %if% assert_that(length(alias)==1)}
+Rd_aliases <- function(aliases){Rd_lines(lapply(aliases, Rd_alias), 'Rd')}
 Rd_author <- function(author){
     if (is(author, 'person'))
         author <- toRd(author)
@@ -700,6 +701,7 @@ Rd_item <- function(arg, description) {
      , class = c('Rd_tag', 'Rd'))
 }
 Rd_keyword <- function(name){Rd_tag('keyword', Rd_text(name))}
+Rd_keywords <- function(keys){Rd(lapply(aliases, Rd_keyword))}
 Rd_name <- function(name){Rd_tag('name', Rd_symb(name))}
 Rd_title <- function(title){Rd_tag('title', Rd_text(title))}
 Rd_usage <- function(..., content=compact_Rd(Rd(...))){

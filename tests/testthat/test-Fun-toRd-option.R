@@ -11,21 +11,10 @@ test_that('toRd,option-Documentation-method', { #@testing
 
     option.rd <- toRd(doc)
 
-    expect_true(!anyDuplicated(names(option.rd)))
-
-    expect_identical(option.rd[['name']], '\\name{anOption-option}')
-    expect_identical(option.rd[['title']], "\\title{Documentation for Option 'anOption'}")
-    expect_identical(option.rd[['description']], '\\description{a description}')
 
 
-    # tmp2 <- tempfile('docs', fileext = '.Rd')
-    # write_documentation(doc, fmt='Rd', file = textConnection('my_txt', 'w'))
-
-
-
-    # expect_identical( my_txt
-    #                 , c( "\\name{option-myOption)"
-    #                    )
-    #                 )
-
+    expect_identical(option.rd[['\\name']], Rd_name('anOption-option'))
+    expect_identical(option.rd[['\\title']], Rd_title("Documentation for Option 'anOption'"))
+    expect_identical(option.rd[['\\description']], Rd_description('a description'))
+    expect_identical(option.rd['\\alias'], Rd(Rd_alias('anOption'), Rd_alias('anOption-option')))
 })
