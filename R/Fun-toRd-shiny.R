@@ -679,7 +679,7 @@ html_to_Rd.dl <- function(html, ...){
         items <- c(.Rd.newline, cl(undim(rbind(items, .Rd.newline)), 'Rd'))
     else
         items <- cl(items, 'Rd')
-    Rd_tag('describe', content=.Rd_indent(items, ...))
+    Rd_tag('describe', content=Rd_canonize(items, ...))
 }
 if(FALSE){#@testing
     html <- htmltools::tags$dl( htmltools::tags$dt("term1")
@@ -772,8 +772,8 @@ if(FALSE){#@testing
 #' @S3method html_to_Rd li
 html_to_Rd.li <- function(html, ...){
     Rd_canonize(c( Rd_tag("item"), Rd_text(space(1))
-                 , html_to_Rd(html$children)
-                 ))
+                 , html_to_Rd(html$children, ...)
+                 ), ...)
 }
 if(FALSE){#@testing
     html <- htmltools::tags$li("some ", htmltools::tags$em('text'), '.')
@@ -925,7 +925,7 @@ function( html, ...
     if (length(rows) > 1L)
         rows <- undim( rbind(list(c(Rd_tag("cr"), .Rd.newline))
                             , rows))[-1L]
-    rows <- Rd_canonize(compact_Rd(rows))
+    rows <- Rd_canonize(compact_Rd(rows), ...)
     s( rows, ncols = ncols, nrows = length(html$children), class='Rd')
 }
 

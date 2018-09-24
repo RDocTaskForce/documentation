@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-toRd-function.R`')
-#line 20 "R/Fun-toRd-function.R"
+#line 34 "R/Fun-toRd-function.R"
 test_that('toRd,function-Documentation-method', {#! @testing
     obj <- new( "function-Documentation"
               , name = as.name('function_documentation')
@@ -17,10 +17,9 @@ test_that('toRd,function-Documentation-method', {#! @testing
                                         )
               , value = "A function-Documentation obj."
               )
-    Rd <- toRd(obj)
-    expect_true(is.character(Rd))
-    expect_true(inherits(Rd, 'Rd'))
-    expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
+    rd <- toRd(obj)
+    expect_is_exactly(rd, 'Rd')
+
     expect_equal(Rd[['name']], '\\name{function_documentation}')
     expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
     expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')

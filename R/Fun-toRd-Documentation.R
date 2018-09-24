@@ -14,9 +14,19 @@
      , 'keywords'
      )
 
+
+slot_to_tag <- function(slot, obj, ..., control=list()){
+    elem <- getElement(obj, slot)
+    if (length(elem) == 0) return(Rd())
+    content <- toRd( elem, ...)
+    Rd_tag_(slot, content, control=control)
+}
+
 setMethod('toRd', 'BaseDocumentation',
-function( obj, ...
-        , exclude = character(0)
+function( obj                     #< Documentation Object.
+        , ...                     #< Currently Ignored, but included for compatability.
+        , exclude = character(0)  #< Specific slots in `obj` to exclude from output.
+        , control = list()        #< Formatting control parameters.
         ){
     "Convert Documentation to Rd format."
     to_tag <- function(name)
@@ -25,7 +35,7 @@ function( obj, ...
     .exclude <- c('author', 'keywords', 'aliases', 'concepts', 'sections')
 
     slots <- setdiff(slotNames(obj), c(.exclude, exclude))
-    rd <- structure(lapply(slots, to_tag), names = slots)
+    rd <- structure(lapply(slots, slot_to_tag, obj=obj, control=control), names = slots)
     rd <- Filter(length, rd)
 
     rd[['author']]   <- Rd_author(obj@author) %if% (length(obj@author))
@@ -47,7 +57,8 @@ if(FALSE){#! @testing
 
     description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
     description <- Rd_canonize( Rd(collapse(description, '\n\n'))
-                              , wrap.lines = TRUE, wrap.at=72)
+                              , control=list(wrap.lines = TRUE, wrap.at=72)
+                              )
     obj <-
     object <- new( "BaseDocumentation"
                  , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')

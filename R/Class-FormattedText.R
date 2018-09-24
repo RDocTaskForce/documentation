@@ -40,9 +40,9 @@ if(FALSE){#@testing FormattedText/Rd
     y <- S3Part(x, strictS3 = TRUE)
     expect_identical(x, y)
 
+    control = list(wrap.lines = TRUE, wrap.at=72)
     description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
-    description <- Rd_canonize( Rd(collapse(description, '\n\n'))
-                              , wrap.lines = TRUE, wrap.at=72)
+    description <- Rd_canonize( Rd(collapse(description, '\n\n')), control=control)
     expect_is(description, 'Rd')
     expect_true(length(description)>5L)
 

@@ -11,9 +11,9 @@ test_that('FormattedText/html', {#@testing FormattedText/html
     expect_is(obj, 'FormattedText/html')
     expect_is(obj, 'FormattedText')
 })
-#line 32 "R/Class-FormattedText.R"
+#line 33 "R/Class-FormattedText.R"
 test_that('FormattedText/Rd', {#@testing FormattedText/Rd
-    x <- Rd("\\note{Rd format text}")
+    x <- Rd_tag("note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
     expect_is(obj, 'Rd')
     expect_is(obj, 'FormattedText/Rd')
@@ -22,16 +22,20 @@ test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     y <- S3Part(x, strictS3 = TRUE)
     expect_identical(x, y)
 
-    z <- S3Part(FT_Rd("\\note{Rd format text}"), strictS3 = TRUE)
+    control = list(wrap.lines = TRUE, wrap.at=72)
+    description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
+    description <- Rd_canonize( Rd(collapse(description, '\n\n')), control=control)
+    expect_is(description, 'Rd')
+    expect_true(length(description)>5L)
+
+    x <- FT_Rd(Rd(description))
+    z <- S3Part(x, strictS3 = TRUE)
     attr(class(z), 'package') <- NULL
-    expect_identical(z, x)
+    expect_identical(z, description)
 
-
-    val <- S3Part(FT_Rd(1L))
-    attr(class(val), 'package') <- NULL
-    expect_equal(val, Rd('1'))
+    expect_error(val <- S3Part(FT_Rd(1L)))
 })
-#line 75 "R/Class-FormattedText.R"
+#line 80 "R/Class-FormattedText.R"
 test_that('FormattedText/character', {#@testing FormattedText/character
     x <- "just plain text"
     obj <- FT_character(x)

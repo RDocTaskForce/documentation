@@ -8,7 +8,7 @@ function(obj, ...){
     content <- lapply(content, Rd_rcode)
     if (length(content)>1L) {
         content <- c(.Rd.code.newline, Rd_lines(content))
-        content <- .Rd_indent(cl(content, 'Rd'), ...)
+        content <- Rd_canonize(cl(content, 'Rd'), ...)
     }
     Rd_usage(content=content)
 })

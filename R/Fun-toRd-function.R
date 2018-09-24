@@ -2,20 +2,34 @@
 #' @include Fun-toRd.R
 
 
+.default.functiondocumentation.order <-
+    c( 'name', 'aliases', 'concepts', 'title', 'author'
+     , 'description', 'usage', 'arguments'
+     , 'sections'
+     , 'value', 'seealso'
+     , 'references'
+     , 'examples'
+     , 'keywords'
+     )
+
 setMethod('toRd', 'function-Documentation',
 function( obj
         , ...
+        , control = list()
         ){
-    #' format the function documentation obj to markdown/CommonMark
-    Rd <- callNextMethod(obj, exclude=c('usage','arguments'), ...)
-    Rd[['arguments']] <- collapse(toRd(doc_get_arguments(obj)), '\n')
-    Rd[['usage']]     <- toRd(doc_get_usage(obj), ...)
+    #' format the function documentation obj to Rd format.
+    rd <- callNextMethod(obj, exclude=c('usage','arguments'), ...)
+    rd <- c(rd, toRd(doc_get_arguments(obj), ...))
+    rd <- c(rd, toRd(doc_get_usage(obj), ...))
 
+    order <- get_option( "Documentation::function-Documentation::documentation-order"
+                       , .default.functiondocumentation.order
+                       )
     if (is.na(obj@value))
-        Rd[['value']] <- ''
-    Rd <- Rd[nchar(Rd)>0]
+        rd[['value']] <- ''
+    rd <- rd[nchar(rd)>0]
 
-    return(Rd)
+    return(rd)
 })
 if(FALSE){#! @testing
     obj <- new( "function-Documentation"
@@ -31,14 +45,13 @@ if(FALSE){#! @testing
                                         )
               , value = "A function-Documentation obj."
               )
-    Rd <- toRd(obj)
-    expect_true(is.character(Rd))
-    expect_true(inherits(Rd, 'Rd'))
-    expect_true(all(c('name', 'usage', 'value', 'arguments') %in% names(Rd)))
-    expect_equal(Rd[['name']], '\\name{function_documentation}')
-    expect_equal(Rd[['value']], '\\value{A function-Documentation obj.}')
-    expect_equal(Rd[['usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
-    expect_equal(length(Rd[['arguments']]), 1)
+    rd <- toRd(obj)
+    expect_is_exactly(rd, 'Rd')
+
+    expect_equal(rd[['\\name']], Rd_name('function_documentation'))
+    expect_equal(rd[['\\value']], '\\value{A function-Documentation obj.}')
+    expect_equal(rd[['\\usage']], '\\usage{function_documentation(name, arguments, usage, ...)}')
+    expect_equal(length(rd[['\\arguments']]), 1)
 
     expect_false(any(nchar(Rd) == 0))
 
