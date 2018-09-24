@@ -394,7 +394,7 @@ function( pkg = '.'     #< package to extract tests for.
     }
     if (!is.null(filter)) {
         assert_that(is.string(filter))
-        which.files <- grepl(filter, sub("\\.[rR]$", "", basename(files)))
+        which.files <- grepl(filter, sub("\\.[rR]$", "", basename(files)), perl = TRUE)
         if (!any(which.files))
             doc_error("Filtered to no files to extract from.")
         files <- files[which.files]
@@ -534,7 +534,7 @@ test <- function(...){
     tests <- extract_tests(pkg, filter=filter)
     doc_message(length(unlist(tests))%<<<%' test blocks extracted.\n')
     if (requireNamespace('devtools'))
-        devtools::test(pkg=pkg, filter=filter)
+        devtools::test(pkg=pkg, filter=filter, perl=TRUE)
     else
         stop('devtools is required to run the tests.')
 }
