@@ -197,14 +197,13 @@ if(FALSE){#@testing
 
 # toRd,Documentation-Examples ##################################################
 setMethod('toRd', "Documentation-Examples",
-function( obj, ..., indent=default(indent, FALSE)){
+function( obj, ...) {
     if (length(obj)==0) return(Rd())
     content <- lapply(obj, toRd, ...)
     if (length(content) > 1L)
-        content <- compact_Rd(interleave(rep(list(.Rd.code.newline), length(content)), content))
-    if (indent)
-        content <- .Rd_indent(cl(content, 'Rd'), indent = TRUE, ...)
-    Rd_examples(content=compact_Rd(content), ...)
+        content <- Rd_lines(content)
+    content <- Rd_canonize(cl(content, 'Rd'), ...)
+    Rd_examples(content=content)
 })
 if(FALSE){#@testing
     simple.text <- "
@@ -235,11 +234,11 @@ if(FALSE){#@testing
                       'expect_is(b, "Rd")' %\%
                       "}")
 
-    rd <- toRd(examples, indent=TRUE, indent.with=space(4))
+    rd <- toRd(examples, control=list(indent=TRUE, indent.with=space(4)))
     expect_is_exactly(rd, 'Rd')
     expect_true(is_Rd_tag(rd[[1]], "\\examples"))
-    expect_identical( as.character(collapse0(rd))
-                    , "\\examples{" %\%
+    expect_identical( collapse0(rd)
+                    , exp <- "\\examples{" %\%
                       "    # prints hello world." %\%
                       "    hw()" %\%
                       '' %\%

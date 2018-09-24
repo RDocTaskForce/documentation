@@ -130,7 +130,7 @@ test_that('toRd,example-method', {#@testing
                     , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
                     )
 })
-#line 209 "R/Fun-toRd-example.R"
+#line 208 "R/Fun-toRd-example.R"
 test_that('toRd,Documentation-Examples-method', {#@testing
     simple.text <- "
     # prints hello world.
@@ -160,11 +160,11 @@ test_that('toRd,Documentation-Examples-method', {#@testing
                       'expect_is(b, "Rd")' %\%
                       "}")
 
-    rd <- toRd(examples, indent=TRUE, indent.with=space(4))
+    rd <- toRd(examples, control=list(indent=TRUE, indent.with=space(4)))
     expect_is_exactly(rd, 'Rd')
     expect_true(is_Rd_tag(rd[[1]], "\\examples"))
-    expect_identical( as.character(collapse0(rd))
-                    , "\\examples{" %\%
+    expect_identical( collapse0(rd)
+                    , exp <- "\\examples{" %\%
                       "    # prints hello world." %\%
                       "    hw()" %\%
                       '' %\%
