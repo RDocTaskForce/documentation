@@ -24,7 +24,8 @@ Suggests:
     htmltools,
     rmarkdown (>= 1.8),
     rstudioapi,
-    testthat
+    testthat,
+    knitr
 Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
@@ -64,6 +65,7 @@ Collate:
     'Fun-documentation.R'
     'Fun-accessors.R'
     'Fun-accessors-funtion.R'
+    'Fun-accessors-option.R'
     'Fun-check_documented.R'
     'Fun-default.R'
     'Fun-document.R'
@@ -74,7 +76,6 @@ Collate:
     'Fun-toRd.R'
     'Fun-format.R'
     'Fun-toRd-Documentation.R'
-    'Fun-toRd-SectionList.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-example.R'
     'Fun-toRd-function.R'
@@ -83,6 +84,7 @@ Collate:
     'Fun-toRd-usage.R'
     'Fun-write_documentation.R'
     'Funs.R'
+Roxygen: list(markdown = TRUE, roclets = c("namespace", "collate"))
 RoxygenNote: 6.1.0
 Enhances: devtools
 Encoding: UTF-8

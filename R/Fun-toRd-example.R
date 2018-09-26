@@ -1,5 +1,5 @@
 #' @include Classes.R
-#' @importFrom utils head tails
+#' @importFrom utils head tail
 
 
 trimws_example <- function(txt){
@@ -44,10 +44,10 @@ function(src){
         return(flatten_lines(l))
     }
     assert_that(is(src, 'srcref'))
-    start <- getSrcLocation(src, 'line', TRUE)
-    end   <- getSrcLocation(src, 'line', FALSE)
-    col1  <- getSrcLocation(src, 'col', TRUE)
-    col2  <- getSrcLocation(src, 'col', FALSE)
+    start <- utils::getSrcLocation(src, 'line', TRUE)
+    end   <- utils::getSrcLocation(src, 'line', FALSE)
+    col1  <- utils::getSrcLocation(src, 'col', TRUE)
+    col2  <- utils::getSrcLocation(src, 'col', FALSE)
 
     file <- attr(src, 'srcfile')
     assert_that(is(file, 'srcfile'))

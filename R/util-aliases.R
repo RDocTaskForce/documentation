@@ -114,5 +114,8 @@ if(FALSE){
                     )
 }
 
-
+no_attributes <- function(object){
+    mostattributes(object) <- NULL
+    return(object)
+}
 

@@ -55,7 +55,7 @@ if(FALSE){#! @testing
 #' @export
 setGeneric( 'documentation<-', signature=c('object', 'value')
           , simpleInheritanceOnly = FALSE
-          , function(object, value, ...){
+          , function(object, value){
                 if (!is(value, 'Documentation')) doc_invalid()
                 standardGeneric('documentation<-')
             })

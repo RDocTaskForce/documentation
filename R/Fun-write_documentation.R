@@ -55,7 +55,7 @@ function( doc    #< A Documentation object.
                , is.character(header.lines)
                )
     lines <- format(doc, fmt=fmt, ...)
-    writeLines(lines, file)
+    cat(lines, file=file, sep='')
 }
 if(FALSE){
     doc <- function_documentation( name = 'test'
@@ -63,6 +63,9 @@ if(FALSE){
                                  , description = "A description for my test function"
                                  , arguments = ArgumentList( arg_('x', 'the x argument'))
                                  )
+    toRd(doc)
+    format(doc, 'Rd') %>% collapse0() %>% cat
+
     tmp <- tempfile('docs', fileext = '.Rd')
 
     txt <- textConnection('my_txt', 'w')
@@ -79,25 +82,23 @@ if(FALSE){
     rm(list='my_txt')
 
 
-    doc <- function_documentation( name = (name <- stri_rand_strings(1, 10))
-              , title = (title <- stri_wrap(stri_rand_lipsum(1), 40)[[1]])
+    doc <- function_documentation( name = (name <- stringi::stri_rand_strings(1, 10, "[a-z]"))
+              , title = (title <- stringi::stri_wrap(stringi::stri_rand_lipsum(1), 40)[[1]])
               , description = (description <- FormattedText(stringi::stri_rand_lipsum(3)))
               , arguments = ArgumentList()
               )
 
-    Rd_description(toRd(doc@description))
-
     write_documentation(doc, fmt='Rd', file = textConnection('test_documentation', 'w'))
-
     expect_identical( test_documentation
                     , c( "\\name{" %<<<% name %<<<% "}"
-                       , "\\usage{" %<<<% name %<<<% "()}"
                        , "\\title{" %<<<% title %<<<% "}"
                        , "\\description{"
                        , head(interleave(description, c('', '', '')), -1)
                        , "}"
+                       , "\\usage{" %<<<% name %<<<% "()}"
                        )
                     )
+    rm(list='test_documentation')
 }
 
 

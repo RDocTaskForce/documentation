@@ -18,6 +18,8 @@
 `%unless%` <- function( prior, proposition ){
     if (!proposition) return(prior)
 }
+#' @rdname %unless%
+#' @export
 `%then%` <- function( clause, alternate){
     clause.call <- substitute(clause)
     if (clause.call[[1]] != '%unless%')
@@ -81,10 +83,12 @@ if(FALSE){#@example
 #' @param proposition The logical statement to evaluate
 #' @param alternate The value to be returned if proposition evaluates to FALSE.
 #'
-#' @export %if% %otherwise%
+#' @export
 `%if%` <- function( prior, proposition ){
     if (proposition) return(prior)
 }
+#' @rdname %if%
+#' @export
 `%otherwise%` <- function( clause, alternate){
     clause.call <- substitute(clause)
     if (clause.call[[1]] != '%if%')

@@ -203,7 +203,7 @@ expect_rd_output <- function(rd, file, info=NULL, label=NULL){
     ident <- identical(val, expected)
     msg <- if (ident) '' else ""
         sprintf("%s does not produce lines of documentation in %s", act$label, sQuote(file))
-    expect(ident, msg,info=info)
+    testthat::expect(ident, msg,info=info)
 }
 
 

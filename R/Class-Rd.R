@@ -1,5 +1,5 @@
-#' @import setup.R
-#' @import utils.R
+#' @include setup.R
+#' @include utils.R
 
 # Classes Rd and Rd_tag are set in the file setup-set_old_classes.R
 
@@ -62,7 +62,7 @@ Rd_get_element <- function(x, ..., drop=TRUE){
     doc_error("malformed Rd")
 }
 #' @export
-`[[.Rd` <- function(...)Rd_get_element(...)
+`[[.Rd` <- function(...){Rd_get_element(...)}
 if(FALSE){#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'documentation')
     txt <- tools::parse_Rd(test.file)
@@ -702,7 +702,7 @@ Rd_item <- function(arg, description) {
      , class = c('Rd_tag', 'Rd'))
 }
 Rd_keyword <- function(name){Rd_tag('keyword', Rd_text(name))}
-Rd_keywords <- function(keys){Rd(lapply(aliases, Rd_keyword))}
+Rd_keywords <- function(keys){Rd(lapply(keys, Rd_keyword))}
 Rd_name <- function(name){Rd_tag('name', Rd_symb(name))}
 Rd_title <- function(title){Rd_tag('title', Rd_text(title))}
 Rd_usage <- function(..., content=compact_Rd(Rd(...))){

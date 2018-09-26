@@ -210,7 +210,7 @@ function( x   #< Rd object.
             return(forward_attributes(paste0(indent.with, x),x))
         else if (is_exactly(x, 'Rd_newline')) return(x)
         else
-            doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x)), '/'))
+            doc_error("Unknown Rd type" %<<% sQuote(collapse(class(x), '/')))
     }
     assert_that(is.list(x))
     if (!Rd_spans_multiple_lines(x)) return(x)

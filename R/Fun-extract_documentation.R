@@ -52,9 +52,13 @@ function( object
     roxy.blocks <- roxygen2::parse_file( srcfile, env=env, registry = registry
                                        , global_options=options)
     for (block in roxy.blocks){
+        val <- attr(block, 'object')$value
         # call <- attr(block, 'call')
         # location <- attr(block, 'location')
-        if (identical(attr(block, 'object')$value, object)) {
+        if ( identical(val, object)
+           | ( !is.null(sr<-getSrcref(val)) && identical(sr, getSrcref(object)))
+           | identical(no_attributes(val), no_attributes(object))
+           ) {
             return(block)
         }
     }
