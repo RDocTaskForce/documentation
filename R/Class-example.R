@@ -1,8 +1,10 @@
 #' @include utils.R
 #' @include Class-Vector.R
 
+#' @export
 setClass("Documentation-example", contains='VIRTUAL')
 
+#' @export
 setClass("example", contains=c("Documentation-example", "expression"))
 if(FALSE){#@testing
     simple.text <- "

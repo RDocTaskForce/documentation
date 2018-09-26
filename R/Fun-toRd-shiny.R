@@ -1119,6 +1119,7 @@ if(FALSE){#@testing
 
 # toRd,shiny.tag ------------------------------------------------------------------
 
+#' @export
 setMethod('toRd', 'shiny.tag', function(obj, ...){
     if (identical(class(obj), 'shiny.tag'))
         class(obj) <- c(html_get_type(obj), 'shiny.tag')

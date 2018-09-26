@@ -47,16 +47,16 @@ if(FALSE){#@testing
     expect_error( toRd(cl(1L, 'test_class'))
                 , class = "documentation-error")
 }
-set_option_documentation( "documentation::Rd::indent"
-   , description = "Determines if code should be indented when formatted.  Should default to FALSE when unset."
-   , default = FALSE
-   , constraints = list(is.logical)
-   )
-set_option_documentation( "documentation::Rd::indent.with"
-   , description = "Determines what to indent with, when getOption('documentation::toRd::indent') is TRUE."
-   , default = "  "
-   , constraints = list(~is.string(.))
-   )
+# set_option_documentation( "documentation::Rd::indent"
+#    , description = "Determines if code should be indented when formatted.  Should default to FALSE when unset."
+#    , default = FALSE
+#    , constraints = list(is.logical)
+#    )
+# set_option_documentation( "documentation::Rd::indent.with"
+#    , description = "Determines what to indent with, when getOption('documentation::toRd::indent') is TRUE."
+#    , default = "  "
+#    , constraints = list(~is.string(.))
+#    )
 
 # Helpers ============================================
 .Rd.default.indent <- s(list(s( "    "
@@ -346,19 +346,19 @@ if(FALSE){#@testing indenting first lines
 }
 
 
-set_option_documentation("documentation::Rd::collapse.lines"
-   , description = "should documentation functions return a single " %<<%
-                   "string (TRUE) or a array of strings (FALSE) " %<<%
-                   "representing the lines of documentation."
-   , default = FALSE
-   , constraints = list(is.logical)
-   )
-set_option_documentation("documentation::Rd::collapse.with"
-   , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %<<%
-                   "is \\code{TRUE} what the lines should be separated with."
-   , default = "\n"
-   , constraints = list(~is.string(.))
-   )
+# set_option_documentation("documentation::Rd::collapse.lines"
+#    , description = "should documentation functions return a single " %<<%
+#                    "string (TRUE) or a array of strings (FALSE) " %<<%
+#                    "representing the lines of documentation."
+#    , default = FALSE
+#    , constraints = list(is.logical)
+#    )
+# set_option_documentation("documentation::Rd::collapse.with"
+#    , description = "when \\code{getOption(documentation::toRd::collapse.lines)}" %<<%
+#                    "is \\code{TRUE} what the lines should be separated with."
+#    , default = "\n"
+#    , constraints = list(~is.string(.))
+#    )
 
 .Rd_strwrap <-
 function( x
@@ -672,6 +672,7 @@ if(FALSE){#@testing
 # }
 
 ### toRd,Documentation-Keyword #####
+#' @export
 setMethod('toRd', 'Documentation-Keyword', function( obj, ...){
     if(length(obj) == 1 ) Rd_keyword(obj@.Data)
     cl(lapply(obj@.Data, Rd_keyword), 'Rd')
@@ -695,6 +696,7 @@ if(FALSE){#! @testing
 
 
 ### toRd,FormattedText/Rd #####
+#' @export
 setMethod('toRd', 'FormattedText/Rd',
 function( obj, ...){
     #! Convert formatted text into Rd lines.
@@ -727,6 +729,7 @@ if(FALSE){#! @testing
 }
 
 ### toRd,FormattedText/character #####
+#' @export
 setMethod('toRd', 'FormattedText/character',
 function( obj, ..., control=list()){
     txt <- S3Part(obj, strictS3 =TRUE)

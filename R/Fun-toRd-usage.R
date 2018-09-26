@@ -1,6 +1,7 @@
 #' @include Classes.R
 #' @include Fun-toRd.R
 
+#' @export
 setMethod('toRd', 'usage',
 function(obj, ...){
     content <- lapply(obj, deparse)

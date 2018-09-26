@@ -125,6 +125,7 @@ if(FALSE){#@testing
 }
 
 # toRd,example #################################################################
+#' @export
 setMethod('toRd', "example",
 function( obj, ...
         , use.source = default(use.source, TRUE) #< use source lines over reconstructed.
@@ -196,6 +197,7 @@ if(FALSE){#@testing
 }
 
 # toRd,Documentation-Examples ##################################################
+#' @export
 setMethod('toRd', "Documentation-Examples",
 function( obj, ...) {
     if (length(obj)==0) return(Rd())

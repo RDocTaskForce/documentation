@@ -1,6 +1,7 @@
 #' @include Classes.R
 #' @include Fun-documentation.R
 
+#' @export
 get_S4_documentation <-
 function( Class  #< A [classRepresentation] or a string representing a class.
         , ... #< passed on to getClassDef if `Class` is a character, discarded otherwise.
@@ -24,6 +25,7 @@ function( Class  #< A [classRepresentation] or a string representing a class.
 }
 
 
+#' @export
 setMethod('documentation', 'classRepresentation',
 function( object    #< the classRepresentation object
         , ...       #< Currently ignored
@@ -73,10 +75,12 @@ function( Class  #< A [classRepresentation] or a string representing a class.
             message("documentation already exists; overwriting.")
     assign(dname, docs, envir=where)
 }
+#' @export
 setMethod('documentation<-', c('classRepresentation', 'S4-Documentation'),
 function(object, value){
     set_S4_documentation(object, value)
 })
+#' @export
 setMethod('documentation<-', c('ANY', 'S4-Documentation'),
 function(object, value){
     stop('S4-Documentation objects can only be set for objects'   %<<%
@@ -103,6 +107,7 @@ if(FALSE){#
 }
 
 
+#' @export
 setClass('S4-Method-Documentation', contains='function-Documentation'
         , slots = c( signature = 'character'
                    , package.of.generic = 'character'

@@ -3,12 +3,15 @@
 #' @include Fun-accessors.R
 
 
+#' @export
 setMethod("doc_get_name", 'option-Documentation', function(doc){
     doc@key %<<<% "-option"
 })
+#' @export
 setMethod("doc_get_title", 'option-Documentation', function(doc){
     ._("Documentation for Option '%s'", doc@key)
 })
+#' @export
 setMethod("doc_get_details", 'option-Documentation', function(doc){
     if (inherits(doc@default, "Documentation-No-Default-Value"))
         ._("Option '%s' has no set default value.", doc@key)
@@ -17,10 +20,12 @@ setMethod("doc_get_details", 'option-Documentation', function(doc){
     #TODO add formatting for including constraints in details.
 
 })
+#' @export
 setMethod("doc_get_aliases", 'option-Documentation', function(doc){
     c(doc@key, doc_get_name(doc))
 })
 
+#' @export
 setMethod("toRd", 'option-Documentation', function(obj, ..., raw.list=FALSE){
     l <- list( name        = Rd_name(doc_get_name(obj))
              , aliases     = Rd_aliases(doc_get_aliases(obj))

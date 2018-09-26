@@ -183,8 +183,8 @@ if(F){# development
     envir <- ns <- asNamespace('documentation')
     (results <- document_env(ns, exclude="^\\..+"))
 
-    extract_documentation(`%otherwise%`)
-    
+    docs <- extract_documentation(`%if%`)
+
     library(dplyr)
     results %>% filter(Name == "%<<%")
     results %>% filter(Name == "as.filename")
@@ -279,10 +279,10 @@ if(FALSE){#@testing
 }
 
 #' @describeIn document  Document a package documentation style.
-#' 
+#'
 #' When document is provided a character string it is assumed
 #' to be the path to a package.
-#' 
+#'
 #' @note character vectors do not carry any class information
 #' and thus documentation cannot be extracted
 document_package <-

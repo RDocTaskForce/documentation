@@ -2,6 +2,7 @@
 #' @include Class-function-Documentation.R
 #' @include Class-Vector.R
 
+#' @export
 setClass('slot-Documentation', contains = 'arg-Documentation'
         , slots= c(valid.class='character')
         )
@@ -10,6 +11,7 @@ setVector( element = "slot-Documentation"
          , Class   = "Slots-Documentation"
          )
 
+#' @export
 S4_documentation <-
 setClass( 'S4-Documentation', contains='BaseDocumentation'
         , slots = c( Slots = 'Slots-Documentation'

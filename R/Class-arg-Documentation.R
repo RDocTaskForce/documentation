@@ -1,6 +1,7 @@
 #' @include utils.R
 #' @include Class-Vector.R
 
+#' @export
 arg_ <-
 setClass( "arg-Documentation"
         , slots = c( name        = 'name'
@@ -9,6 +10,7 @@ setClass( "arg-Documentation"
                    , constraints = 'list'
                    )
         )
+#' @export
 setMethod('initialize', 'arg-Documentation',
     function( .Object
             , name                      #< [name|character] name of the argument

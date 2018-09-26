@@ -1,6 +1,7 @@
 #' @include Classes.R
 #' @include Fun-accessors.R
 
+#' @export
 setMethod("doc_get_usage", "function-Documentation", function(doc){
     if (is(doc@usage, 'waiver')){
         as(as.call( c( as.name(doc_get_name(doc))

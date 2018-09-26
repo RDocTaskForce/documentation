@@ -2,6 +2,7 @@
 #' @include Class-Documentation-Default-Value.R
 #' @include utils.R
 
+#' @export
 option_documentation <-
 setClass('option-Documentation', contains = 'BaseDocumentation'
         , slots = c( key         = 'character'
@@ -9,6 +10,7 @@ setClass('option-Documentation', contains = 'BaseDocumentation'
                    , constraints = 'list'
                    )
         )
+#' @export
 setMethod('initialize', 'option-Documentation',
     function( .Object
             , key                       #< [character] name of the argument

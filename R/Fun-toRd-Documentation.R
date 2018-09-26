@@ -22,6 +22,7 @@ slot_to_tag <- function(slot, obj, ..., control=list()){
     Rd_tag_(slot, content, control=control)
 }
 
+#' @export
 setMethod('toRd', 'BaseDocumentation',
 function( obj                     #< Documentation Object.
         , ...                     #< Currently Ignored, but included for compatability.

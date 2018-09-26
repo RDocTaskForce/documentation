@@ -12,6 +12,7 @@
      , 'keywords'
      )
 
+#' @export
 setMethod('toRd', 'function-Documentation',
 function( obj
         , ...

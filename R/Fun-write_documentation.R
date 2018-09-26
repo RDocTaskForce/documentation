@@ -5,6 +5,7 @@
 #'
 #' This scans through all objects in a package environment
 #' and writes documentation files to the given directory.
+#' @export
 write_package_documentation <-
 function( pkg = '.'      #< Base path of package to document.
         , ...            #< arguments passed on to write_documentation.
@@ -36,7 +37,8 @@ if(FALSE){#@development
 }
 
 
-
+#' Write a documentation objec to file.
+#' @export
 write_documentation <-
 function( doc    #< A Documentation object.
         , ...    #< passed on to format
@@ -99,6 +101,28 @@ if(FALSE){
                        )
                     )
     rm(list='test_documentation')
+
+
+    doc <- new('option-Documentation', 'anOption', 'a description')
+
+    expect_identical(doc_get_name(doc), "anOption-option")
+    expect_identical(doc_get_title(doc), "Documentation for Option 'anOption'")
+
+    x <- textConnection("anOption-option.Rd", 'w')
+    write_documentation(doc, fmt='Rd', file = x)
+    close(x)
+
+    expect_identical( `anOption-option.Rd`
+                    , c( "\\name{anOption-option}"
+                       , "\\alias{anOption}"
+                       , "\\alias{anOption-option}"
+                       , "\\title{Documentation for Option 'anOption'}"
+                       , "\\description{a description}"
+                       ))
+
+
+
+
 }
 
 

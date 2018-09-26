@@ -1,7 +1,9 @@
 
+#' @export
 setClass("Virtual/Usage", contains='VIRTUAL')
 
 
+#' @export
 usage <- setClass("usage", contains=c("Virtual/Usage", "expression"))
 if(FALSE){#@testing
     u <- usage()
@@ -43,8 +45,10 @@ if(FALSE){#@usage
     expect_identical(as(name, 'usage'), usage(expression(hello)))
 }
 
+#' @export
 setClass("waiver")
 
+#' @export
 usage_waiver <-
 setClass('usage-waiver', contains=c("Virtual/Usage", "waiver"))
 if(FALSE){#@testing

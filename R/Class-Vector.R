@@ -9,6 +9,7 @@ function( element                                   #< name of the class that el
         , where = topenv(parent.frame())
         ){
 stopifnot(is.character(element) && length(element) == 1)
+#' @export
 val <-
 setClass( Class=Class, contains = c(contains, 'list')
         , validity =  function(object){

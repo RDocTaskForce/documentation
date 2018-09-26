@@ -1,6 +1,7 @@
 #' @include utils.R
 
 setClass('Documentation-Default-Value'           , contains="VIRTUAL")
+setClass('Documentation-Default-Value'           , contains="VIRTUAL")
 setClass('Documentation-Default-Value:logical'   , contains=c('Documentation-Default-Value', 'logical'   ))
 setClass('Documentation-Default-Value:integer'   , contains=c('Documentation-Default-Value', 'integer'   ))
 setClass('Documentation-Default-Value:numeric'   , contains=c('Documentation-Default-Value', 'numeric'   ))
@@ -25,9 +26,11 @@ setAs('function'  , 'Documentation-Default-Value', function(from){new('Documenta
 setAs('name'      , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:name'      , from)})
 setAs('NULL'      , 'Documentation-Default-Value', function(from){new('Documentation-Default-Value:NULL'      , from)})
 
+#' @export
 setClass( 'Documentation-Default-Value:language'
         , contains  = c('Documentation-Default-Value', 'language')
         )
+#' @export
 setMethod('initialize', 'Documentation-Default-Value:language',
     function(.Object, value, ...){
         stopifnot(is(value, 'language'))

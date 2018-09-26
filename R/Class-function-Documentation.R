@@ -15,6 +15,7 @@ setClass('function-Documentation', contains = 'BaseDocumentation'
                    )
         )
 functionDocumentation <- getClass('function-Documentation')
+#' @export
 setMethod('initialize', 'function-Documentation',
     function( .Object
             , name

@@ -18,6 +18,7 @@ if(FALSE){#@testing FormattedText/html
 
 #' @export
 FT_Rd <- setClass("FormattedText/Rd", list('FormattedText', 'Rd'))
+#' @export
 setMethod('initialize', "FormattedText/Rd",
 function( .Object, value=list(), ...){
     if (is.character(value))

@@ -60,6 +60,7 @@ setGeneric( 'documentation<-', signature=c('object', 'value')
                 standardGeneric('documentation<-')
             })
 
+#' @export
 setMethod('documentation<-', c('ANY', 'Documentation'),
 function( object, value
         ){

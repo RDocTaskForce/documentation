@@ -3,6 +3,7 @@
 
 
 ### toRd,arg-Documentation #####
+#' @export
 setMethod('toRd', 'arg-Documentation',
 function(obj, ...){
     #Question: does thise need to include more details like default value?
@@ -16,6 +17,7 @@ if(FALSE){#! @testing
 }
 
 ### toRd,ArgumentList #####
+#' @export
 setMethod('toRd', 'ArgumentList',
 function( obj
         , ...

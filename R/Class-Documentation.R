@@ -7,9 +7,11 @@
 #' @import methods
 
 
+#' @export
 setClass('Documentation', contains='VIRTUAL')
 
 ### BaseDocumentation-class #####
+#' @export
 setClass( "BaseDocumentation", contains='Documentation'
         , slots = c( author      = "person"
                    , title       = "character"
@@ -32,6 +34,7 @@ setClass( "BaseDocumentation", contains='Documentation'
         )
 
 ### intialize,BaseDocumentation #####
+#' @export
 setMethod("initialize", 'BaseDocumentation',
     function( .Object
             , ...
@@ -127,6 +130,7 @@ if(FALSE){#@testing
 }
 
 ### as.list,Documentation #####
+#' @export
 setMethod("as.list", 'Documentation',
 function(x, ...){
     structure( lapply(slotNames(x), getElement, object=x)

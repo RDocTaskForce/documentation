@@ -3,6 +3,7 @@
 setGeneric("is_complete", valueClass="logical", function(doc){
     stop("is_complete is intended to be used with documentation objects only.")
 })
+#' @export
 setMethod("is_complete", "Documentation", function(doc){
     warning("is_complete is not implemented for documentation class ", class(doc))
     invisible(TRUE)
