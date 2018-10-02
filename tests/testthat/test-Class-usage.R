@@ -27,7 +27,7 @@ test_that('usage', {#@testing
     expect_is(object@usage, 'expression')
     removeClass('FD-test')
 })
-#line 63 "R/Class-usage.R"
+#line 66 "R/Class-usage.R"
 test_that('as(`function`, "usage")', {#@testing
     val <- as(rnorm, 'usage')
     exp <- new('usage', expression(rnorm(n, mean=0, sd=1)))
@@ -39,13 +39,10 @@ test_that('as(`function`, "usage")', {#@testing
     exp2 <- new('usage', expression(dnorm(x, mean=0, sd=1, log=FALSE)))
     expect_identical(val2, exp2)
 
-    v3 <- c(val, val2)
 
-    attr(v3[[2]], 'additional') <- TRUE
-
-
-    v3
-
+    val <- as(html_to_Rd.a, 'usage')
+    expect_is(val, 'usage')
+    expect_is_exactly(val, 'usage/S3method')
 })
 #line 93 "R/Class-usage.R"
 test_that('usage_waiver', {#@testing

@@ -51,8 +51,11 @@ if(FALSE){#@usage
 
 ### function → usage #####
 setAs("function", 'usage', function(from){
-    name <- attr(from, 'name') %||% match.call(call=sys.call(-1))$from
+    name <- attr(from, 'name') %||% name_me(from) %||% match.call(call=sys.call(-1))$from
     args <- formals(from)
+
+    if (is_registered_S3method(from))
+        return(as(from, "usage/S3method"))
 
     for (i in which(nchar(args)==0)){
         args[[i]] <- as.name(names(args)[[i]])
@@ -71,13 +74,10 @@ if(FALSE){#@testing
     exp2 <- new('usage', expression(dnorm(x, mean=0, sd=1, log=FALSE)))
     expect_identical(val2, exp2)
 
-    v3 <- c(val, val2)
 
-    attr(v3[[2]], 'additional') <- TRUE
-
-
-    v3
-
+    val <- as(html_to_Rd.a, 'usage')
+    expect_is(val, 'usage')
+    expect_is_exactly(val, 'usage/S3method')
 }
 
 
@@ -148,7 +148,7 @@ if(FALSE){#@testing
 
 ### function → usage/S3method #####
 setAs("function", 'usage/S3method', function(from){
-    name <- attr(from, 'name') %||% match.call(call=sys.call(-1))$from
+    name <- attr(from, 'name') %||% name_me(from) %||% match.call(call=sys.call(-1))$from
     generic <- attr(from, 'generic') %||%
                strsplit(as.character(name), '.', fixed=TRUE)[[1L]][[1L]]
     signature <- attr(from, 'signature') %||%
@@ -196,7 +196,7 @@ setMethod("initialize", "usage/S4method",
     })
 
 ### function → usage/S4method #####
-setAs("MethodDefinition", 'usage/S4method', function(from){
+setAs("MethodDefinition", 'usage', function(from){
     generic <- as.name(from@generic)
     signature <- from@defined
 
