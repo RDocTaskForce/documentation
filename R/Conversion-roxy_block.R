@@ -1,8 +1,10 @@
 #' @include Classes.R
 
+### Definitions #####
 .roxy.namespace <- roxygen2::roclet_tags( roxygen2::roclet('namespace'))
 .roxy.namespace.tags <- names(.roxy.namespace)
 
+### roxy_block → Documentation #####
 setAs('roxy_block', 'Documentation', function(from){
     call <- attr(from, 'call')
     while (call[[1]] == as.name('<-'))
@@ -11,6 +13,7 @@ setAs('roxy_block', 'Documentation', function(from){
         as(from, 'function-Documentation')
 })
 
+### roxy_block → function-Documentation #####
 setAs('roxy_block', 'function-Documentation', function(from){
     if ('rdname' %in% from)
         browser()
@@ -36,7 +39,11 @@ setAs('roxy_block', 'function-Documentation', function(from){
                     docs@usage <- as(parse(text=unlist(strsplit(from[[i]], '\n'))), 'usage')
               }
               , 'details' = {
-                    docs@sections[['details']] <- as(from[[i]], 'Prose')
+                    docs@sections[['details']] <- as(from[[i]], 'FormattedText')
+              }
+              , 'describeIn' = {
+                    attr(docs, 'describe.in') <- get(value$name)
+                    docs@description <- as(value$description, 'FormattedText')
               }
               , {
                     name <- names(from)[[i]]
