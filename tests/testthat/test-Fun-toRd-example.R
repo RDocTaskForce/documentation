@@ -79,7 +79,7 @@ test_that('doc_example_get_src_lines', {#@testing
                    ))
 
 })
-#line 148 "R/Fun-toRd-example.R"
+#line 149 "R/Fun-toRd-example.R"
 test_that('toRd,example-method', {#@testing
     simple.text <- "
     # prints hello world.
@@ -108,7 +108,7 @@ test_that('toRd,example-method', {#@testing
                     ,Rd_rcode( 'expect_is(b, "Rd")\n')
                     ))
 })
-#line 176 "R/Fun-toRd-example.R"
+#line 177 "R/Fun-toRd-example.R"
 test_that('toRd,example-method', {#@testing
     ex.blank <- new('example')
     expect_identical(toRd(ex.blank), Rd(character(0)))
@@ -130,7 +130,7 @@ test_that('toRd,example-method', {#@testing
                     , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
                     )
 })
-#line 208 "R/Fun-toRd-example.R"
+#line 210 "R/Fun-toRd-example.R"
 test_that('toRd,Documentation-Examples-method', {#@testing
     simple.text <- "
     # prints hello world.

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-postlogic.R`')
-#line 34 "R/util-postlogic.R"
+#line 36 "R/util-postlogic.R"
 test_that('unless-then logic', {#@testing unless-then logic
     if (exists('x', inherits=FALSE)) rm(list='x')
     val <- (x <- 'it is supposed to be evaluated') %unless% FALSE
@@ -31,7 +31,7 @@ test_that('unless-then logic', {#@testing unless-then logic
                   "following an '%unless%' infix."
                 )
 })
-#line 101 "R/util-postlogic.R"
+#line 105 "R/util-postlogic.R"
 test_that('if-otherwise logic', {#@testing if-otherwise logic
     if (exists('x', inherits=FALSE)) rm(list='x')
     val <- (x <- 'it still evaluated') %if% FALSE

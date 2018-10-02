@@ -536,7 +536,7 @@ test_that('html_to_Rd.ul', {#@testing
                                                ))
                 )
 })
-#line 1127 "R/Fun-toRd-shiny.R"
+#line 1128 "R/Fun-toRd-shiny.R"
 test_that('toRd,shiny.tag-method', {#@testing
     html <-
         with(htmltools::tags, {

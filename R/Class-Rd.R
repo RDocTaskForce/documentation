@@ -707,7 +707,7 @@ Rd_name <- function(name){Rd_tag('name', Rd_symb(name))}
 Rd_title <- function(title){Rd_tag('title', Rd_text(title))}
 Rd_usage <- function(..., content=compact_Rd(Rd(...))){
     val <- Rd_tag('usage', content=content, opt=NULL, wrap.lines = FALSE)
-    assert_that(all_inherit(val, c('Rd_RCODE', 'Rd_indent', 'Rd_newline')))
+    assert_that(all_are_tag(val, c('RCODE', '\\S3method', '\\S4method')))
     return(val)
 }
 Rd_value <- function(value){Rd_tag('value', content=value)}

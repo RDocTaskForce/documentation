@@ -12,6 +12,7 @@
      , 'keywords'
      )
 
+#' format the function documentation obj to Rd format.
 #' @export
 setMethod('toRd', 'function-Documentation',
 function( obj
@@ -19,7 +20,6 @@ function( obj
         , control = list()
         , raw.list = FALSE
         ){
-    #' format the function documentation obj to Rd format.
 
     order <- get_option( "Documentation::function-Documentation::documentation-order"
                        , .default.functiondocumentation.order

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-extract_documentation.R`')
-#line 62 "R/Fun-extract_documentation.R"
+#line 66 "R/Fun-extract_documentation.R"
 test_that('.get_roxy_block', {#@testing
     test.file <- system.file("examples", "example_character.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -14,7 +14,7 @@ test_that('.get_roxy_block', {#@testing
     expect_equal(block$title, "An example character vector")
     expect_equal(attr(block, 'object')$alias, 'example_character')
 })
-#line 80 "R/Fun-extract_documentation.R"
+#line 84 "R/Fun-extract_documentation.R"
 test_that('get_parse_data.roxy_block', {#@testing
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -31,7 +31,7 @@ test_that('get_parse_data.roxy_block', {#@testing
     expect_equal( attr(val, 'root'), attr(pd, 'root') )
     expect_false( attr(val, 'id') == attr(pd, 'id') )
 })
-#line 157 "R/Fun-extract_documentation.R"
+#line 161 "R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -54,7 +54,7 @@ test_that('.construct_documentation.function', {#@testing
 
 
 })
-#line 179 "R/Fun-extract_documentation.R"
+#line 183 "R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
     test.file <- system.file("examples", "example_multiple.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -65,7 +65,7 @@ test_that('.construct_documentation.function', {#@testing
     expect_error( .construct_documentation.function(example_function1, roxy.block, pd)
                 , class='documentation-error-bad_pd')
 })
-#line 189 "R/Fun-extract_documentation.R"
+#line 193 "R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
     text <- deparse(.construct_documentation.function)
     pd <- get_parse_data(parse(text=text, keep.source=TRUE))
@@ -73,7 +73,7 @@ test_that('.construct_documentation.function', {#@testing
     expect_error(.construct_documentation.function( .construct_documentation.function, NULL, pd)
                 , class='documentation-error-no_comments')
 })
-#line 196 "R/Fun-extract_documentation.R"
+#line 200 "R/Fun-extract_documentation.R"
 test_that('.construct_documentation.function', {#@testing
     text <- "
     #' Testing for bad arguments
@@ -96,7 +96,7 @@ test_that('.construct_documentation.function', {#@testing
     expect_error(.construct_documentation.function( p, roxy , pd)
                 , class='documentation-error')
 })
-#line 250 "R/Fun-extract_documentation.R"
+#line 254 "R/Fun-extract_documentation.R"
 test_that('extract_documentation', {#@testing
     test.file <- system.file("examples", "example_multiple.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -118,7 +118,7 @@ test_that('extract_documentation', {#@testing
 
     docs <- extract_documentation(example_function1)
 })
-#line 311 "R/Fun-extract_documentation.R"
+#line 315 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function1', {#@testing extract_documentation.function with example_function1
     test.file <- system.file("examples", "example_function1.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -140,7 +140,7 @@ test_that('extract_documentation.function with example_function1', {#@testing ex
     expect_error( documentation(example_function1)
                 , class = 'documentation-error-dnf')
 })
-#line 332 "R/Fun-extract_documentation.R"
+#line 336 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function with example_function2', {#@testing extract_documentation.function with example_function2
     test.file <- system.file("examples", "example_function2.R", package='documentation')
     sys.source( test.file, environment(), keep.source=TRUE)
@@ -155,7 +155,7 @@ test_that('extract_documentation.function with example_function2', {#@testing ex
     expect_identical(docs@arguments$y@description, "The y argument description takes 2 lines.")
     expect_identical(docs@name, as.name("example_function2"))
 })
-#line 346 "R/Fun-extract_documentation.R"
+#line 350 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function errors', {#@testing extract_documentation.function errors
     test.file <- system.file("examples", "example_multiple.R", package='documentation')
     sys.source( test.file, keep.source=TRUE)
@@ -185,7 +185,7 @@ test_that('extract_documentation.function errors', {#@testing extract_documentat
     docs2 <- extract_documentation(example_function1, pd=spec.pd)
     expect_identical(docs2, docs)
 })
-#line 375 "R/Fun-extract_documentation.R"
+#line 379 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function', {#@testing
     text <- "
     #' Testing name mismatch
@@ -213,7 +213,7 @@ test_that('extract_documentation.function', {#@testing
                 , class="documentation-error")
 
 })
-#line 402 "R/Fun-extract_documentation.R"
+#line 406 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.function no_doc_comments.', {#@testing extract_documentation.function no_doc_comments.
     text <- "
     hw <- function( greeting = 'hello'
@@ -230,7 +230,7 @@ test_that('extract_documentation.function no_doc_comments.', {#@testing extract_
 
     expect_identical(doc_get_name(docs), 'hw')
 })
-#line 453 "R/Fun-extract_documentation.R"
+#line 457 "R/Fun-extract_documentation.R"
 test_that('with example_generic', {#@testing with example_generic
     env <- new.env()
     env$.packageName <- "documentation-testing-environment"
@@ -252,7 +252,7 @@ test_that('with example_generic', {#@testing with example_generic
 
     expect_identical(docs2, docs)
 })
-#line 474 "R/Fun-extract_documentation.R"
+#line 478 "R/Fun-extract_documentation.R"
 test_that('extract_documentation.standardGeneric no_src error', {#@testing extract_documentation.standardGeneric no_src error
     env <- new.env()
     env$.packageName <- "documentation-testing-environment"

@@ -11,7 +11,7 @@ test_that('FormattedText/html', {#@testing FormattedText/html
     expect_is(obj, 'FormattedText/html')
     expect_is(obj, 'FormattedText')
 })
-#line 33 "R/Class-FormattedText.R"
+#line 34 "R/Class-FormattedText.R"
 test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     x <- Rd_tag("note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
@@ -35,7 +35,7 @@ test_that('FormattedText/Rd', {#@testing FormattedText/Rd
 
     expect_error(val <- S3Part(FT_Rd(1L)))
 })
-#line 80 "R/Class-FormattedText.R"
+#line 81 "R/Class-FormattedText.R"
 test_that('FormattedText/character', {#@testing FormattedText/character
     x <- "just plain text"
     obj <- FT_character(x)

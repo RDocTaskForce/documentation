@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation-Keyword.R`')
-#line 30 "R/Class-Documentation-Keyword.R"
+#line 31 "R/Class-Documentation-Keyword.R"
 test_that('keyword', {#! @testing
     x <- new('Documentation-Keyword', 'utilities')
     expect_true(validObject(x))

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-example.R`')
-#line 7 "R/Class-example.R"
+#line 9 "R/Class-example.R"
 test_that('setClass("example", ...)', {#@testing
     simple.text <- "
     # prints hello world.
@@ -20,7 +20,7 @@ test_that('setClass("example", ...)', {#@testing
     expect_is(ex2, 'Documentation-example')
     expect_null(getSrcref(ex2))
 })
-#line 36 "R/Class-example.R"
+#line 38 "R/Class-example.R"
 test_that('as(character, "example")', {#@testing
     txt <- "# example given as text" %\%
            "test(x,y)"
@@ -30,7 +30,7 @@ test_that('as(character, "example")', {#@testing
                 , check.attributes=FALSE)
 
 })
-#line 48 "R/Class-example.R"
+#line 50 "R/Class-example.R"
 test_that('as(expression, "Documentation-Examples")', {#@testing
     x <- expression(test(x,y))
     val <- as(x, 'Documentation-Examples')

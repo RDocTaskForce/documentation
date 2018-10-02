@@ -278,7 +278,7 @@ test_that('toRd.list', {#@testing
     expect_is(val, 'Rd')
     expect_is(val[[1]], 'Rd_TEXT')
 })
-#line 589 "R/Fun-toRd.R"
+#line 588 "R/Fun-toRd.R"
 test_that('toRd.Rd', {#@testing
     obj <- Rd("test")
     expect_identical(toRd(obj), obj)
@@ -287,7 +287,7 @@ test_that('toRd.Rd', {#@testing
     obj <- Rd("\\rd")
     expect_identical(toRd(obj), obj)
 })
-#line 610 "R/Fun-toRd.R"
+#line 609 "R/Fun-toRd.R"
 test_that('toRd,author', {#@testing toRd,author
     obj <- list(author = c( person('Andrew', 'Redd'
                                   , email='andrew.redd@hsc.utah.edu')
@@ -302,7 +302,7 @@ test_that('toRd,author', {#@testing toRd,author
                     , "Andrew Redd \\email{andrew.redd@hsc.utah.edu} and Drew Blue"
                     )
 })
-#line 624 "R/Fun-toRd.R"
+#line 623 "R/Fun-toRd.R"
 test_that('toRd.person', {#! @testing
     object <-c( person('First' , 'Author', email='me1@email.com')
               , person('Second', 'Author', email='me2@email.com')
@@ -327,7 +327,7 @@ test_that('toRd.person', {#! @testing
                            , class='Rd')
                 )
 })
-#line 650 "R/Fun-toRd.R"
+#line 649 "R/Fun-toRd.R"
 test_that('toRd.name', {#@testing
     obj <- as.name('test.name')
     val <- toRd(obj)
@@ -351,7 +351,7 @@ test_that('toRd,Documentation-Keyword-method', {#! @testing
     expect_equal( collapse0(as.character(val))
                 , '\\keyword{utilities}\\keyword{character}')
 })
-#line 703 "R/Fun-toRd.R"
+#line 704 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/Rd-method', {#! @testing
     obj <- FT_Rd(rd <- Rd( Rd_text("A description of ")
                          , Rd_tag('code', Rd_tag('link', Rd_rcode("toRd")))
@@ -377,7 +377,7 @@ test_that('toRd,FormattedText/Rd-method', {#! @testing
     expect_equal( val, Rd('Hello world!'))
     expect_false(identical(toRd(obj), obj))
 })
-#line 740 "R/Fun-toRd.R"
+#line 742 "R/Fun-toRd.R"
 test_that('toRd,FormattedText/character-method', {#@testing
     obj <- FormattedText(stringi::stri_rand_lipsum(3))
     as.rd <- toRd(obj)

@@ -43,7 +43,7 @@ function(format, fun, dir = '.', ext = paste0('.', format[[1]]), overwrite=NA){
     invisible(NULL)
 }# nocov end
 
-set_formatter(c("Rd", "toRd", ".Rd"), toRd, 'man', '.Rd')
+set_formatter(c("Rd", "toRd", ".Rd"), function(...)toRd(...), 'man', '.Rd')
 
 
 get_formatter <-
