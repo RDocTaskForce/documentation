@@ -6,5 +6,5 @@
 #' @include  Class-arg-Documentation.R
 #' @include  Class-function-Documentation.R
 #' @include  Class-S4-Documentation.R
-#' @include  Class-data.frame-Documentation.R
+#' @include  Class-data-Documentation.R
 #' @include  Class-option-Documentation.R

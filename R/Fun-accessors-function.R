@@ -51,3 +51,17 @@ if(FALSE){#@testing
     expect_is(u, 'usage')
     expect_identical(u, usage(expression(test(x,y))))
 }
+
+### doc_get_name, S3Method-Documentation
+#' @export
+setMethod("doc_get_name", "S3method-Documentation", function(doc){
+    as.name(paste0(doc@generic, '.', doc@signature))
+})
+if(FALSE){#@testing
+    doc <- S3method_documentation('html_to_Rd', 'em')
+
+    expect_identical(doc@generic, as.name('html_to_Rd'))
+    expect_identical(doc@signature, as.name('em'))
+    expect_identical(doc@name, .undefined)
+    expect_identical(doc_get_name(doc), as.name('html_to_Rd.em'))
+}
