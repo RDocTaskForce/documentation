@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-accessors.R`')
-#line 58 "R/Fun-accessors.R"
+#line 76 "R/Fun-accessors.R"
 test_that('generic accessors', {#@testing generic accessors
     if (.document.generated){
         expect_is(doc <- documentation(doc_get_name), 'function-Documentation')

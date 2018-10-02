@@ -4,8 +4,9 @@
 
 # nocov start
 .define_generic_doc_accessor <-
-function(name, valueClass="character", where = topenv()){
-    if (length(name)>1L) return(lapply(name, .define_generic_doc_accessor))
+function(name, valueClass="character", where = topenv(), setter=TRUE){
+    if (length(name)>1L) return(lapply(name, .define_generic_doc_accessor
+                                      , where=where, setter=setter))
 
     fun.name <- "doc_get_"  %<<<% name
     def <- substitute(function(doc){
@@ -33,7 +34,24 @@ function(name, valueClass="character", where = topenv()){
                                         "or is generated form other known information.")
                                   )
     }
-    invisible(where[[fun.name]])
+    if (setter){
+        setter.name <- "doc_" %<<<% name %<<<% '<-'
+        setter.def <- substitute(function(doc, value){
+            if (hasMethod(setter.name, class(doc)))
+                return(standardGeneric(setter.name))
+            if (.hasSlot(doc, name)){
+                doc@name <- as(value, getElement(getSlots(getClass(class(doc))), name))
+                return(doc)
+            }
+            doc_error(._("Class '%s' does not have a '%s' which can be set."
+                        , class(doc), name)
+                     , type = 'invalid-slot'
+                     , class = class(doc), slot=name)
+        }, env = list(name = name, setter.name = setter.name, valueClass=valueClass))
+        setter <- s(eval(setter.def, envir=where), srcref=NULL)
+        setGeneric( setter.name, def = setter, where=where)
+    }
+    invisible(TRUE)
 }
 # nocov end
 
