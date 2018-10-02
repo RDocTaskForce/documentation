@@ -1,8 +1,9 @@
 
+### Class: Virtual/Usage #####
 #' @export
 setClass("Virtual/Usage", contains='VIRTUAL')
 
-
+### Class: usage #####
 #' @export
 usage <- setClass("usage", contains=c("Virtual/Usage", "expression"))
 if(FALSE){#@testing
@@ -30,6 +31,8 @@ if(FALSE){#@testing
 }
 
 usageClass <- getClass('usage', where = topenv(environment()))
+
+### call → usage #####
 setAs("call", 'usage', function(from)new(as.expression(from), Class=usageClass))
 if(FALSE){#@usage
     call <- substitute(test(x,y))
@@ -37,6 +40,7 @@ if(FALSE){#@usage
     expect_is(as(call, 'usage'), "usage")
     expect_identical(as(call, 'usage'), usage(expression(test(x,y))))
 }
+### name → usage #####
 setAs("name", 'usage', function(from)new(as.expression(from), Class=usageClass))
 if(FALSE){#@usage
     name <- substitute(hello)
@@ -45,9 +49,44 @@ if(FALSE){#@usage
     expect_identical(as(name, 'usage'), usage(expression(hello)))
 }
 
+### function → usage #####
+setAs("function", 'usage', function(from){
+    name <- attr(from, 'name') %||% match.call(call=sys.call(-1))$from
+    args <- formals(from)
+
+    for (i in which(nchar(args)==0)){
+        args[[i]] <- as.name(names(args)[[i]])
+        names(args)[[i]] <- ''
+    }
+    as(as.call(c(as.name(name), args)), 'usage')
+})
+if(FALSE){#@testing
+    val <- as(rnorm, 'usage')
+    exp <- new('usage', expression(rnorm(n, mean=0, sd=1)))
+    expect_identical(val, exp)
+
+    fun <- dnorm
+    attr(fun, 'name') <- 'dnorm'
+    val2 <- as(fun, 'usage')
+    exp2 <- new('usage', expression(dnorm(x, mean=0, sd=1, log=FALSE)))
+    expect_identical(val2, exp2)
+
+    v3 <- c(val, val2)
+
+    attr(v3[[2]], 'additional') <- TRUE
+
+
+    v3
+
+}
+
+
+
+### Class: waiver #####
 #' @export
 setClass("waiver")
 
+### Class: usage_waiver #####
 #' @export
 usage_waiver <-
 setClass('usage-waiver', contains=c("Virtual/Usage", "waiver"))
@@ -73,5 +112,142 @@ if(FALSE){#@testing
     expect_is(object@usage, 'waiver')
     expect_is(object@usage, 'Virtual/Usage')
     removeClass('FD-test')
+}
+
+
+### Class: usage/S3method #####
+#' @export
+s3usage <-
+setClass("usage/S3method", contains = "usage"
+        , representation( generic = 'name'
+                        , signature = 'name'
+                        ))
+### usage/S3Method::initialize #####
+#' @export
+setMethod("initialize", "usage/S3method",
+    function(.Object, ex=expression(), generic=NULL, signature=NULL){
+        if (is.call(ex))
+            ex <- as.expression(ex)
+        if(length(ex))
+            S3Part(.Object) <- ex
+        if (!is.null(generic))
+            .Object@generic <- as.name(generic)
+        if (!is.null(signature))
+            .Object@signature <- as.name(signature)
+        return(.Object)
+    })
+if(FALSE){#@testing
+    ex <- expression(html_to_Rd.em(html, ...))
+    .Object <- new('usage/S3method')
+    obj <- new('usage/S3method', ex, generic = 'html_to_Rd', signature = 'em')
+    expect_is(obj, 'usage/S3method')
+    expect_identical(S3Part(obj,TRUE), ex)
+    expect_identical(obj@generic, as.name('html_to_Rd'))
+    expect_identical(obj@signature, as.name('em'))
+}
+
+### function → usage/S3method #####
+setAs("function", 'usage/S3method', function(from){
+    name <- attr(from, 'name') %||% match.call(call=sys.call(-1))$from
+    generic <- attr(from, 'generic') %||%
+               strsplit(as.character(name), '.', fixed=TRUE)[[1L]][[1L]]
+    signature <- attr(from, 'signature') %||%
+                gsub(generic %<<<% "\\.", '', as.character(name))
+
+    args <- formals(from)
+
+    for (i in which(nchar(args)==0)){
+        args[[i]] <- as.name(names(args)[[i]])
+        names(args)[[i]] <- ''
+    }
+    new('usage/S3method', as.call(c(as.name(name), args))
+                        , generic = generic
+                        , signature=signature
+                        )
+})
+if(FALSE){#@testing
+    val <- as(html_to_Rd.a, 'usage/S3method')
+    exp <- s3usage( expression(html_to_Rd.a(html, ...))
+                  , generic= 'html_to_Rd'
+                  , signature = 'a'
+                  )
+    expect_identical(val, exp)
+}
+
+
+### Class: usage/S4Method #####
+#' @export
+s4usage <-
+setClass("usage/S4method", contains = "usage"
+        , representation( generic = 'name'
+                        , signature = 'signature'
+                        ))
+setMethod("initialize", "usage/S4method",
+    function(.Object, ex=expression(), generic=NULL, signature=NULL){
+        if (is.call(ex))
+            ex <- as.expression(ex)
+        if(length(ex))
+            S3Part(.Object) <- ex
+        if (!is.null(generic))
+            .Object@generic <- as.name(generic)
+        if (!is.null(signature))
+            .Object@signature <- as(signature, 'signature')
+        return(.Object)
+    })
+
+### function → usage/S4method #####
+setAs("MethodDefinition", 'usage/S4method', function(from){
+    generic <- as.name(from@generic)
+    signature <- from@defined
+
+    args <- formals(from)
+
+    for (i in which(nchar(args)==0)){
+        args[[i]] <- as.name(names(args)[[i]])
+        names(args)[[i]] <- ''
+    }
+    new('usage/S4method', as.call(c(as.name(generic), args))
+                        , generic = generic
+                        , signature=signature
+                        )
+})
+if(FALSE){
+    from <- getMethod('as.list', 'Documentation')
+    val <- as(from, 'usage/S4method')
+    exp <- s4usage( expression(as.list(x, ...))
+                  , generic = 'as.list'
+                  , signature = s(signature(x='Documentation'), package='documentation')
+                  )
+    expect_identical(val, exp)
+}
+
+### Class: UsageList #####
+setVector("Virtual/Usage", "UsageList")
+c.UsageList <- function(...)as(NextMethod(), "UsageList")
+`[.UsageList` <- function(...)as(NextMethod(), "UsageList")
+setAs('usage', 'UsageList'
+     , function(from)UsageList(list(from))
+     )
+
+### Method: c, Virtual/Usage
+`c.Virtual/Usage` <- function(...){
+    l <- list(...)
+    as(l, 'UsageList')
+}
+if(FALSE){#@testing
+    U <- as(html_to_Rd, 'usage')
+    V <- as(html_to_Rd.a, 'usage/S3method')
+    val <- c(U,V)
+
+    expect_identical(val[[1]], U)
+    expect_identical(val[[2]], V)
+    expect_identical(S3Part(val, TRUE), list(U,V))
+
+    W <- as(html_to_Rd.abbr, 'usage/S3method')
+    val2 <- c(val, list(W))
+    expect_length(val2, 3L)
+    expect_identical(val2[[1]], U)
+    expect_identical(val2[[2]], V)
+    expect_identical(val2[[3]], W)
 }
 
