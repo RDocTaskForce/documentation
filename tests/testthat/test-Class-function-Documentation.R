@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-function-Documentation.R`')
-#line 45 "R/Class-function-Documentation.R"
+#line 46 "R/Class-function-Documentation.R"
 test_that('initialize,function-Documentation-method', {#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
@@ -54,7 +54,7 @@ test_that('initialize,function-Documentation-method', {#! @testing
     expect_identical(docs2@arguments, AL(a))
     expect_identical(object, docs2)
 })
-#line 96 "R/Class-function-Documentation.R"
+#line 97 "R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
@@ -64,4 +64,11 @@ test_that('documentation<-,function,function-Documentation', {#@testing document
     expect_identical(docs, function_documentation(title = "the standard Hello world"))
     expect_true(.is_undefined(docs@name))
     expect_identical(docs@title, "the standard Hello world")
+})
+#line 134 "R/Class-function-Documentation.R"
+test_that('initialize,S3method-Documentation-method', {#@testing
+    doc <- S3method_documentation('html_to_Rd', 'em')
+
+    expect_identical(doc@generic, as.name('html_to_Rd'))
+    expect_identical(doc@signature, as.name('em'))
 })

@@ -4,7 +4,7 @@
 #' @include Class-FormattedText.R
 #' @include Class-usage.R
 
-#' @export function_documentation
+### Class: function-Documentation #####
 #' @export
 function_documentation <-
 setClass('function-Documentation', contains = 'BaseDocumentation'
@@ -106,4 +106,37 @@ if(FALSE){#@testing documentation<-,function,function-Documentation
 }
 
 setAs('function-Documentation', 'ArgumentList', function(from)from@arguments)
+
+
+
+### Class: S3method-Documentation #####
+S3method_documentation <-
+setClass( "S3method-Documentation"
+        , contains = 'function-Documentation'
+        , representation = representation( generic = 'name'
+                                         , signature = 'name'
+                                         )
+        # , validity =
+        )
+setMethod('initialize', 'S3method-Documentation',
+    function( .Object
+            , generic
+            , signature
+            , ...
+            , name=NULL
+            , usage=NULL
+            ){
+    .Object@generic <- as.name(generic)
+    .Object@signature <- as.name(signature)
+    .Object <- callNextMethod( .Object, ...)
+    .Object
+})
+if(FALSE){#@testing
+    doc <- S3method_documentation('html_to_Rd', 'em')
+
+    expect_identical(doc@generic, as.name('html_to_Rd'))
+    expect_identical(doc@signature, as.name('em'))
+}
+
+
 
