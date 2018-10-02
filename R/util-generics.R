@@ -161,3 +161,48 @@ if(FALSE){#@testing
     val <- toRd(object)
     expect_equal(as.character(val), 'test_class')
 }
+
+is_registered_S3method <- function(fun, env = topenv(environment(fun))){
+    if (!isNamespace(env))
+        doc_warning("S3 methods are only registered inside namespace environments.")
+    if (exists('.__S3MethodsTable__.', envir = env, inherits = FALSE)){
+        for (fname in ls(env$.__S3MethodsTable__.))
+            if (identical(fun, get(fname, envir=env$.__S3MethodsTable__.)))
+                return(TRUE)
+    } else if (getPackageName(env) == 'base'){
+        base.s3 <- apply(base::.S3_methods_table, 1, collapse, with='.')
+        name <- name_me(fun, envir=env)
+        return(name %in% base.s3)
+    }
+    return(FALSE)
+}
+if(FALSE){#@testing
+    expect_true(is_registered_S3method(html_to_Rd.a))
+    expect_true(is_registered_S3method(unique.array))
+    expect_false(is_registered_S3method(toRd))
+    expect_warning(is_registered_S3method(toRd, environment(toRd)))
+}
+
+name_me <- function(obj, envir=environment(obj)){
+    assert_that(is.environment(envir))
+    objects <- ls(envir)
+    if (exists('.__NAMESPACE__.', envir = envir) &&
+        exists('lazydata', envir = envir$.__NAMESPACE__.))
+        objects <- c(objects, ls(envir$.__NAMESPACE__.$lazydata))
+    for (name in objects)
+        if (identical(obj, get(name, envir=envir)))
+            return(name)
+    return(NULL)
+}
+if(FALSE){#@testing
+    obj <- unique.array
+    expect_identical(name_me(obj), "unique.array")
+
+
+    obj <- iris
+    expect_identical(name_me(iris, asNamespace('datasets')), 'iris')
+
+    expect_error(name_me(iris))
+    expect_null(name_me(iris, rlang::base_env()))
+}
+

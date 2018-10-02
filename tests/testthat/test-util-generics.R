@@ -96,3 +96,22 @@ test_that('get_S4_method_specialization', {#@testing
     val <- toRd(object)
     expect_equal(as.character(val), 'test_class')
 })
+#line 179 "R/util-generics.R"
+test_that('is_registered_S3method', {#@testing
+    expect_true(is_registered_S3method(html_to_Rd.a))
+    expect_true(is_registered_S3method(unique.array))
+    expect_false(is_registered_S3method(toRd))
+    expect_warning(is_registered_S3method(toRd, environment(toRd)))
+})
+#line 197 "R/util-generics.R"
+test_that('name_me', {#@testing
+    obj <- unique.array
+    expect_identical(name_me(obj), "unique.array")
+
+
+    obj <- iris
+    expect_identical(name_me(iris, asNamespace('datasets')), 'iris')
+
+    expect_error(name_me(iris))
+    expect_null(name_me(iris, rlang::base_env()))
+})

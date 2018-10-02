@@ -1,10 +1,10 @@
 
 #' @rdname documentation-infix-operators
 #' @title Infix string concatenation.
-#' 
+#'
 #' @param lhs left string
 #' @param rhs right string
-#' 
+#'
 #' @details
 #' The infix operators listed here are three versions of paste.
 #' \itemize{
@@ -25,7 +25,7 @@ if(FALSE){#! @testing %<<%
     c <- 'How can the fifteen distress lose?'
     expect_equal(a %<<% b, paste(a,b))
     expect_equal(a %<<% b %<<% c, paste(a,b,c))
-    
+
     expect_equal(a %<<% NULL, a)
     expect_equal(NULL %<<% a, a)
     expect_equal(NULL %<<% NULL, "")
@@ -39,7 +39,7 @@ if(FALSE){#! @testing %<<<%
     c <- 'How can the fifteen distress lose?'
     expect_equal(a %<<<% b, paste0(a,b))
     expect_equal(a %<<<% b %<<<% c, paste0(a,b, c, sep=''))
-    
+
     expect_equal(a %<<<% NULL, a)
     expect_equal(NULL %<<<% a, a)
     expect_equal(NULL %<<<% NULL, '')
@@ -59,3 +59,5 @@ if(FALSE){#@testing
     expect_true( NULL %||% TRUE)
     expect_true( TRUE %||% FALSE)
 }
+
+`%!in%` <- Negate(`%in%`)
