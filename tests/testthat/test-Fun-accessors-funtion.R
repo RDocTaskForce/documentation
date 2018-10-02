@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-accessors-funtion.R`')
-#line 11 "R/Fun-accessors-funtion.R"
+#line 12 "R/Fun-accessors-funtion.R"
 test_that('doc_get_usage,function-Documentation-method', {#@testing
     doc <- function_documentation( name=as.name('test')
                                  , arguments = AL( arg_('x', 'first')

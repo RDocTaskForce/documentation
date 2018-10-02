@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-arg-Documentation.R`')
-#line 55 "R/Class-arg-Documentation.R"
+#line 57 "R/Class-arg-Documentation.R"
 test_that('arg', {#! @testing arg
     a <- new( "arg-Documentation"
             , name= 'testing'
