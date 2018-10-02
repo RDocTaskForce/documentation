@@ -577,7 +577,6 @@ if(FALSE){#@testing
 
 
 
-#' @export
 #' @S3method toRd Rd
 toRd.Rd <- function(obj, ...){
     assert_that( is(obj, 'Rd')

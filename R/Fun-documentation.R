@@ -1,5 +1,6 @@
 #' @include Classes.R
 
+### Generic: documentation #####
 #' @title Retrieve documentation
 #'
 #' @description
@@ -44,6 +45,7 @@ if(FALSE){#! @testing
     expect_is(documentation(test_function), 'Documentation')
 }
 
+### Generic: documentation<- #####
 #' Replace documentation
 #'
 #' Generic for setting documentation.  Similar to the `documentation()`
@@ -60,6 +62,7 @@ setGeneric( 'documentation<-', signature=c('object', 'value')
                 standardGeneric('documentation<-')
             })
 
+### Method: documentation<-Any,Documentation #####
 #' @export
 setMethod('documentation<-', c('ANY', 'Documentation'),
 function( object, value

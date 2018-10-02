@@ -35,9 +35,9 @@
 #' Iterate through all objects in an environment and extract documentation.
 #'
 #'
-#' @export
 #' @aliases .documentation.exclude .documentation.exclude.patterns
 #'          .documentation.exclude.classes
+#' @export
 document_env <-
 function( envir = parent.frame() #< environment with objects to documents.
         , exclude = NULL         #< Objects to not document, see details.
@@ -145,7 +145,7 @@ function( envir = parent.frame() #< environment with objects to documents.
         }
         , "documentation-error" = function(e){
             data.frame( Name=on
-                      , Documented=!inherits(e, 'documentation-error-overwrite')
+                      , Documented=FALSE
                       , Reason = class(e)[[1]]
                       , Message = e$message
                       , stringsAsFactors = FALSE
@@ -183,11 +183,14 @@ if(F){# development
     envir <- ns <- asNamespace('documentation')
     (results <- document_env(ns, exclude="^\\..+"))
 
-    docs <- extract_documentation(`%if%`)
 
     library(dplyr)
     results %>% filter(Name == "%<<%")
     results %>% filter(Name == "as.filename")
+    results %>% filter(Name == "write_documentation")
+    results %>% filter(Name == "usage")
+
+    !is.null(documentation(usage))
 
     env <- new.env()
     env$.packageName <- "documentation-testing"
@@ -285,6 +288,7 @@ if(FALSE){#@testing
 #'
 #' @note character vectors do not carry any class information
 #' and thus documentation cannot be extracted
+#' @export
 document_package <-
 function(pkg = '.', ..., only.exports = TRUE){
     pkg <- devtools::as.package(pkg)
