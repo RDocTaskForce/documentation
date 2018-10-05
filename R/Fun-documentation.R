@@ -46,7 +46,7 @@ if(FALSE){#! @testing
 }
 
 ### Generic: documentation<- #####
-#' Replace documentation
+#' Set or Replace documentation
 #'
 #' Generic for setting documentation.  Similar to the `documentation()`
 #' function, this is a generic whose behavior differs depending on the
@@ -94,4 +94,73 @@ if(FALSE){#! @testing
                   )
 }
 
+### set_documentation #####
+#' Set documentation
+set_documentation <-
+function( object, doc
+        , name=substitute(object)
+        , envir=environment(object) %||% parent.frame()
+        , ...){
+    force(envir)
+    force(name)
+    assert_that( is(doc, 'Documentation')
+               , is.name(name)
+               , is.environment(envir)
+               )
+    set_documentation_(object, doc, name=name, envir=envir)
+}
+
+### Generic: set_documentation_ #####
+setGeneric( 'set_documentation_'
+          , signature = c('object', 'doc', 'name', 'envir'),
+    function( object, doc, name, envir
+            , ...) standardGeneric('set_documentation_')
+    )
+
+### Method: set_documentation_,Any,Documentation #####
+setMethod('set_documentation_', signature = c('ANY', 'Documentation'),
+    function( object, doc
+            , name
+            , envir
+            , ...
+            , .infer=TRUE
+            ){
+        assert_that( is.flag(.infer))
+
+        if (.infer){
+            if (.is_undefined(doc@name))
+                doc@name <- name
+            if (!length(. <- doc_get_aliases(doc)) || deparse(name) %!in% .)
+                doc@aliases <- c(., deparse(name))
+        }
+        documentation(object) <- doc
+        assign(deparse(name), value=object, envir = envir)
+        invisible(doc)
+    })
+if(FALSE){#@testing
+    a <- letters
+
+    docs <- data_documentation(title="Letters big and small", description = "Small letters"
+                              , source = bibentry() )
+
+    expect_error(documentation(a))
+    set_documentation(a, docs)
+
+    d2 <- docs
+    d2@aliases <- 'a'
+    d2@name <- as.name('a')
+    expect_identical(documentation(a), d2)
+
+    A <- LETTERS
+    set_documentation(A, docs)
+    d3 <- docs
+    d3@aliases <- 'A'
+    d3@name <- as.name('A')
+    expect_identical(documentation(A), d3)
+
+    expect_message(set_documentation(A, documentation(a)))
+    d4 <- d2
+    d4@aliases <- c('a', 'A')
+    expect_identical(documentation(A), d4)
+}
 

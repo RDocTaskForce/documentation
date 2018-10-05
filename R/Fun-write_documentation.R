@@ -25,15 +25,23 @@ function( pkg = '.'      #< Base path of package to document.
     env <- asNamespace(pkg$package)
     doc.objects <- collect_documentation_objects(env)
     for (doc in doc.objects)
-        write_documentation(doc)
+        write_documentation(doc, ...)
     invisible(lapply(doc.objects, doc_get_aliases))
     # nocov end
 }
 if(FALSE){#@development
     pkg <- as.package('.')
 
-    write_package_documentation(pkg)
+    write_package_documentation(pkg, fmt='Rd', only.exports=FALSE)
 
+    env <- asNamespace(pkg$package)
+    doc.objects <- collect_documentation_objects(env)
+    length(doc.objects)
+
+    doc <- doc.objects[[1]]
+
+    for (doc in doc.objects)
+        write_documentation(doc, fmt='Rd', dir='man')
 }
 
 
@@ -133,16 +141,20 @@ if(FALSE){
 #' from an environment, typically a package namespace,
 #' whether from documented objects or from standalone
 #' documentation objects.
+#'
+#' @export
 collect_documentation_objects <-
 function(env){
     is.namespace <- isNamespace(env)
-    all.objects <- ls(envir=env, all.names = TRUE)
-    all.docs <- lapply(all.objects, function(obj){
+    all.objects <- objects(envir=env, all.names = TRUE)
+    all.docs <- lapply(all.objects, function(obj) {
         object <- get(obj, envir=env, inherits = FALSE)
         if (inherits(object, "Documentation"))
             return(object)
-        else if (!is.null(docs <- attr(object, "documentation")))
-            return(docs)
+        else if (!is.null(doc <- rlang::eval_tidy(rlang::quo(documentation(!!(rlang::sym(obj)))), env)))
+            return(doc)
+        else if (!is.null(doc <- attr(object, "documentation")))
+            return(doc)
         else
             return(NULL)
     })
@@ -150,7 +162,21 @@ function(env){
     all.docs <- Filter(Negate(is.null), all.docs)
     return (all.docs)
 }
+if(FALSE){# Development
+    env <- asNamespace('documentation')
+    doc.objects <- collect_documentation_objects(env)
+    length(doc.objects)
+    names(doc.objects)
 
+    obj <- 'collect_documentation_objects'
+
+    expr <- rlang::quo(documentation(!!(rlang::sym(obj))))
+    rlang::eval_tidy(expr, env)
+
+    documentation(collect_documentation_objects)
+    extract_documentation(collect_documentation_objects)
+
+}
 
 
 #' Convert a string to a valid filename.

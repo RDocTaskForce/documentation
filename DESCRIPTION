@@ -61,7 +61,6 @@ Collate:
     'Class-option-Documentation.R'
     'Classes.R'
     'Conversion-roxy_block.R'
-    'Conversion-Rd.R'
     'Conversions.R'
     'Fun-documentation.R'
     'Fun-accessors.R'
