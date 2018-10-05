@@ -43,8 +43,9 @@ function( file              #< file to extract tests from
         , test.dir  = NULL  #< directory where to store extracted blocks.
         , verbose   = default('verbose', FALSE) #< Show progress messages?
         , full.path = FALSE
+        , force = FALSE     #< Force extraction
         ){
-    if (verbose) message("* Extracting tests from file `", file, "`.")
+    doc_message(._("* Extracting tests from file `%s`.\n", file)) %if% verbose
     if (is.null(file.out)){
         if (is.null(test.dir)){
             test.dir <- '.'
@@ -53,13 +54,18 @@ function( file              #< file to extract tests from
             if (verbose) message("  + `test.dir` not provided. Setting to `", test.dir, "`")
         }
         file.out <- file.path(test.dir, sprintf("test-%s", basename(file)))
-        doc_message(._("  + Writting extracted tests to `%s`.", file.out)) %if% verbose
     }
 
+    if (!force && file.exists(file.out) && file.mtime(file) < file.mtime(file.out)){
+        doc_message(._("  + file `%s` is newer.  SKIPPING.\n", file.out)) %if% verbose
+        return(invisible(s(character(0), test.file=file.out)))
+    }
+
+    doc_message(._("  + Writting extracted tests to `%s`.", file.out)) %if% verbose
     #! Extract `if(F){#! @TESTTHAT }` blocks from file
     content <- parsetools::extract_test_blocks(file)
     if (length(content)==0){
-        if(verbose) message("No testing blocks found in ", dQuote(file))
+        doc_message(._("  + No testing blocks found in `%s`.", file)) %if% verbose
         return(invisible(character(0)))
     }
     context.line <- sprintf("context('tests extracted from file `%s`')"
@@ -77,7 +83,7 @@ function( file              #< file to extract tests from
     #! The comment must be a documentation comment, regular comments are
     #! ignored, and the taging comment must be the first element in the block.
     #!
-    return(attr(content, 'test.names'))
+    return(s(attr(content, 'test.names'), test.file=file.out))
 }
 if(FALSE){#@testing extract_tests_to_file_ Basic
 {'hello_world <- function(){
@@ -140,6 +146,16 @@ expect_equal( lines
                , "})"
                ))
 expect_equal(x, c("hello_world", "f2"))
+
+val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=FALSE)
+expect_identical(val, character(0))
+expect_message( val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE, force=FALSE)
+              , "  \\+ file `" %<<<% tmp.out %<<<% "` is newer\\.  SKIPPING\\."
+              )
+
+val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=TRUE)
+expect_equal(val, c("hello_world", "f2"))
+
 unlink(tmp.out)
 
 
@@ -346,6 +362,7 @@ function( pkg = '.'     #< package to extract tests for.
         , filter = NULL
         , verbose  = default(verbose, FALSE) #< print messages
         , full.path = default(full.path, NA)
+        , force = FALSE #< Force extraction of tests.
         ){
     #! Extract tests for testing directory.
     if (requireNamespace('devtools')){
@@ -403,6 +420,7 @@ function( pkg = '.'     #< package to extract tests for.
                      , test.dir=test.dir
                      , verbose=verbose
                      , full.path = isTRUE(full.path)
+                     , force = force
                      )
              , names = files)
 

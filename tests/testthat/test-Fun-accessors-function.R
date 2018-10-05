@@ -1,8 +1,8 @@
 #! This file was automatically produced by the documentation package.
 #! Changes will be overwritten.
 
-context('tests extracted from file `Fun-accessors-funtion.R`')
-#line 12 "R/Fun-accessors-funtion.R"
+context('tests extracted from file `Fun-accessors-function.R`')
+#line 12 "R/Fun-accessors-function.R"
 test_that('doc_get_usage,function-Documentation-method', {#@testing
     doc <- function_documentation( name=as.name('test')
                                  , arguments = AL( arg_('x', 'first')
@@ -44,4 +44,13 @@ test_that('doc_get_usage,function-Documentation-method', {#@testing
     u <- doc_get_usage(doc)
     expect_is(u, 'usage')
     expect_identical(u, usage(expression(test(x,y))))
+})
+#line 60 "R/Fun-accessors-function.R"
+test_that('doc_get_name,S3method-Documentation-method', {#@testing
+    doc <- S3method_documentation('html_to_Rd', 'em')
+
+    expect_identical(doc@generic, as.name('html_to_Rd'))
+    expect_identical(doc@signature, as.name('em'))
+    expect_identical(doc@name, .undefined)
+    expect_identical(doc_get_name(doc), as.name('html_to_Rd.em'))
 })

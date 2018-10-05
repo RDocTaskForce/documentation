@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-extract_tests.R`')
-#line 82 "R/Fun-extract_tests.R"
+#line 88 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ Basic', {#@testing extract_tests_to_file_ Basic
 {'hello_world <- function(){
     print("hello world")
@@ -64,6 +64,16 @@ expect_equal( lines
                , "})"
                ))
 expect_equal(x, c("hello_world", "f2"))
+
+val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=FALSE)
+expect_identical(val, character(0))
+expect_message( val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE, force=FALSE)
+              , "  \\+ file `" %<<<% tmp.out %<<<% "` is newer\\.  SKIPPING\\."
+              )
+
+val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=TRUE)
+expect_equal(val, c("hello_world", "f2"))
+
 unlink(tmp.out)
 
 
@@ -150,7 +160,7 @@ expect_false(dir.exists(file.path(tempdir(), "tests")))
 
 unlink(tmp.in)
 })
-#line 229 "R/Fun-extract_tests.R"
+#line 245 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setClass', {#@testing extract_tests_to_file_ setClass
 {'
 setClass("Test-Class")
@@ -185,7 +195,7 @@ expect_equal(x, "setClass(\"Test-Class\", ...)")
 unlink(tmp.in)
 unlink(tmp.out)
 })
-#line 263 "R/Fun-extract_tests.R"
+#line 279 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setMethod', {#@testing extract_tests_to_file_ setMethod
 '
 setMethod("show", "Test-Class", function(x){cat("hi")})
@@ -217,7 +227,7 @@ expect_equal(x, "show,Test-Class-method")
 unlink(tmp.in)
 unlink(tmp.out)
 })
-#line 294 "R/Fun-extract_tests.R"
+#line 310 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ setGeneric', {#@testing extract_tests_to_file_ setGeneric
 '
 setGeneric("yolo", yolo::yolo)
@@ -246,7 +256,7 @@ expect_equal( lines
             )
 expect_equal(x, "setGeneric(\"yolo\", ...)")
 })
-#line 322 "R/Fun-extract_tests.R"
+#line 338 "R/Fun-extract_tests.R"
 test_that('extract_tests_to_file_ no test blocks', {#@testing extract_tests_to_file_ no test blocks
 'hello_world <- function(){
     print("hello world")
@@ -266,7 +276,7 @@ expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
 expect_identical(x, character())
 expect_false (file.exists(tmp.out))
 })
-#line 410 "R/Fun-extract_tests.R"
+#line 428 "R/Fun-extract_tests.R"
 test_that('extract_tests', {#@testing
     tmp.dir <- tempdir()
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
@@ -349,7 +359,7 @@ test_that('extract_tests', {#@testing
 
     unlink(pkg, recursive=TRUE)
 })
-#line 492 "R/Fun-extract_tests.R"
+#line 510 "R/Fun-extract_tests.R"
 test_that('extract_tests', {#@testing
     package.skeleton("testExtractionTest", path=tempdir()
                     , code_files = list.files(system.file("testExtractionTest", "R", package='documentation'), full=TRUE)
