@@ -15,6 +15,7 @@ setClass('function-Documentation', contains = 'BaseDocumentation'
                    )
         )
 functionDocumentation <- getClass('function-Documentation')
+### Method: initialize #####
 #' @export
 setMethod('initialize', 'function-Documentation',
     function( .Object
@@ -23,6 +24,7 @@ setMethod('initialize', 'function-Documentation',
             , value     = NA_character_
             , usage
             , ...
+            , details
             ){
         if(!missing(name))
             .Object@name <- as.name(name)
@@ -41,6 +43,7 @@ setMethod('initialize', 'function-Documentation',
                          if (is(usage, 'Virtual/Usage')) usage             else
                                                          as(usage, 'usage')
         .Object <- callNextMethod(.Object, ...)
+        if(!missing(details)) doc_details(.Object) <- FT(details)
         .Object
     })
 if(FALSE){#! @testing
@@ -61,7 +64,7 @@ if(FALSE){#! @testing
                  , name = as.name('function_documentation')
                  , title = 'Create function documentation'
                  , author = person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-                 , usage= call('function_documentation', as.name('name'), as.name('arguments'), as.name('usage'), as.name('...'))
+                 , usage = call('function_documentation', as.name('name'), as.name('arguments'), as.name('usage'), as.name('...'))
                  , arguments = fun.args
                  , description = "create documentation for a function"
                  , value = "A function-Documentation object."
@@ -104,6 +107,14 @@ if(FALSE){#@testing documentation<-,function,function-Documentation
     expect_true(.is_undefined(docs@name))
     expect_identical(docs@title, "the standard Hello world")
 }
+if(FALSE){#@testing function_documentation details
+    det <- FT(stringi::stri_rand_lipsum(3))
+    doc <- function_documentation( name='test-doc'
+                                 , details = det
+                                 )
+
+    expect_identical(doc_get_details(doc), det)
+}
 
 setAs('function-Documentation', 'ArgumentList', function(from)from@arguments)
 
@@ -116,7 +127,6 @@ setClass( "S3method-Documentation"
         , representation = representation( generic = 'name'
                                          , signature = 'name'
                                          )
-        # , validity =
         )
 setMethod('initialize', 'S3method-Documentation',
     function( .Object

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-function-Documentation.R`')
-#line 46 "R/Class-function-Documentation.R"
+#line 49 "/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('initialize,function-Documentation-method', {#! @testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
@@ -21,7 +21,7 @@ test_that('initialize,function-Documentation-method', {#! @testing
                  , name = as.name('function_documentation')
                  , title = 'Create function documentation'
                  , author = person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-                 , usage= call('function_documentation', as.name('name'), as.name('arguments'), as.name('usage'), as.name('...'))
+                 , usage = call('function_documentation', as.name('name'), as.name('arguments'), as.name('usage'), as.name('...'))
                  , arguments = fun.args
                  , description = "create documentation for a function"
                  , value = "A function-Documentation object."
@@ -54,7 +54,7 @@ test_that('initialize,function-Documentation-method', {#! @testing
     expect_identical(docs2@arguments, AL(a))
     expect_identical(object, docs2)
 })
-#line 97 "R/Class-function-Documentation.R"
+#line 100 "/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
@@ -65,7 +65,16 @@ test_that('documentation<-,function,function-Documentation', {#@testing document
     expect_true(.is_undefined(docs@name))
     expect_identical(docs@title, "the standard Hello world")
 })
-#line 134 "R/Class-function-Documentation.R"
+#line 110 "/rdtf/documentation/R/Class-function-Documentation.R"
+test_that('function_documentation details', {#@testing function_documentation details
+    det <- FT(stringi::stri_rand_lipsum(3))
+    doc <- function_documentation( name='test-doc'
+                                 , details = det
+                                 )
+
+    expect_identical(doc_get_details(doc), det)
+})
+#line 144 "/rdtf/documentation/R/Class-function-Documentation.R"
 test_that('initialize,S3method-Documentation-method', {#@testing
     doc <- S3method_documentation('html_to_Rd', 'em')
 
