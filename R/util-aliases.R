@@ -119,3 +119,4 @@ no_attributes <- function(object){
     return(object)
 }
 
+no_src <- function(object){s(object, srcref=NULL, wholeSrcref=NULL)}
