@@ -9,6 +9,7 @@
 #' @include Fun-default.R
 #' @include Fun-document.R
 #' @include Fun-documentation-S4.R
+#' @include Fun-documentation-Shared.R
 #' @include Fun-documentation.R
 #' @include Fun-extract_documentation-classGeneratorFunction.R
 #' @include Fun-extract_documentation.R
