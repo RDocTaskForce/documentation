@@ -70,6 +70,7 @@ Collate:
     'Fun-default.R'
     'Fun-document.R'
     'Fun-documentation-S4.R'
+    'Fun-documentation-Shared.R'
     'Fun-extract_documentation.R'
     'Fun-extract_documentation-classGeneratorFunction.R'
     'Fun-extract_tests.R'

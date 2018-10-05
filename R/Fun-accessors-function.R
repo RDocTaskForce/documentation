@@ -65,3 +65,15 @@ if(FALSE){#@testing
     expect_identical(doc@name, .undefined)
     expect_identical(doc_get_name(doc), as.name('html_to_Rd.em'))
 }
+
+
+setMethod("doc_get_aliases", "function-Documentation", function(doc){
+    union(doc_get_name(doc), sort(doc@aliases))
+})
+if(FALSE){#@testing
+    doc <- function_documentation( name = "Normal"
+                                 , title = "The Normal Distribution"
+                                 , aliases = c('rnorm', 'dnorm', 'pnorm', 'qnorm')
+                                 )
+    expect_identical(doc_get_aliases(doc), .T(Normal, dnorm, pnorm, qnorm, rnorm))
+}

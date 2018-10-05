@@ -228,6 +228,7 @@ c.UsageList <- function(...)as(NextMethod(), "UsageList")
 setAs('usage', 'UsageList'
      , function(from)UsageList(list(from))
      )
+setIs('UsageList', 'Virtual/Usage')
 
 ### Method: c, Virtual/Usage
 `c.Virtual/Usage` <- function(...){
