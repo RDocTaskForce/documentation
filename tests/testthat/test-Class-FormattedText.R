@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-FormattedText.R`')
-#line 10 "R/Class-FormattedText.R"
+#line 11 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/html', {#@testing FormattedText/html
     html <- with(htmltools::tags, p("html formatted text"))
     expect_is(html, 'shiny.tag')
@@ -11,7 +11,7 @@ test_that('FormattedText/html', {#@testing FormattedText/html
     expect_is(obj, 'FormattedText/html')
     expect_is(obj, 'FormattedText')
 })
-#line 34 "R/Class-FormattedText.R"
+#line 36 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     x <- Rd_tag("note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
@@ -35,7 +35,7 @@ test_that('FormattedText/Rd', {#@testing FormattedText/Rd
 
     expect_error(val <- S3Part(FT_Rd(1L)))
 })
-#line 81 "R/Class-FormattedText.R"
+#line 84 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/character', {#@testing FormattedText/character
     x <- "just plain text"
     obj <- FT_character(x)
@@ -49,4 +49,21 @@ test_that('FormattedText/character', {#@testing FormattedText/character
 
     val <- S3Part(FT_character(1L), strictS3 = TRUE)
     expect_equal(val, '1')
+})
+#line 107 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('FormattedText As Methods', {#@testing FormattedText As Methods
+    expect_is(as("hello world", 'FormattedText'), 'FormattedText/character')
+
+        y <- with(htmltools::tags, div('Regular', a('link')))
+    expect_is(y, 'shiny.tag')
+    expect_is(as(y, 'FormattedText'), 'FormattedText/html')
+})
+#line 144 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Class: SubSection', {#@testing Class: SubSection
+
+    obj <- subsection("Test Subsection"
+                     , content = (x <- stringi::stri_rand_lipsum(3))
+                     )
+    expect_identical(obj@title, "Test Subsection")
+    expect_identical(obj@content, FT(x))
 })

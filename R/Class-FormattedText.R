@@ -1,10 +1,11 @@
 #' @include utils.R
 
-#TODO
+### Class: FormattedText(VIRTUAL) #####
 #'
 #' @export
 setClass('FormattedText', contains="VIRTUAL")
 
+### Class: FormattedText/html #####
 #' @export
 FT_html <- setClass("FormattedText/html", list('FormattedText', 'shiny.tag'))
 if(FALSE){#@testing FormattedText/html
@@ -16,6 +17,7 @@ if(FALSE){#@testing FormattedText/html
     expect_is(obj, 'FormattedText')
 }
 
+### Class: FormattedText/Rd #####
 #' @export
 FT_Rd <- setClass("FormattedText/Rd", list('FormattedText', 'Rd'))
 #' @export
@@ -55,6 +57,7 @@ if(FALSE){#@testing FormattedText/Rd
     expect_error(val <- S3Part(FT_Rd(1L)))
 }
 
+### Class: FormattedText/character #####
 #' Plain Text
 #'
 #' Plain text can be used for documentation when no special formatting is needed.
@@ -94,14 +97,14 @@ if(FALSE){#@testing FormattedText/character
 }
 
 
+### As Methods #####
 setAs('character', 'FormattedText', function(from)FT_character(from))
 setAs('shiny.tag', 'FormattedText', function(from)FT_html(from))
 setAs('Rd'       , 'FormattedText', function(from)FT_Rd(from))
 setAs('NULL'     , 'FormattedText', function(from)FT())
 
 FormattedText <- FT <- function(from=character(0))as(from, 'FormattedText')
-
-if(FALSE){
+if(FALSE){#@testing FormattedText As Methods
     expect_is(as("hello world", 'FormattedText'), 'FormattedText/character')
 
         y <- with(htmltools::tags, div('Regular', a('link')))
@@ -109,7 +112,40 @@ if(FALSE){
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 }
 
+### Class: SectionList #####
 setVector( element = "FormattedText"
          , Class   = "SectionList"
          )
 
+### Class: SubSection #####
+#' Create a documentation subsection
+#'
+#' @export
+subsection <-
+setClass( "SubSection"
+        , list( 'FormattedText'
+              , title = 'character'
+              , content = 'FormattedText'
+              )
+        )
+setValidity("SubSection", function(object){
+    validate_that( is(content, 'FormattedText')
+                 , length(title) == 1L
+                 )
+})
+setMethod("initialize", "SubSection", function(.Object, title, content){
+    assert_that( rlang::is_string(title))
+    if (!is(content, 'FormattedText'))
+        content <- FT(content)
+    .Object@title <- title
+    .Object@content <- content
+    return(.Object)
+})
+if(FALSE){#@testing Class: SubSection
+
+    obj <- subsection("Test Subsection"
+                     , content = (x <- stringi::stri_rand_lipsum(3))
+                     )
+    expect_identical(obj@title, "Test Subsection")
+    expect_identical(obj@content, FT(x))
+}
