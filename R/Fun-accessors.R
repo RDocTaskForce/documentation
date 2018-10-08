@@ -4,7 +4,10 @@
 
 # nocov start
 .define_generic_doc_accessor <-
-function(name, valueClass="character", where = topenv(), setter=TRUE){
+function( name, valueClass="character", where = topenv()
+        , setter=TRUE #< Define `doc_*<-` function
+        , has=TRUE   #< Define `doc_has_*` function
+        ){
     if (length(name)>1L) return(lapply(name, .define_generic_doc_accessor
                                       , where=where, setter=setter))
 
@@ -48,8 +51,16 @@ function(name, valueClass="character", where = topenv(), setter=TRUE){
                      , type = 'invalid-slot'
                      , class = class(doc), slot=name)
         }, env = list(name = name, setter.name = setter.name, valueClass=valueClass))
-        setter <- s(eval(setter.def, envir=where), srcref=NULL)
+        setter <- no_src(eval(setter.def, envir=where))
         setGeneric( setter.name, def = setter, where=where)
+    }
+    if (has){
+        has.name <- 'doc_has_' %<<<% name
+        has.def <- substitute(function(doc){
+            length(get(doc)) > 0L
+        }, list(get = as.name(fun.name)))
+        has <- no_src(eval(has.def, envir=where))
+        setGeneric( has.name, def = has, where=where)
     }
     invisible(TRUE)
 }
@@ -96,6 +107,16 @@ if(FALSE){#@testing generic accessors
                                     "or is generated form other known information."))
     }
 }
+if(FALSE){#@testing doc_has_*
+    doc <- function_documentation("test", title="Test me!")
+
+    expect_true(doc_has_name(doc))
+    expect_true(doc_has_title(doc))
+    expect_true(doc_has_export(doc))
+    expect_false(doc_has_description(doc))
+    expect_false(doc_has_details(doc))
+}
+
 
 setMethod('doc_get_details', 'Documentation', function(doc)doc@sections[['details']])
 setMethod('doc_details<-', 'Documentation', function(doc, value){

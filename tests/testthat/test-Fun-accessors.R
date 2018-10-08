@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-accessors.R`')
-#line 76 "/rdtf/documentation/R/Fun-accessors.R"
+#line 87 "/rdtf/documentation/R/Fun-accessors.R"
 test_that('generic accessors', {#@testing generic accessors
     if (.document.generated){
         expect_is(doc <- documentation(doc_get_name), 'function-Documentation')
@@ -26,7 +26,17 @@ test_that('generic accessors', {#@testing generic accessors
                                     "or is generated form other known information."))
     }
 })
-#line 105 "/rdtf/documentation/R/Fun-accessors.R"
+#line 110 "/rdtf/documentation/R/Fun-accessors.R"
+test_that('doc_has_*', {#@testing doc_has_*
+    doc <- function_documentation("test", title="Test me!")
+
+    expect_true(doc_has_name(doc))
+    expect_true(doc_has_title(doc))
+    expect_true(doc_has_export(doc))
+    expect_false(doc_has_description(doc))
+    expect_false(doc_has_details(doc))
+})
+#line 126 "/rdtf/documentation/R/Fun-accessors.R"
 test_that('doc_details<-,Documentation-method', {#@testing
     doc <- function_documentation(name='test-doc')
     det <- FT(stringi::stri_rand_lipsum(3))
