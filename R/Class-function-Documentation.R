@@ -148,5 +148,23 @@ if(FALSE){#@testing
     expect_identical(doc@signature, as.name('em'))
 }
 
-
-
+### S3method → function-Documentation #####
+setAs('S3method-Documentation', 'function-Documentation',
+function(from){
+    new <- new('function-Documentation')
+    for(s in setdiff(slotNames(new), c('usage', 'name')))
+        slot(new, s) <- slot(from, s)
+    new@name <- as.name(doc_get_name(from))
+    new@usage <- doc_get_usage(from)
+    return(new)
+})
+if(FALSE){#@testing
+    from <- S3method_documentation('html_to_Rd', 'a'
+                                  , description = "convert html link to Rd Link"
+                                  )
+    new <- as(from, 'function-Documentation')
+    expect_is_exactly(new, 'function-Documentation')
+    expect_identical(doc_get_name(new), 'html_to_Rd.a')
+    expect_identical(new@usage, doc_get_usage(from))
+    expect_identical(new@description, doc_get_description(from))
+}
