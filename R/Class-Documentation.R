@@ -30,6 +30,7 @@ setClass( "BaseDocumentation", contains='Documentation'
                           , references = bibentry()
                           , seealso    = FT()
                           , description= FT()
+                          , export=FALSE
                           )
         )
 
@@ -140,16 +141,16 @@ function(x, ...){
 if(FALSE){#! @testing
     x <-
     object <- new( "BaseDocumentation"
-             , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-                              , person('Drew'  , 'Blue')
-                              )
-             , title       = 'Create function documentation'
-             , description = stringi::stri_rand_lipsum(3)
-             , seealso     = '\\link{documentation-package}'
-             , keywords    = 'internal'
-             , aliases     = 'test-alias'
-             , references  = citation()
-             )
+                 , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
+                                  , person('Drew'  , 'Blue')
+                                  )
+                 , title       = 'Create function documentation'
+                 , description = stringi::stri_rand_lipsum(3)
+                 , seealso     = '\\link{documentation-package}'
+                 , keywords    = 'internal'
+                 , aliases     = 'test-alias'
+                 , references  = citation()
+                 )
     object.as.list <- as.list(object)
     expect_is(object.as.list, 'list')
     expect_equal(names(object.as.list), slotNames(object))
