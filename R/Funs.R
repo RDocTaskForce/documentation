@@ -4,6 +4,7 @@
 #' @include setup.R
 #' @include Fun-accessors-function.R
 #' @include Fun-accessors-option.R
+#' @include Fun-accessors-Shared.R
 #' @include Fun-accessors.R
 #' @include Fun-check_documented.R
 #' @include Fun-default.R

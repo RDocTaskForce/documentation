@@ -64,6 +64,7 @@ Collate:
     'Conversions.R'
     'Fun-documentation.R'
     'Fun-accessors.R'
+    'Fun-accessors-Shared.R'
     'Fun-accessors-function.R'
     'Fun-accessors-option.R'
     'Fun-check_documented.R'
