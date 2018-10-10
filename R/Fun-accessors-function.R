@@ -76,5 +76,6 @@ if(FALSE){#@testing
                                  , title = "The Normal Distribution"
                                  , aliases = c('rnorm', 'dnorm', 'pnorm', 'qnorm')
                                  )
+    expect_identical(doc@aliases, .T(rnorm, dnorm, pnorm, qnorm))
     expect_identical(doc_get_aliases(doc), .T(Normal, dnorm, pnorm, qnorm, rnorm))
 }
