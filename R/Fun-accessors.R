@@ -65,8 +65,82 @@ function( name, valueClass="character", where = topenv()
     invisible(TRUE)
 }
 # nocov end
+if(FALSE){#@testing
+    if (isNamespaceLoaded("my-test-package"))
+        unloadNamespace('my-test-package')
+
+    env <- devtools:::makeNamespace('my-test-package')
+    env$.__NAMESPACE__.$imports <- list("documentation", 'methods'
+                                       , documentation = s( getNamespaceExports('documentation')
+                                                          , names = getNamespaceExports('documentation')
+                                                          )
+                                       , methods = s( getNamespaceExports('methods')
+                                                    , names=getNamespaceExports('methods')
+                                                    )
+                                       )
+    setPackageName('my-test-package', env)
+    .define_generic_doc_accessor('test_slot', where = env)
+
+    expect_true(exists('doc_get_test_slot', where = env))
+    getter <- get('doc_get_test_slot', env)
+    expect_is(getter, "nonstandardGenericFunction")
+
+    expect_true(exists('doc_test_slot<-', where = env))
+    setter <- get('doc_test_slot<-', env)
+    expect_is(setter, "nonstandardGenericFunction")
+
+    expect_true(exists('doc_has_test_slot', where = env))
+    has <- get('doc_has_test_slot', env)
+    expect_is(has, "standardGeneric")
 
 
+    val <- .define_generic_doc_accessor(c('test1', 'test2'), where=env)
+    expect_identical(val, list(TRUE, TRUE))
+    expect_true(exists('doc_get_test1', where = env))
+    expect_true(exists('doc_get_test2', where = env))
+
+    myDoc <- setClass( 'myDoc', contains = 'Documentation'
+                     , list(test_slot = 'name', test1='character')
+                     , where = env
+                     )
+    setMethod('doc_get_test2', 'myDoc', function(doc)"prepare to die."
+             , where = env )
+    setMethod('doc_test_slot<-', 'myDoc', function(doc, value){
+        value <- as.name(value)
+        doc@test_slot <- value
+        return(invisible(doc))
+    }, where=env)
+
+    env$doc <- myDoc( test_slot = as.name('Inigo Montoya')
+                    , test1 = "you kill my father"
+                    )
+
+    expect_is(env$doc, 'myDoc')
+    expect_true(with(env, doc_has_test_slot(doc)))
+    expect_true(with(env, doc_has_test1(doc)))
+    expect_true(with(env, doc_has_test2(doc)))
+
+    expect_identical(with(env, doc_get_test_slot(doc)), "Inigo Montoya")
+    expect_identical(with(env, doc_get_test1(doc)), "you kill my father")
+    expect_identical(with(env, doc_get_test2(doc)), "prepare to die.")
+
+
+    with(env, doc_test_slot(doc) <- "Thanos")
+    expect_identical(with(env, doc_get_test_slot(doc)), "Thanos")
+    with(env, doc_test1(doc) <- "I kill everyone.")
+    expect_identical(with(env, doc_get_test1(doc)), "I kill everyone.")
+    expect_error(with(env, doc_test2(doc) <- "I'll kill you to."))
+
+
+    .define_generic_doc_accessor(c('bad_slot'), where=env)
+    expect_error( with(env, doc_get_bad_slot(doc))
+                , class='documentation-error-invalid-slot' )
+
+    unloadNamespace('my-test-package')
+}
+
+
+### Non-specific accessors #####
 all.documentation.slots <-
     c( getSlots(getClass('Documentation'))
      , getSlots(getClass('BaseDocumentation'))
@@ -81,8 +155,19 @@ for (i in seq_along(all.documentation.slots)){
     .define_generic_doc_accessor(slot.name, slot.class)
 }
 
-.define_generic_doc_accessor('name', 'character')
-.define_generic_doc_accessor('details', 'FormattedText')
+### Name accessors #####
+.define_generic_doc_accessor('name', 'character', has=FALSE)
+setGeneric( "doc_has_name"
+          , function(doc){
+              !.is_undefined(doc@name)
+          })
+if(FALSE){#@testing
+    doc <- function_documentation()
+    expect_false(doc_has_name(doc))
+    doc_name(doc) <- 'test'
+    expect_true(doc_has_name(doc))
+    expect_identical(doc_get_name(doc), 'test')
+}
 
 if(FALSE){#@testing generic accessors
     if (.document.generated){
@@ -118,7 +203,11 @@ if(FALSE){#@testing doc_has_*
 }
 
 
-setMethod('doc_get_details', 'Documentation', function(doc)doc@sections[['details']])
+### Details accessors #####
+.define_generic_doc_accessor('details', 'FormattedText')
+setMethod('doc_get_details', 'Documentation', function(doc){
+    doc@sections[['details']]
+})
 setMethod('doc_details<-', 'Documentation', function(doc, value){
     doc@sections[['details']] <- value
     return(doc)
@@ -130,5 +219,37 @@ if(FALSE){#@testing
     expect_null(doc_get_details(doc))
     doc_details(doc) <- det
     expect_identical(doc_get_details(doc), det)
+}
+
+
+# Very Generic Accessors ==================
+doc_has <- function(doc, name){
+    fun <- try(match.fun('doc_has_' %<<<% name), silent = TRUE)
+    if (is.function(fun))
+        return(fun(doc))
+    name %in% slotNames(doc) &&
+        (length(slot(doc, name)) > 0L)
+}
+doc_get<- function(doc, name){
+    fun <- match.fun('doc_get_' %<<<% name)
+    return(fun(doc))
+}
+if(FALSE){#@testing doc_has & doc_get
+    doc <- function_documentation( name = "Normal"
+                                 , title = "The Normal Distribution"
+                                 , aliases = c('rnorm', 'dnorm', 'pnorm', 'qnorm')
+                                 )
+    expect_true(doc_has(doc, 'name'))
+    expect_true(doc_has(doc, 'title'))
+    expect_true(doc_has(doc, 'aliases'))
+
+    expect_identical(doc_get(doc, 'name'), "Normal")
+    expect_identical(doc_get(doc, 'title'), "The Normal Distribution")
+    expect_identical(doc_get(doc, 'aliases'), c('Normal', 'dnorm', 'pnorm', 'qnorm', 'rnorm'))
+
+    doc <- S3method_documentation('test', 'me')
+
+    expect_true(doc_has(doc, 'generic'))
+    expect_true(doc_has(doc, 'signature'))
 }
 

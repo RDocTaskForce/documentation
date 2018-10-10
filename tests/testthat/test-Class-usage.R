@@ -88,7 +88,7 @@ test_that('as(`function`, "usage/S3method")', {#@testing
                   )
     expect_identical(val, exp)
 })
-#line 237 "R/Class-usage.R"
+#line 238 "R/Class-usage.R"
 test_that('`c.Virtual/Usage`', {#@testing
     U <- as(html_to_Rd, 'usage')
     V <- as(html_to_Rd.a, 'usage/S3method')
