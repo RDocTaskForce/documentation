@@ -39,7 +39,7 @@ setMethod('doc_has_name', 'Shared-Documentation', function(doc){
     !.is_undefined(doc$docs@name)
 })
 if(FALSE){#@testing
-    doc <- shared(function_documentation())
+    doc <- shared_function_documentation()
     expect_false(doc_has_name(doc))
     doc_name(doc) <- "test"
     expect_true(doc_has_name(doc))
