@@ -45,15 +45,12 @@ function( name                   #< name of the argument
 }
 
 #' @exportClass ArgumentList
+#' @S3method c ArgumentList
+#' @S3method [ ArgumentList
+#' @S3method unique ArgumentList
 setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
          )
-#' @export
-c.ArgumentList <- function(...){as(NextMethod(), "ArgumentList")}
-#' @export
-`[.ArgumentList` <- function(...){as(NextMethod(), "ArgumentList")}
-#' @export
-unique.ArgumentList <- function(...){as(NextMethod(), "ArgumentList")}
 #' @export
 ArgumentList <- function(...){new('ArgumentList', list(...))}
 AL <- ArgumentList

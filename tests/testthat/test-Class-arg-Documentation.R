@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-arg-Documentation.R`')
-#line 61 "/rdtf/documentation/R/Class-arg-Documentation.R"
+#line 63 "/rdtf/documentation/R/Class-arg-Documentation.R"
 test_that('arg', {#! @testing arg
     a <- new( "arg-Documentation"
             , name= 'testing'
@@ -44,7 +44,7 @@ test_that('arg', {#! @testing arg
     expect_identical(c(M, c), AL(a,b,c))
     expect_identical(c(M, AL(c,d)), AL(a,b,c,d))
 })
-#line 102 "/rdtf/documentation/R/Class-arg-Documentation.R"
+#line 104 "/rdtf/documentation/R/Class-arg-Documentation.R"
 test_that('unique.ArgumentList and [.ArgumentList', {#@testing unique.ArgumentList and [.ArgumentList
     a <- arg(a, 'first')
     b <- arg(b, 'second')
@@ -57,7 +57,7 @@ test_that('unique.ArgumentList and [.ArgumentList', {#@testing unique.ArgumentLi
 
     expect_identical(y[c(1,3)], AL(a,a))
 })
-#line 117 "/rdtf/documentation/R/Class-arg-Documentation.R"
+#line 119 "/rdtf/documentation/R/Class-arg-Documentation.R"
 test_that('`c.arg-Documentation`', {#@testing
     a <- arg(a, 'first')
     b <- arg(b, 'second')

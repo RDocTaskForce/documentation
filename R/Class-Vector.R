@@ -22,6 +22,12 @@ setClass( Class=Class, contains = c(contains, 'list')
 setAs(element, Class, function(from){
     new(Class, list(from))
 }, where=where)
+wrapped <- no_src(eval(substitute(function(...){
+            as(NextMethod(), Class)
+          }, list(Class=Class)), where))
+assign( '[.' %<<<% Class, wrapped, envir = where)
+assign( 'c.' %<<<% Class, wrapped, envir = where)
+assign( 'unique.' %<<<% Class, wrapped, envir = where)
 return(val)
 }
 if(FALSE){#! @testing
