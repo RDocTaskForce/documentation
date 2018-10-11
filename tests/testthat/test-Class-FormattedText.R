@@ -58,12 +58,62 @@ test_that('FormattedText As Methods', {#@testing FormattedText As Methods
     expect_is(y, 'shiny.tag')
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 })
-#line 144 "/rdtf/documentation/R/Class-FormattedText.R"
+#line 145 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('Class: SubSection', {#@testing Class: SubSection
-
     obj <- subsection("Test Subsection"
                      , content = (x <- stringi::stri_rand_lipsum(3))
                      )
     expect_identical(obj@title, "Test Subsection")
     expect_identical(obj@content, FT(x))
+})
+#line 161 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Section(Virtual)', {#@testing Section(Virtual)
+    expect_error(new('Section'), "trying to generate an object from a virtual class")
+})
+#line 171 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Section(Anonymous)', {#@testing Section(Anonymous)
+    bare <- new('Section(Anonymous)')
+    expect_is(bare, 'Section(Anonymous)')
+    expect_equal(mode(bare), 'list')
+
+    x <- stringi::stri_rand_lipsum(3)
+    char <- FT(x)
+    html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
+    rd <- FT_Rd(toRd(char))
+
+    val <- new('Section(Anonymous)', list(char))
+    expect_is(val, 'Section')
+    expect_is_exactly(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], char)
+
+    val <- new('Section(Anonymous)', list(char, html, rd))
+    expect_is(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], char)
+    expect_identical(val[[2]], html)
+    expect_identical(val[[3]], rd)
+})
+#line 200 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Section(Titled)', {#@testing Section(Titled)
+    bare <- new('Section(Titled)')
+    expect_is(bare, 'Section(Titled)')
+    expect_equal(mode(bare), 'list')
+    expect_error(validObject(bare), "invalid class")
+
+    x <- stringi::stri_rand_lipsum(3)
+    char <- FT(x)
+    html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
+    rd <- FT_Rd(toRd(char))
+
+    val <- new('Section(Titled)', list(char), title = "Character Section")
+    expect_is(val, 'Section')
+    expect_is_exactly(val, 'Section(Titled)')
+    expect_identical(val[[1]], char)
+    expect_identical(val@title, "Character Section")
+
+    val <- new('Section(Titled)', list(char, html, rd), title = 'Mixed Section')
+    expect_is(val, 'Section(Titled)')
+    expect_identical(val[[1]], char)
+    expect_identical(val[[2]], html)
+    expect_identical(val[[3]], rd)
+    expect_identical(val@title, "Mixed Section")
 })

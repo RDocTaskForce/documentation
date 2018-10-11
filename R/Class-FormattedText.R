@@ -113,7 +113,8 @@ if(FALSE){#@testing FormattedText As Methods
 }
 
 ### Class: SectionList #####
-setVector( element = "FormattedText"
+#' @exportClass SectionList
+setVector( element = "Section"
          , Class   = "SectionList"
          )
 
@@ -142,10 +143,81 @@ setMethod("initialize", "SubSection", function(.Object, title, content){
     return(.Object)
 })
 if(FALSE){#@testing Class: SubSection
-
     obj <- subsection("Test Subsection"
                      , content = (x <- stringi::stri_rand_lipsum(3))
                      )
     expect_identical(obj@title, "Test Subsection")
     expect_identical(obj@content, FT(x))
+}
+
+### Class: Section #####
+#' @export
+setClass('Section', contains='VIRTUAL')
+setValidity('Section', function(object){
+    validate_that( all_inherit(object, 'FormattedText')
+                 , !any(purrr::map_lgl(object, is, "Section"))
+                 )
+})
+if(FALSE){#@testing Section(Virtual)
+    expect_error(new('Section'), "trying to generate an object from a virtual class")
+}
+
+asection <- setClass("Section(Anonymous)", contains=c('Section', 'list'))
+setValidity("Section(Anonymous)", function(object){
+    validate_that( all_inherit(object, 'FormattedText')
+                 , !any(purrr::map_lgl(object, is, "Section"))
+                 )
+})
+if(FALSE){#@testing Section(Anonymous)
+    bare <- new('Section(Anonymous)')
+    expect_is(bare, 'Section(Anonymous)')
+    expect_equal(mode(bare), 'list')
+
+    x <- stringi::stri_rand_lipsum(3)
+    char <- FT(x)
+    html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
+    rd <- FT_Rd(toRd(char))
+
+    val <- new('Section(Anonymous)', list(char))
+    expect_is(val, 'Section')
+    expect_is_exactly(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], char)
+
+    val <- new('Section(Anonymous)', list(char, html, rd))
+    expect_is(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], char)
+    expect_identical(val[[2]], html)
+    expect_identical(val[[3]], rd)
+}
+section <-
+setClass('Section(Titled)', c(title='character' ), contains=c('Section', 'list'))
+setValidity('Section(Titled)', function(object){
+    validate_that( length(object@title) == 1
+                 , !is.na(object@title)
+                 , nchar(object@title) > 0
+                 )
+})
+if(FALSE){#@testing Section(Titled)
+    bare <- new('Section(Titled)')
+    expect_is(bare, 'Section(Titled)')
+    expect_equal(mode(bare), 'list')
+    expect_error(validObject(bare), "invalid class")
+
+    x <- stringi::stri_rand_lipsum(3)
+    char <- FT(x)
+    html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
+    rd <- FT_Rd(toRd(char))
+
+    val <- new('Section(Titled)', list(char), title = "Character Section")
+    expect_is(val, 'Section')
+    expect_is_exactly(val, 'Section(Titled)')
+    expect_identical(val[[1]], char)
+    expect_identical(val@title, "Character Section")
+
+    val <- new('Section(Titled)', list(char, html, rd), title = 'Mixed Section')
+    expect_is(val, 'Section(Titled)')
+    expect_identical(val[[1]], char)
+    expect_identical(val[[2]], html)
+    expect_identical(val[[3]], rd)
+    expect_identical(val@title, "Mixed Section")
 }
