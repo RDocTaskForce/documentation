@@ -44,15 +44,19 @@ function( name                   #< name of the argument
         )
 }
 
-
+#' @exportClass ArgumentList
 setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
          )
-c.ArgumentList <- function(...)as(NextMethod(), "ArgumentList")
-`[.ArgumentList` <- function(...)as(NextMethod(), "ArgumentList")
+#' @export
+c.ArgumentList <- function(...){as(NextMethod(), "ArgumentList")}
+#' @export
+`[.ArgumentList` <- function(...){as(NextMethod(), "ArgumentList")}
+#' @export
+unique.ArgumentList <- function(...){as(NextMethod(), "ArgumentList")}
+#' @export
 ArgumentList <- function(...){new('ArgumentList', list(...))}
 AL <- ArgumentList
-
 
 if(FALSE){#! @testing arg
     a <- new( "arg-Documentation"
@@ -95,5 +99,26 @@ if(FALSE){#! @testing arg
     expect_identical(c(M, c), AL(a,b,c))
     expect_identical(c(M, AL(c,d)), AL(a,b,c,d))
 }
+if(FALSE){#@testing unique.ArgumentList and [.ArgumentList
+    a <- arg(a, 'first')
+    b <- arg(b, 'second')
+    c <- arg(c, 'last')
 
+    x <- AL(a,b)
+
+    expect_identical(y <- c(x, a, b, c), AL(a, b, a, b, c))
+    expect_identical(unique(y), AL(a,b,c))
+
+    expect_identical(y[c(1,3)], AL(a,a))
+}
+
+#' @export
+`c.arg-Documentation` <- function(...){ArgumentList(...)}
+if(FALSE){#@testing
+    a <- arg(a, 'first')
+    b <- arg(b, 'second')
+
+    x <- c(a,b)
+    expect_identical(x, AL(a,b))
+}
 
