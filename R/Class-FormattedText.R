@@ -191,6 +191,15 @@ setValidity('Section(Titled)', function(object){
                  , nchar(object@title) > 0
                  )
 })
+setMethod('initialize', 'Section(Titled)',
+function(.Object, title, ...){
+    S3Part(.Object, TRUE) <- list(...)
+    assert_that( all_inherit(S3Part(.Object, TRUE), 'FormattedText', "`...`")
+               , is.string(title)
+               )
+    .Object@title <- title
+    .Object
+})
 if(FALSE){#@testing Section(Titled)
     bare <- new('Section(Titled)')
     expect_is(bare, 'Section(Titled)')

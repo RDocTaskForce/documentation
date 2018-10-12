@@ -2,8 +2,8 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-function-Documentation.R`')
-#line 49 "R/Class-function-Documentation.R"
-test_that('initialize,function-Documentation-method', {#! @testing
+#line 53 "R/Class-function-Documentation.R"
+test_that('initialize,function-Documentation-method', {#@testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
 
@@ -54,7 +54,7 @@ test_that('initialize,function-Documentation-method', {#! @testing
     expect_identical(docs2@arguments, AL(a))
     expect_identical(object, docs2)
 })
-#line 100 "R/Class-function-Documentation.R"
+#line 104 "R/Class-function-Documentation.R"
 test_that('documentation<-,function,function-Documentation', {#@testing documentation<-,function,function-Documentation
     hw <- function(){print("hello world")}
     documentation(hw) <- function_documentation(title = "the standard Hello world")
@@ -65,23 +65,23 @@ test_that('documentation<-,function,function-Documentation', {#@testing document
     expect_true(.is_undefined(docs@name))
     expect_identical(docs@title, "the standard Hello world")
 })
-#line 110 "R/Class-function-Documentation.R"
+#line 114 "R/Class-function-Documentation.R"
 test_that('function_documentation details', {#@testing function_documentation details
     det <- FT(stringi::stri_rand_lipsum(3))
     doc <- function_documentation( name='test-doc'
                                  , details = det
                                  )
 
-    expect_identical(doc_get_details(doc), det)
+    expect_identical(doc_get_details(doc), section('Details', FT(det)))
 })
-#line 144 "R/Class-function-Documentation.R"
+#line 148 "R/Class-function-Documentation.R"
 test_that('initialize,S3method-Documentation-method', {#@testing
     doc <- S3method_documentation('html_to_Rd', 'em')
 
     expect_identical(doc@generic, as.name('html_to_Rd'))
     expect_identical(doc@signature, as.name('em'))
 })
-#line 161 "R/Class-function-Documentation.R"
+#line 165 "R/Class-function-Documentation.R"
 test_that('as(`S3method-Documentation`, "function-Documentation")', {#@testing
     from <- S3method_documentation('html_to_Rd', 'a'
                                   , description = "convert html link to Rd Link"

@@ -43,10 +43,14 @@ setMethod('initialize', 'function-Documentation',
                          if (is(usage, 'Virtual/Usage')) usage             else
                                                          as(usage, 'usage')
         .Object <- callNextMethod(.Object, ...)
-        if(!missing(details)) doc_details(.Object) <- FT(details)
+        if(!missing(details)){
+            if (!is(details, 'FormattedText')) details <- FT(details)
+            if (!is(details, 'Section')) details <- section('Details', FT(details))
+            doc_details(.Object) <- details
+        }
         .Object
     })
-if(FALSE){#! @testing
+if(FALSE){#@testing
     empty.object <- new( "function-Documentation")
     expect_is(empty.object, "function-Documentation")
 
@@ -113,7 +117,7 @@ if(FALSE){#@testing function_documentation details
                                  , details = det
                                  )
 
-    expect_identical(doc_get_details(doc), det)
+    expect_identical(doc_get_details(doc), section('Details', FT(det)))
 }
 
 setAs('function-Documentation', 'ArgumentList', function(from)from@arguments)

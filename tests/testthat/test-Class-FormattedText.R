@@ -92,7 +92,7 @@ test_that('Section(Anonymous)', {#@testing Section(Anonymous)
     expect_identical(val[[2]], html)
     expect_identical(val[[3]], rd)
 })
-#line 194 "R/Class-FormattedText.R"
+#line 203 "R/Class-FormattedText.R"
 test_that('Section(Titled)', {#@testing Section(Titled)
     bare <- new('Section(Titled)')
     expect_is(bare, 'Section(Titled)')
