@@ -112,12 +112,6 @@ if(FALSE){#@testing FormattedText As Methods
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 }
 
-### Class: SectionList #####
-#' @exportClass SectionList
-setVector( element = "Section"
-         , Class   = "SectionList"
-         )
-
 ### Class: SubSection #####
 #' Create a documentation subsection
 #'
@@ -221,3 +215,9 @@ if(FALSE){#@testing Section(Titled)
     expect_identical(val[[3]], rd)
     expect_identical(val@title, "Mixed Section")
 }
+
+### Class: SectionList #####
+#' @exportClass SectionList
+setVector( element = "Section"
+         , Class   = "SectionList"
+         )

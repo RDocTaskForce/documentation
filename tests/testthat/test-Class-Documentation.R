@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation.R`')
-#line 70 "R/Class-Documentation.R"
+#line 71 "R/Class-Documentation.R"
 test_that('initialize,BaseDocumentation-method', {#!@testing
     x <- new('BaseDocumentation')
     expect_identical(x@author, person())
@@ -44,7 +44,7 @@ test_that('initialize,BaseDocumentation-method', {#!@testing
     expect_error(x <- new( 'BaseDocumentation', references = lrf)
                 , class = 'documentation-error-invalid_argument')
 })
-#line 123 "R/Class-Documentation.R"
+#line 124 "R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -53,20 +53,20 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
 
 })
-#line 140 "R/Class-Documentation.R"
+#line 141 "R/Class-Documentation.R"
 test_that('as.list,Documentation-method', {#! @testing
     x <-
     object <- new( "BaseDocumentation"
-             , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
-                              , person('Drew'  , 'Blue')
-                              )
-             , title       = 'Create function documentation'
-             , description = stringi::stri_rand_lipsum(3)
-             , seealso     = '\\link{documentation-package}'
-             , keywords    = 'internal'
-             , aliases     = 'test-alias'
-             , references  = citation()
-             )
+                 , author      = c( person('Andrew', 'Redd', email='andrew.redd@hsc.utah.edu')
+                                  , person('Drew'  , 'Blue')
+                                  )
+                 , title       = 'Create function documentation'
+                 , description = stringi::stri_rand_lipsum(3)
+                 , seealso     = '\\link{documentation-package}'
+                 , keywords    = 'internal'
+                 , aliases     = 'test-alias'
+                 , references  = citation()
+                 )
     object.as.list <- as.list(object)
     expect_is(object.as.list, 'list')
     expect_equal(names(object.as.list), slotNames(object))

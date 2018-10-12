@@ -95,7 +95,7 @@ forward_attributes <- function(value, object){
     mostattributes(value) <- attributes(object)
     return(value)
 }
-if(FALSE){
+if(FALSE){#@testing
     a <- s( list(Rd_symb("some"))
           , Rd_tag="\\keyword"
           , class=c("Rd_tag", 'Rd'))
@@ -120,3 +120,35 @@ no_attributes <- function(object){
 }
 
 no_src <- function(object){s(object, srcref=NULL, wholeSrcref=NULL)}
+
+regex_escape <- function(x){
+    gsub('(\\\\^|\\$|\\.|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\{)', '\\\\\\1', x)
+}
+if(FALSE){#@testing
+    expect_identical(regex_escape('Vector(name)'), 'Vector\\(name\\)')
+    expect_identical(regex_escape('my.function'), 'my\\.function')
+}
+
+getAs <- function(from, to, where = NULL){
+    if (isS4(from) &&.hasSlot(from, 'className'))
+        from <- from@className
+    if (isS4(to) &&.hasSlot(to, 'className'))
+        to <- to@className
+
+    if (is.null(where))
+        where <- attr(to, 'package') %||% attr(from, 'package') %||% topenv(parent.frame())
+    if (is.character(where))
+        where <- asNamespace(where)
+    assert_that(is(where, 'environment'))
+
+    getMethod('coerce', c(from, to), where=where)
+}
+if(FALSE){#@testing
+    f <- getAs( getClass('MethodDefinition')
+              , getClass("usage/S4method")
+              )
+    expect_is(f, 'MethodDefinition')
+}
+
+
+

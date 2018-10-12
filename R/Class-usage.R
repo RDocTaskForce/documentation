@@ -122,7 +122,7 @@ setClass("usage/S3method", contains = "usage"
         , representation( generic = 'name'
                         , signature = 'name'
                         ))
-### usage/S3Method::initialize #####
+### usage/S3method::initialize #####
 #' @export
 setMethod("initialize", "usage/S3method",
     function(.Object, ex=expression(), generic=NULL, signature=NULL){
@@ -175,7 +175,7 @@ if(FALSE){#@testing
 }
 
 
-### Class: usage/S4Method #####
+### Class: usage/S4method #####
 #' @export
 s4usage <-
 setClass("usage/S4method", contains = "usage"
@@ -194,9 +194,18 @@ setMethod("initialize", "usage/S4method",
             .Object@signature <- as(signature, 'signature')
         return(.Object)
     })
+if(FALSE){#@testing
+    val <- s4usage(substitute(.(ex=expression(), generic=NULL, signature=NULL))
+                  , generic = 'initialize'
+                  , signature = c(.Object='usage/S4method')
+                  )
+    expect_is(val, 'usage/S4method')
+    expect_identical(val@generic, as.name('initialize'))
+    expect_identical(val@signature, as(c(.Object='usage/S4method'), 'signature'))
+}
 
 ### function → usage/S4method #####
-setAs("MethodDefinition", 'usage', function(from){
+setAs("MethodDefinition", 'usage/S4method', function(from){
     generic <- as.name(from@generic)
     signature <- from@defined
 
@@ -211,7 +220,10 @@ setAs("MethodDefinition", 'usage', function(from){
                         , signature=signature
                         )
 })
-if(FALSE){
+setAs( "MethodDefinition", 'usage'
+     , getAs('MethodDefinition', s4usage)
+     )
+if(FALSE){#@testing Coersion from MethodDefinition
     from <- getMethod('as.list', 'Documentation')
     val <- as(from, 'usage/S4method')
     exp <- s4usage( expression(as.list(x, ...))
@@ -219,23 +231,20 @@ if(FALSE){
                   , signature = s(signature(x='Documentation'), package='documentation')
                   )
     expect_identical(val, exp)
+
+    val2 <- as(from, 'usage')
+    expect_identical(val, val2)
 }
 
 ### Class: UsageList #####
-setVector("Virtual/Usage", "UsageList")
-c.UsageList <- function(...)as(NextMethod(), "UsageList")
-`[.UsageList` <- function(...)as(NextMethod(), "UsageList")
-setAs('usage', 'UsageList'
-     , function(from)UsageList(list(from))
-     )
-setIs('UsageList', 'Virtual/Usage')
-
-### Method: c, Virtual/Usage
-`c.Virtual/Usage` <- function(...){
-    l <- list(...)
-    as(l, 'UsageList')
-}
-if(FALSE){#@testing
+#' @exportClass UsageList
+#' @S3method [ UsageList
+#' @S3method [<- UsageList
+#' @S3method c Virtual/Usage
+#' @S3method c UsageList
+#' @S3method unique UsageList
+UsageList <- setVector("Virtual/Usage", "UsageList")
+if(FALSE){#@testing c.Virtual/Usage
     U <- as(html_to_Rd, 'usage')
     V <- as(html_to_Rd.a, 'usage/S3method')
     val <- c(U,V)
@@ -245,10 +254,10 @@ if(FALSE){#@testing
     expect_identical(S3Part(val, TRUE), list(U,V))
 
     W <- as(html_to_Rd.abbr, 'usage/S3method')
-    val2 <- c(val, list(W))
+    val2 <- c(val, W)
+    expect_is(val2, 'UsageList')
     expect_length(val2, 3L)
     expect_identical(val2[[1]], U)
     expect_identical(val2[[2]], V)
     expect_identical(val2[[3]], W)
 }
-

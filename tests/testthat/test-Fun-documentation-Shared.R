@@ -2,17 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Fun-documentation-Shared.R`')
-#line 24 "R/Fun-documentation-Shared.R"
-test_that('Shared accessors', {#@testing Shared accessors
-    doc <- shared(docs=function_documentation())
-    expect_is_exactly(doc, 'Shared-Documentation')
-    doc_name(doc) <- 'Normal'
-    expect_is_exactly(doc, 'Shared-Documentation')
-
-    expect_identical(doc_get_name(doc), 'Normal')
-    expect_identical(doc$docs@name, substitute(Normal))
-})
-#line 68 "R/Fun-documentation-Shared.R"
+#line 35 "R/Fun-documentation-Shared.R"
 test_that('set_documentation_,function,Shared-Documentation-method', {#@testing
     doc <- new( 'Shared-Documentation'
               , docs = function_documentation( name = 'Normal'

@@ -2,14 +2,14 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-usage.R`')
-#line 9 "R/Class-usage.R"
+#line 9 "/rdtf/documentation/R/Class-usage.R"
 test_that('usage', {#@testing
     u <- usage()
     expect_is(u, 'usage')
     expect_is(u, 'Virtual/Usage')
     expect_is(u, 'expression')
 })
-#line 15 "R/Class-usage.R"
+#line 15 "/rdtf/documentation/R/Class-usage.R"
 test_that('usage', {#@testing
     FD <-
     setClass('FD-test'
@@ -27,7 +27,7 @@ test_that('usage', {#@testing
     expect_is(object@usage, 'expression')
     removeClass('FD-test')
 })
-#line 66 "R/Class-usage.R"
+#line 66 "/rdtf/documentation/R/Class-usage.R"
 test_that('as(`function`, "usage")', {#@testing
     val <- as(rnorm, 'usage')
     exp <- new('usage', expression(rnorm(n, mean=0, sd=1)))
@@ -44,7 +44,7 @@ test_that('as(`function`, "usage")', {#@testing
     expect_is(val, 'usage')
     expect_is_exactly(val, 'usage/S3method')
 })
-#line 93 "R/Class-usage.R"
+#line 93 "/rdtf/documentation/R/Class-usage.R"
 test_that('usage_waiver', {#@testing
     uv <- usage_waiver()
     expect_error(as.character(uv))
@@ -52,7 +52,7 @@ test_that('usage_waiver', {#@testing
     expect_is(uv, "Virtual/Usage")
     expect_error(usage_waiver(expression(1L)))
 })
-#line 100 "R/Class-usage.R"
+#line 100 "/rdtf/documentation/R/Class-usage.R"
 test_that('usage_waiver', {#@testing
     FD <-
     setClass('FD-test'
@@ -69,7 +69,7 @@ test_that('usage_waiver', {#@testing
     expect_is(object@usage, 'Virtual/Usage')
     removeClass('FD-test')
 })
-#line 139 "R/Class-usage.R"
+#line 139 "/rdtf/documentation/R/Class-usage.R"
 test_that('initialize,usage/S3method-method', {#@testing
     ex <- expression(html_to_Rd.em(html, ...))
     .Object <- new('usage/S3method')
@@ -79,7 +79,7 @@ test_that('initialize,usage/S3method-method', {#@testing
     expect_identical(obj@generic, as.name('html_to_Rd'))
     expect_identical(obj@signature, as.name('em'))
 })
-#line 168 "R/Class-usage.R"
+#line 168 "/rdtf/documentation/R/Class-usage.R"
 test_that('as(`function`, "usage/S3method")', {#@testing
     val <- as(html_to_Rd.a, 'usage/S3method')
     exp <- s3usage( expression(html_to_Rd.a(html, ...))
@@ -88,8 +88,31 @@ test_that('as(`function`, "usage/S3method")', {#@testing
                   )
     expect_identical(val, exp)
 })
-#line 238 "R/Class-usage.R"
-test_that('`c.Virtual/Usage`', {#@testing
+#line 197 "/rdtf/documentation/R/Class-usage.R"
+test_that('initialize,usage/S4method-method', {#@testing
+    val <- s4usage(substitute(.(ex=expression(), generic=NULL, signature=NULL))
+                  , generic = 'initialize'
+                  , signature = c(.Object='usage/S4method')
+                  )
+    expect_is(val, 'usage/S4method')
+    expect_identical(val@generic, as.name('initialize'))
+    expect_identical(val@signature, as(c(.Object='usage/S4method'), 'signature'))
+})
+#line 226 "/rdtf/documentation/R/Class-usage.R"
+test_that('Coersion from MethodDefinition', {#@testing Coersion from MethodDefinition
+    from <- getMethod('as.list', 'Documentation')
+    val <- as(from, 'usage/S4method')
+    exp <- s4usage( expression(as.list(x, ...))
+                  , generic = 'as.list'
+                  , signature = s(signature(x='Documentation'), package='documentation')
+                  )
+    expect_identical(val, exp)
+
+    val2 <- as(from, 'usage')
+    expect_identical(val, val2)
+})
+#line 247 "/rdtf/documentation/R/Class-usage.R"
+test_that('c.Virtual/Usage', {#@testing c.Virtual/Usage
     U <- as(html_to_Rd, 'usage')
     V <- as(html_to_Rd.a, 'usage/S3method')
     val <- c(U,V)
@@ -99,7 +122,8 @@ test_that('`c.Virtual/Usage`', {#@testing
     expect_identical(S3Part(val, TRUE), list(U,V))
 
     W <- as(html_to_Rd.abbr, 'usage/S3method')
-    val2 <- c(val, list(W))
+    val2 <- c(val, W)
+    expect_is(val2, 'UsageList')
     expect_length(val2, 3L)
     expect_identical(val2[[1]], U)
     expect_identical(val2[[2]], V)

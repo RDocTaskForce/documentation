@@ -45,8 +45,10 @@ function( name                   #< name of the argument
 }
 
 #' @exportClass ArgumentList
-#' @S3method c ArgumentList
 #' @S3method [ ArgumentList
+#' @S3method [<- ArgumentList
+#' @S3method c arg-Documentation
+#' @S3method c ArgumentList
 #' @S3method unique ArgumentList
 setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
@@ -108,10 +110,7 @@ if(FALSE){#@testing unique.ArgumentList and [.ArgumentList
 
     expect_identical(y[c(1,3)], AL(a,a))
 }
-
-#' @export
-`c.arg-Documentation` <- function(...){ArgumentList(...)}
-if(FALSE){#@testing
+if(FALSE){#@testing c.arg-Documentation
     a <- arg(a, 'first')
     b <- arg(b, 'second')
 

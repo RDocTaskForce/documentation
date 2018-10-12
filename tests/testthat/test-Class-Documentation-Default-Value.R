@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation-Default-Value.R`')
-#line 47 "R/Class-Documentation-Default-Value.R"
+#line 46 "R/Class-Documentation-Default-Value.R"
 test_that('Documentation-Default-Value', {#@testing Documentation-Default-Value
     expect_is(dv.lgl <- new('Documentation-Default-Value:logical'   , TRUE             ), 'Documentation-Default-Value:logical'   )
     expect_is(dv.dbl <- new('Documentation-Default-Value:numeric'   , 2.5              ), 'Documentation-Default-Value:numeric'   )
