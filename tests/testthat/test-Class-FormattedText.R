@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-FormattedText.R`')
-#line 11 "R/Class-FormattedText.R"
+#line 11 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/html', {#@testing FormattedText/html
     html <- with(htmltools::tags, p("html formatted text"))
     expect_is(html, 'shiny.tag')
@@ -11,7 +11,7 @@ test_that('FormattedText/html', {#@testing FormattedText/html
     expect_is(obj, 'FormattedText/html')
     expect_is(obj, 'FormattedText')
 })
-#line 36 "R/Class-FormattedText.R"
+#line 36 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     x <- Rd_tag("note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
@@ -34,8 +34,11 @@ test_that('FormattedText/Rd', {#@testing FormattedText/Rd
     expect_identical(z, description)
 
     expect_error(val <- S3Part(FT_Rd(1L)))
+
+    x <- FT_Rd(stringi::stri_rand_lipsum(1))
+    expect_is(x, 'FormattedText/Rd')
 })
-#line 84 "R/Class-FormattedText.R"
+#line 87 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText/character', {#@testing FormattedText/character
     x <- "just plain text"
     obj <- FT_character(x)
@@ -50,7 +53,7 @@ test_that('FormattedText/character', {#@testing FormattedText/character
     val <- S3Part(FT_character(1L), strictS3 = TRUE)
     expect_equal(val, '1')
 })
-#line 107 "R/Class-FormattedText.R"
+#line 110 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('FormattedText As Methods', {#@testing FormattedText As Methods
     expect_is(as("hello world", 'FormattedText'), 'FormattedText/character')
 
@@ -58,19 +61,16 @@ test_that('FormattedText As Methods', {#@testing FormattedText As Methods
     expect_is(y, 'shiny.tag')
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 })
-#line 139 "R/Class-FormattedText.R"
-test_that('Class: SubSection', {#@testing Class: SubSection
-    obj <- subsection("Test Subsection"
-                     , content = (x <- stringi::stri_rand_lipsum(3))
-                     )
-    expect_identical(obj@title, "Test Subsection")
-    expect_identical(obj@content, FT(x))
-})
-#line 155 "R/Class-FormattedText.R"
+#line 126 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('Section(Virtual)', {#@testing Section(Virtual)
     expect_error(new('Section'), "trying to generate an object from a virtual class")
 })
-#line 165 "R/Class-FormattedText.R"
+#line 132 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Section is FormattedText', {#@testing Section is FormattedText
+    x <- asection(list(FT(stringi::stri_rand_lipsum(3))))
+    expect_is(x, 'FormattedText')
+})
+#line 145 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('Section(Anonymous)', {#@testing Section(Anonymous)
     bare <- new('Section(Anonymous)')
     expect_is(bare, 'Section(Anonymous)')
@@ -92,9 +92,11 @@ test_that('Section(Anonymous)', {#@testing Section(Anonymous)
     expect_identical(val[[2]], html)
     expect_identical(val[[3]], rd)
 })
-#line 203 "R/Class-FormattedText.R"
+#line 194 "/rdtf/documentation/R/Class-FormattedText.R"
 test_that('Section(Titled)', {#@testing Section(Titled)
-    bare <- new('Section(Titled)')
+    expect_error(new('Section(Titled)'))
+    bare <- new('Section(Titled)', '')
+
     expect_is(bare, 'Section(Titled)')
     expect_equal(mode(bare), 'list')
     expect_error(validObject(bare), "invalid class")
@@ -104,16 +106,66 @@ test_that('Section(Titled)', {#@testing Section(Titled)
     html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
     rd <- FT_Rd(toRd(char))
 
-    val <- new('Section(Titled)', list(char), title = "Character Section")
+    val <- new('Section(Titled)', content=list(char), title = "Character Section")
     expect_is(val, 'Section')
     expect_is_exactly(val, 'Section(Titled)')
     expect_identical(val[[1]], char)
     expect_identical(val@title, "Character Section")
 
-    val <- new('Section(Titled)', list(char, html, rd), title = 'Mixed Section')
+    val <- new('Section(Titled)'
+              , char, html, rd
+              , title = 'Mixed Section')
     expect_is(val, 'Section(Titled)')
     expect_identical(val[[1]], char)
     expect_identical(val[[2]], html)
     expect_identical(val[[3]], rd)
     expect_identical(val@title, "Mixed Section")
+
+    val <- section(title='Testing', content=stringi::stri_rand_lipsum(1))
+    expect_is(val, 'Section(Titled)')
+})
+#line 261 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('Class: SubSection', {#@testing Class: SubSection
+    obj <- subsection("Test Subsection"
+                     , content = (x <- stringi::stri_rand_lipsum(3))
+                     )
+    expect_identical(obj@title, "Test Subsection")
+    expect_identical(S3Part(obj, TRUE), list(FT(x)))
+})
+#line 276 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('as(SubSection, "Section")', {#@testing
+    ss <- subsection('Sub-Section', stringi::stri_rand_lipsum(1))
+
+    sec <- as(ss, 'Section')
+    expect_is_exactly(sec, 'Section(Titled)')
+    expect_identical(S3Part(sec, TRUE), S3Part(ss, TRUE))
+    expect_identical(as.list(sec), as.list(ss))
+    expect_identical(attr(as.list(sec), 'title'), 'Sub-Section')
+})
+#line 317 "/rdtf/documentation/R/Class-FormattedText.R"
+test_that('c.SubSection', {#@testing
+    part1 <- FT(stringi::stri_rand_lipsum(1))
+    part2 <- subsection('Part 2', stringi::stri_rand_lipsum(1))
+    part3 <- subsection('Part 3', stringi::stri_rand_lipsum(1))
+
+    expect_identical(c(part1), part1)
+
+    expect_is_exactly(c(part1, 'More Text'), 'FormattedText/character')
+
+    val <- c(part1, part2)
+    expect_is(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], part1)
+    expect_identical(val[[2]], part2)
+
+    expect_identical(as.list(val), list(part1, part2))
+
+    val2 <- c(val, part3)
+    expect_is(val2, 'SectionList')
+    expect_length(val2, 2L)
+    expect_all_inherit(val2, 'Section')
+    expect_is(val2[[1]], 'Section(Anonymous)')
+    expect_is(val2[[2]], 'Section(Titled)')
+
+    expect_is(c(part2, part3), 'Section')
+    expect_is(c(part2, "More Text"), 'Section')
 })

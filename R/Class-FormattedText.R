@@ -55,6 +55,9 @@ if(FALSE){#@testing FormattedText/Rd
     expect_identical(z, description)
 
     expect_error(val <- S3Part(FT_Rd(1L)))
+
+    x <- FT_Rd(stringi::stri_rand_lipsum(1))
+    expect_is(x, 'FormattedText/Rd')
 }
 
 ### Class: FormattedText/character #####
@@ -112,39 +115,7 @@ if(FALSE){#@testing FormattedText As Methods
     expect_is(as(y, 'FormattedText'), 'FormattedText/html')
 }
 
-### Class: SubSection #####
-#' Create a documentation subsection
-#'
-#' @export
-subsection <-
-setClass( "SubSection"
-        , list( 'FormattedText'
-              , title = 'character'
-              , content = 'FormattedText'
-              )
-        )
-setValidity("SubSection", function(object){
-    validate_that( is(content, 'FormattedText')
-                 , length(title) == 1L
-                 )
-})
-setMethod("initialize", "SubSection", function(.Object, title, content){
-    assert_that( rlang::is_string(title))
-    if (!is(content, 'FormattedText'))
-        content <- FT(content)
-    .Object@title <- title
-    .Object@content <- content
-    return(.Object)
-})
-if(FALSE){#@testing Class: SubSection
-    obj <- subsection("Test Subsection"
-                     , content = (x <- stringi::stri_rand_lipsum(3))
-                     )
-    expect_identical(obj@title, "Test Subsection")
-    expect_identical(obj@content, FT(x))
-}
-
-### Class: Section #####
+# Class: Section(VIRTUAL) =======
 #' @export
 setClass('Section', contains='VIRTUAL')
 setValidity('Section', function(object){
@@ -156,6 +127,15 @@ if(FALSE){#@testing Section(Virtual)
     expect_error(new('Section'), "trying to generate an object from a virtual class")
 }
 
+### Section ≜ FormattedText #####
+setIs('Section', 'FormattedText')
+if(FALSE){#@testing Section is FormattedText
+    x <- asection(list(FT(stringi::stri_rand_lipsum(3))))
+    expect_is(x, 'FormattedText')
+}
+
+
+### Class: Section(Anonymous) #####
 asection <- setClass("Section(Anonymous)", contains=c('Section', 'list'))
 setValidity("Section(Anonymous)", function(object){
     validate_that( all_inherit(object, 'FormattedText')
@@ -183,25 +163,38 @@ if(FALSE){#@testing Section(Anonymous)
     expect_identical(val[[2]], html)
     expect_identical(val[[3]], rd)
 }
+
+### Class: Section(Titled) #####
 section <-
 setClass('Section(Titled)', c(title='character' ), contains=c('Section', 'list'))
 setValidity('Section(Titled)', function(object){
-    validate_that( length(object@title) == 1
+    validate_that( all_inherit(object, 'FormattedText')
+                 , !any(purrr::map_lgl(object, is, "Section"))
+                 , length(object@title) == 1
                  , !is.na(object@title)
                  , nchar(object@title) > 0
                  )
 })
 setMethod('initialize', 'Section(Titled)',
-function(.Object, title, ...){
-    S3Part(.Object, TRUE) <- list(...)
-    assert_that( all_inherit(S3Part(.Object, TRUE), 'FormattedText', "`...`")
-               , is.string(title)
-               )
-    .Object@title <- title
-    .Object
+    function(.Object, title, ..., content=list(...)){
+        assert_that( missing(content) || ...length() == 0L)
+        assert_that( !any(purrr::map_lgl(content, is, "Section"))
+                   , is.string(title)
+                   )
+        .Object@title <- title
+        if (!is.list(content))
+            content <- list(content)
+        for (i in seq_along(content)){
+            if (!is(content[[i]], 'FormattedText'))
+                content[[i]] <- as(content[[i]], 'FormattedText')
+        }
+        S3Part(.Object, TRUE) <- content
+        return(.Object)
 })
 if(FALSE){#@testing Section(Titled)
-    bare <- new('Section(Titled)')
+    expect_error(new('Section(Titled)'))
+    bare <- new('Section(Titled)', '')
+
     expect_is(bare, 'Section(Titled)')
     expect_equal(mode(bare), 'list')
     expect_error(validObject(bare), "invalid class")
@@ -211,22 +204,140 @@ if(FALSE){#@testing Section(Titled)
     html <- FT_html(htmltools::tags$div(purrr::map(x, htmltools::tags$p)))
     rd <- FT_Rd(toRd(char))
 
-    val <- new('Section(Titled)', list(char), title = "Character Section")
+    val <- new('Section(Titled)', content=list(char), title = "Character Section")
     expect_is(val, 'Section')
     expect_is_exactly(val, 'Section(Titled)')
     expect_identical(val[[1]], char)
     expect_identical(val@title, "Character Section")
 
-    val <- new('Section(Titled)', list(char, html, rd), title = 'Mixed Section')
+    val <- new('Section(Titled)'
+              , char, html, rd
+              , title = 'Mixed Section')
     expect_is(val, 'Section(Titled)')
     expect_identical(val[[1]], char)
     expect_identical(val[[2]], html)
     expect_identical(val[[3]], rd)
     expect_identical(val@title, "Mixed Section")
+
+    val <- section(title='Testing', content=stringi::stri_rand_lipsum(1))
+    expect_is(val, 'Section(Titled)')
 }
+
+### Class: SubSection #####
+#' Create a documentation subsection
+#'
+#' @export
+subsection <-
+setClass( "SubSection"
+        , list( 'FormattedText'
+              , 'list'
+              , title = 'character'
+              )
+        )
+setValidity("SubSection", function(object){
+    validate_that( is(S3Part(object, TRUE), 'FormattedText')
+                 , !any(purrr::map_lgl(S3Part(object, TRUE), is, 'Section'))
+                 , length(title) == 1L
+                 )
+})
+setMethod("initialize", "SubSection",
+    function(.Object, title, ...
+            , content=list(...)
+            ){
+        assert_that( missing(content) || ...length() == 0L)
+        assert_that( !any(purrr::map_lgl(content, is, "Section"))
+                   , is.string(title)
+                   )
+        .Object@title <- title
+        if (!is.list(content))
+            content <- list(content)
+        for (i in seq_along(content)){
+            if (!is(content[[i]], 'FormattedText'))
+                content[[i]] <- as(content[[i]], 'FormattedText')
+        }
+        S3Part(.Object, TRUE) <- content
+        return(.Object)
+})
+if(FALSE){#@testing Class: SubSection
+    obj <- subsection("Test Subsection"
+                     , content = (x <- stringi::stri_rand_lipsum(3))
+                     )
+    expect_identical(obj@title, "Test Subsection")
+    expect_identical(S3Part(obj, TRUE), list(FT(x)))
+}
+
+setMethod('as.list', 'SubSection', function(x){s(S3Part(x, TRUE), title=x@title)})
+setMethod('as.list', 'Section(Anonymous)', function(x){S3Part(x, TRUE)})
+setMethod('as.list', 'Section(Titled)', function(x){s(S3Part(x, TRUE), title = x@title)})
+
+setAs('SubSection', 'Section', function(from){
+    new('Section(Titled)', title=from@title, content=S3Part(from, TRUE))
+})
+if(FALSE){#@testing
+    ss <- subsection('Sub-Section', stringi::stri_rand_lipsum(1))
+
+    sec <- as(ss, 'Section')
+    expect_is_exactly(sec, 'Section(Titled)')
+    expect_identical(S3Part(sec, TRUE), S3Part(ss, TRUE))
+    expect_identical(as.list(sec), as.list(ss))
+    expect_identical(attr(as.list(sec), 'title'), 'Sub-Section')
+}
+
+
 
 ### Class: SectionList #####
 #' @exportClass SectionList
 setVector( element = "Section"
          , Class   = "SectionList"
          )
+
+
+### c #####
+#' @export
+c.FormattedText <-
+function(...){
+    l <- list(...)
+    if (...length() == 1) return(..1)
+    for (i in seq_along(l)){
+        if (!is(l[[i]], 'FormattedText'))
+            l[[i]] <- as(l[[i]], 'FormattedText')
+    }
+    if (all_are(l, class(..1))) return(as(NextMethod(), class(..1)))
+    new('Section(Anonymous)', list(...))
+}
+#' @export
+c.SubSection <- function(...){
+    l <- list(...)
+    for (i in seq_along(l)){
+        if (!is(l[[i]], 'FormattedText'))
+            l[[i]] <- as(l[[i]], 'FormattedText')
+    }
+    new('Section(Anonymous)', l)
+}
+if(FALSE){#@testing
+    part1 <- FT(stringi::stri_rand_lipsum(1))
+    part2 <- subsection('Part 2', stringi::stri_rand_lipsum(1))
+    part3 <- subsection('Part 3', stringi::stri_rand_lipsum(1))
+
+    expect_identical(c(part1), part1)
+
+    expect_is_exactly(c(part1, 'More Text'), 'FormattedText/character')
+
+    val <- c(part1, part2)
+    expect_is(val, 'Section(Anonymous)')
+    expect_identical(val[[1]], part1)
+    expect_identical(val[[2]], part2)
+
+    expect_identical(as.list(val), list(part1, part2))
+
+    val2 <- c(val, part3)
+    expect_is(val2, 'SectionList')
+    expect_length(val2, 2L)
+    expect_all_inherit(val2, 'Section')
+    expect_is(val2[[1]], 'Section(Anonymous)')
+    expect_is(val2[[2]], 'Section(Titled)')
+
+    expect_is(c(part2, part3), 'Section')
+    expect_is(c(part2, "More Text"), 'Section')
+}
+
