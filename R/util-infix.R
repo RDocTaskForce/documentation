@@ -1,3 +1,5 @@
+#' @include util-str_rep.R
+
 
 #' @rdname documentation-infix-operators
 #' @title Infix string concatenation.

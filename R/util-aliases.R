@@ -119,7 +119,7 @@ no_attributes <- function(object){
     return(object)
 }
 
-no_src <- function(object){s(object, srcref=NULL, wholeSrcref=NULL)}
+no_src <- function(object){s(object, srcref=NULL, wholeSrcref=NULL, srcfile=NULL)}
 
 regex_escape <- function(x){
     gsub('(\\\\^|\\$|\\.|\\||\\?|\\*|\\+|\\(|\\)|\\[|\\{)', '\\\\\\1', x)

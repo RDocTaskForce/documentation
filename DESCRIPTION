@@ -31,11 +31,11 @@ Description: This package provides infrastructure for containing
     and exporting documentation objects into different formats.
 Collate:
     'util-undefined.R'
-    'util-testing.R'
     'util-str_rep.R'
+    'util-infix.R'
+    'util-testing.R'
     'util-postlogic.R'
     'util-interleave.R'
-    'util-infix.R'
     'util-generics.R'
     'util-aliases.R'
     'util-errors.R'
@@ -51,6 +51,7 @@ Collate:
     'Class-example.R'
     'Class-FormattedText.R'
     'Class-Documentation.R'
+    'Class-NamespaceEntry.R'
     'Class-Rd.R'
     'Class-usage.R'
     'Class-arg-Documentation.R'

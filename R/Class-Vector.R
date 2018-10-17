@@ -42,7 +42,8 @@ function( element                                   #< name of the class that el
         l <- list(...)
         for (i in seq_along(l)) {
             if (is(l[[i]], Class)) l[[i]] <- S3Part(l[[i]], TRUE) else
-            if (is(l[[i]], element)) l[[i]] <- list(l[[i]])
+            if (is(l[[i]], element)) l[[i]] <- list(l[[i]]) else
+            l[[i]] <- list(as(l[[i]], element))
         }
         as(do.call(c, l), Class)
     }, list(Class=Class, element=element))))
