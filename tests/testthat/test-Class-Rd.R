@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Rd.R`')
-#line 66 "R/Class-Rd.R"
+#line 66 "/rdtf/documentation/R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'documentation')
     txt <- tools::parse_Rd(test.file)
@@ -26,7 +26,7 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     expect_is_exactly(txt[[2]], "Rd_newline")
     expect_is_exactly(txt[[c(48, 11)]], "Rd_TEXT")
 })
-#line 102 "R/Class-Rd.R"
+#line 102 "/rdtf/documentation/R/Class-Rd.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_valid(txt)
@@ -73,7 +73,7 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
                     , c('Rd_newline', 'Rd_TEXT', 'Rd_tag', 'Rd')
                     )
 })
-#line 153 "R/Class-Rd.R"
+#line 153 "/rdtf/documentation/R/Class-Rd.R"
 test_that('`[.Rd_tag`', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
 
@@ -84,7 +84,7 @@ test_that('`[.Rd_tag`', {#@testing
     expect_is(y, 'Rd_tag')
     expect_identical(attr(y, 'Rd_tag'), '\\arguments')
 })
-#line 234 "R/Class-Rd.R"
+#line 234 "/rdtf/documentation/R/Class-Rd.R"
 test_that('is_Rd_newline', {#@testing
     expect_true(is_Rd_newline(.Rd.newline))
     expect_true(is_Rd_newline(.Rd.newline[[1]]))
@@ -94,7 +94,7 @@ test_that('is_Rd_newline', {#@testing
     expect_true(is_Rd_newline(.Rd.code.newline[[1]]))
     expect_false(is_Rd_newline(.Rd(.Rd.newline)))
 })
-#line 266 "R/Class-Rd.R"
+#line 266 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_is_all_text', {#@testing
     x <- c("Lorem ipsum", stringi::stri_rand_lipsum(3, start_lipsum = FALSE))
     x <- .Rd_strwrap(collapse(x, '\n\n'), wrap.lines = TRUE, wrap.at = 50)
@@ -122,7 +122,7 @@ test_that('Rd_is_all_text', {#@testing
                       "type for Rd"
                     )
 })
-#line 297 "R/Class-Rd.R"
+#line 297 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_spans_multiple_lines', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_true(Rd_spans_multiple_lines(txt))
@@ -141,7 +141,7 @@ test_that('Rd_spans_multiple_lines', {#@testing
           , .Rd.code.newline)
     expect_true(Rd_spans_multiple_lines(x))
 })
-#line 319 "R/Class-Rd.R"
+#line 319 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_ends_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_true(Rd_ends_with_newline(txt))
@@ -155,14 +155,14 @@ test_that('Rd_ends_with_newline', {#@testing
     expect_true(Rd_ends_with_newline(x))
     expect_false(Rd_ends_with_newline(x, TRUE))
 })
-#line 336 "R/Class-Rd.R"
+#line 336 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_starts_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     expect_false(Rd_starts_with_newline(txt))
     expect_true(Rd_starts_with_newline(txt[['\\arguments']]))
     expect_false(Rd_starts_with_newline(txt[['\\arguments']], TRUE))
 })
-#line 361 "R/Class-Rd.R"
+#line 361 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_split', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
 
@@ -171,7 +171,7 @@ test_that('Rd_split', {#@testing
     expect_is_not(val, 'Rd')
 
     expect_all_inherit(val, 'Rd')
-    expect_false(all_are(val, 'Rd'))
+    expect_false(all_are_exactly(val, 'Rd'))
 
 
     x <- txt['\\examples'][[1]]
@@ -179,7 +179,7 @@ test_that('Rd_split', {#@testing
     expect_identical(y[[1]], x[[1]])
     expect_length(y, 29L)
 })
-#line 399 "R/Class-Rd.R"
+#line 399 "/rdtf/documentation/R/Class-Rd.R"
 test_that('compact_Rd', {#@testing
     l <- s(list( .Rd.newline
                , Rd_text('text')
@@ -201,7 +201,7 @@ test_that('compact_Rd', {#@testing
     expect_is(m[[4L]], 'Rd_tag')
     expect_is(m[[5L]], 'Rd_newline')
 })
-#line 446 "R/Class-Rd.R"
+#line 446 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd', {#@testing
     a <- "test"
     b <- Rd(a)
@@ -235,7 +235,7 @@ test_that('Rd', {#@testing
     expect_is_exactly(x, 'Rd')
     expect_is_exactly(x[[1]], 'Rd_TEXT')
 })
-#line 479 "R/Class-Rd.R"
+#line 479 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Class-Rd', {#@testing Class-Rd
     x <- cl('text', 'Rd')
     expect_is(x, 'Rd')
@@ -244,7 +244,7 @@ test_that('Class-Rd', {#@testing Class-Rd
     expect_is(txt, 'Rd')
     expect_true(validObject(txt))
 })
-#line 519 "R/Class-Rd.R"
+#line 519 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_text', {#@testing
     val <- Rd_text('testing')
     expect_is(val, 'Rd')
@@ -281,7 +281,7 @@ test_that('Rd_text', {#@testing
     # expect_is(x[[2]], 'Rd_TEXT')
     # expect_is(x[[3]], 'Rd_newline')
 })
-#line 570 "R/Class-Rd.R"
+#line 570 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and Rd_comment
     expect_error(Rd_comment("testing"))
     expect_is(Rd_comment("% comment"), "Rd_COMMENT")
@@ -295,7 +295,7 @@ test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and
     expect_is_exactly(a, 'Rd_RCODE')
     expect_length(a, 1L)
 })
-#line 623 "R/Class-Rd.R"
+#line 623 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -337,7 +337,7 @@ test_that('Rd_tag', {#! @testing
     expect_true(length(tag) > 5L)
     expect_equal(substr(tag[[2]], 1, 13)[[1]], '  Lorem ipsum')
 })
-#line 714 "R/Class-Rd.R"
+#line 714 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_* tags', {#@testing Rd_* tags
     rd <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'documentation'))
     txt <- Rd_rm_srcref(rd)
@@ -395,7 +395,7 @@ test_that('Rd_* tags', {#@testing Rd_* tags
                                , Rd_rcode("rnorm(n, mean = 0, sd = 1)\n")
     ), txt[['\\usage']])
 })
-#line 851 "R/Class-Rd.R"
+#line 851 "/rdtf/documentation/R/Class-Rd.R"
 test_that('Rd_lines', {#@testing
     l <- list( Rd_rcode("value \\%if\\% proposition")
              , Rd_rcode("proposition \\%otherwise\\% alternate"))
