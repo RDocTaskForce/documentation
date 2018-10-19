@@ -1,5 +1,6 @@
 #' @include setup.R
 #' @include utils.R
+#' @include Class-Vector.R
 
 # Class: NamespaceEntry(Virtual) -----
 #' Namespace Entries
@@ -290,6 +291,7 @@ setMethod('initialize', 'ImportClassesFrom', function(.Object, package, names){
 #' @export
 format.ImportClassesFrom <-function(x, ...){
     paste0( "importClassesFrom("
+          , namespace_quote(x@package), ','
           , namespace_quote(x@names)
           , ")")
 }
@@ -310,8 +312,8 @@ if(FALSE){#@testing Class: ImportClassesFrom
 
     val <- import_classes_from('pkg', c('class1', 'class 2'))
     expect_identical( format(val)
-                    , c( 'importClassesFrom(class1)'
-                       , 'importClassesFrom("class 2")'
+                    , c( 'importClassesFrom(pkg,class1)'
+                       , 'importClassesFrom(pkg,"class 2")'
                        ))
 }
 
@@ -371,4 +373,280 @@ if(FALSE){#@testing
                     )
 }
 
+# Collection Classes -------
+## Export Collections ======
 
+setRefVector( 'Export')
+setRefVector( 'ExportPattern')
+setRefVector( 'ExportS3method')
+setRefVector( 'ExportS4methods')
+setRefVector( 'ExportS4class')
+
+pass.format <- function(x, ...){
+    sort(as.character(unlist(purrr:::map(x$., format, ...))))
+}
+setMethod('format', "RefVector(Export)"         , pass.format)
+setMethod('format', "RefVector(ExportPattern)"  , pass.format)
+setMethod('format', "RefVector(ExportS3method)" , pass.format)
+setMethod('format', "RefVector(ExportS4methods)", pass.format)
+setMethod('format', "RefVector(ExportS4class)"  , pass.format)
+
+#' @export
+exports <- setRefClass('ExportEntries',
+    fields = c( names    = "RefVector(Export)"
+              , patterns = "RefVector(ExportPattern)"
+              , S3       = "RefVector(ExportS3method)"
+              , S4       = "RefVector(ExportS4methods)"
+              , Classes  = "RefVector(ExportS4class)"
+              ),
+    methods = list(
+        add = function(ex){
+            if (is(ex, "Export"))             names$add(ex) else
+            if (is(ex, "ExportPattern"))   patterns$add(ex) else
+            if (is(ex, "ExportS3method"))        S3$add(ex) else
+            if (is(ex, "ExportS4methods"))       S4$add(ex) else
+            if (is(ex, "ExportS4class"))    Classes$add(ex) else
+            doc_error(._("Don't know how to add a %s.", dQuote(class(ex))))
+        },
+        initialize=function(...){
+            for (i in seq_len(...length()))
+                add(...elt(i))
+        })
+    )
+setMethod('format', 'ExportEntries', function(x, ...){
+    c( sort(format(x$S3, ...))
+     , sort(format(x$patterns, ...))
+     , sort(format(x$names, ...))
+     , sort(format(x$Classes, ...))
+     , sort(format(x$S4, ...))
+     )
+})
+if(FALSE){#@testing
+    val <- new( 'RefVector(ExportS3method)'
+              , export_s3method('c', 'Rd')
+              , export_s3method('c', 'ArgumentList')
+              )
+    expect_is(val, 'RefVector(ExportS3method)')
+    expect_length(val, 2L)
+    expect_identical(format(val), c("S3method(c,ArgumentList)", "S3method(c,Rd)"))
+
+    export.list <- exports( export("my name")
+                          , export_s3method('c', 'Rd')
+                          , export_s3method('c', 'ArgumentList')
+                          , export_pattern("^doc_")
+                          , export_s4methods("initialize")
+                          , export_class("Documentation")
+                          )
+    expect_is(export.list, 'ExportEntries')
+    expect_identical( format(export.list)
+                    , c( "S3method(c,ArgumentList)"
+                       , "S3method(c,Rd)"
+                       , "exportPattern(\"^doc_\")"
+                       , "export(\"my name\")"
+                       , "exportClasses(Documentation)"
+                       , "exportMethods(initialize)"
+                       ))
+
+    expect_error( export.list$add(import('documentation'))
+                , "Don't know how to add")
+}
+
+
+## ImportCollections ======
+#' @export
+# exports <- setRefVector( 'ExportEntry', 'ExportEntries')
+get_packages <- function(){as.character(unlist(purrr::map(., slot, 'package')))}
+get_names <- function(){as.character(unlist(purrr::map(., slot, 'names')))}
+no_duplicate_names <- function(){
+    validate_that( !anyDuplicated(get_names())
+                 , msg = "Cannot contain duplicate names.")
+}
+wrap_validate <- function(){
+    valid <- validate()
+    if (isTRUE(valid)) return(valid) else
+    return(s(FALSE, msg=valid))
+}
+vec.methods <- list( get_packages = get_packages
+                   , get_names    = get_names
+                   , validate     = no_duplicate_names
+                   , is_valid     = wrap_validate
+                   )
+rv_import <- setRefVector( 'Import'
+  , methods=list( get_packages=get_packages
+                , validate = function()validate_that(!anyDuplicated(get_packages()))
+                , is_valid = wrap_validate
+                ))
+rv_import_from    <- setRefVector( 'ImportFrom'       , methods=vec.methods)
+rv_import_classes <- setRefVector( 'ImportClassesFrom', methods=vec.methods)
+rv_import_methods <- setRefVector( 'ImportMethodsFrom', methods=vec.methods)
+rm(get_packages, get_names, no_duplicate_names, vec.methods)
+
+setMethod('format', "RefVector(Import)"           , pass.format)
+setMethod('format', "RefVector(ImportFrom)"       , pass.format)
+setMethod('format', "RefVector(ImportClassesFrom)", pass.format)
+setMethod('format', "RefVector(ImportMethodsFrom)", pass.format)
+
+setMethod('names', 'RefVector(Import)', function(x)purrr::map_chr(x$., slot, 'package'))
+
+imports <- setRefClass('ImportEntries',
+    fields = c( packages = "RefVector(Import)"
+              , objects  = "RefVector(ImportFrom)"
+              , classes  = "RefVector(ImportClassesFrom)"
+              , methods  = "RefVector(ImportMethodsFrom)"
+              ),
+    methods = list(
+        add = function(ex){
+            if (is(ex, "Import"))            packages$add(ex) else
+            if (is(ex, "ImportFrom"))         objects$add(ex) else
+            if (is(ex, "ImportClassesFrom"))  classes$add(ex) else
+            if (is(ex, "ImportMethodsFrom"))  methods$add(ex) else
+            doc_error(._("Don't know how to add a %s.", dQuote(class(ex))))
+        },
+        check_no_extraneous_import_from = function(){
+            pkgs <- objects$get_packages()
+            x <- pkgs %in% packages$get_packages()
+            if (!any(x)) return(TRUE)
+            msg <- ngettext( sum(x)
+                           , "package %s already appears as an import, it"
+                           , "packages %s already appear a imports, they"
+                           ) %<<% "should not appear in any importFrom calls."
+            s(FALSE, msg=._(msg, comma_list(pkgs[x])))
+        },
+        validate = function(...){
+            validate_that( objects$is_valid()
+                         , packages$is_valid()
+                         , classes$is_valid()
+                         , methods$is_valid()
+                         , check_no_extraneous_import_from()
+                         )
+        },
+        is_valid = wrap_validate,
+        get_packages = function(){
+            sort(unique(c(packages$get_packages()
+                         , objects$get_packages()
+                         , classes$get_packages()
+                         , methods$get_packages()
+                         )))
+        },
+        initialize=function(...){
+            for (i in seq_len(...length()))
+                add(...elt(i))
+        })
+    )
+setMethod('format', 'ImportEntries', function(x, ...){
+    c( sort(format(x$packages))
+     , sort(format(x$objects))
+     , sort(format(x$classes))
+     , sort(format(x$methods))
+     )
+})
+if(FALSE){#@testing
+    bare <- new('RefVector(Import)')
+    expect_valid(bare)
+
+    packages <- new('RefVector(Import)', import('utils'), import('methods'))
+    expect_identical( sort(names(packages)), c('methods', 'utils'))
+    expect_identical(format(packages), c('import(methods)', 'import(utils)'))
+
+    x <- import_from('utils', c('head', 'tail'))
+    objects <- new('RefVector(ImportFrom)', x)
+    expect_identical(format(objects), c('importFrom(utils,head)', 'importFrom(utils,tail)'))
+
+    import.list <- imports( import('utils'), import('methods')
+                          , x
+                          , import_classes_from('documentation', c('Documentation', 'function-Documentation'))
+                          , import_methods_from('documentation', c('doc_get_aliases', 'doc_get_name'))
+                          )
+    expect_is(import.list, 'ImportEntries')
+    expect_equal( import.list$validate()
+                , "package utils already appears as an import," %<<%
+                  "it should not appear in any importFrom calls.")
+
+    expect_identical( format(import.list)
+                    , c( 'import(methods)', 'import(utils)'
+                       , 'importFrom(utils,head)', 'importFrom(utils,tail)'
+                       , 'importClassesFrom(documentation,\"function-Documentation\")'
+                       , 'importClassesFrom(documentation,Documentation)'
+                       , 'importMethodsFrom(documentation,doc_get_aliases)'
+                       , 'importMethodsFrom(documentation,doc_get_name)'
+                       ))
+
+    expect_error( import.list$add(export('Documentation'))
+                , "Don't know how to add")
+
+    expect_identical( import.list$get_packages()
+                    , c('documentation', 'methods', 'utils'))
+
+    ilist <- imports( import_from('purrr', '%||%')
+                    , import_from('rlang', '%||%')
+                    )
+    ilist$objects$get_names()
+
+    expect_equal(ilist$validate(), "Cannot contain duplicate names.")
+
+    expect_true(ilist$check_no_extraneous_import_from())
+}
+
+
+namespace <-
+setRefClass('NamespaceEntries',
+    fields = c( imports='ImportEntries'
+              , exports='ExportEntries'
+              ),
+    methods = list(
+        add = function(entry){
+            if (is(entry, 'ExportEntry')) exports$add(entry) else
+            if (is(entry, 'ImportEntry')) imports$add(entry) else
+            doc_error(._("Don't know how to add a %s.", dQuote(class(entry))))
+        },
+        initialize = function(...){
+            for (i in seq_len(...length()))
+                add(...elt(i))
+        },
+        validate = function(){
+            validate_that( imports$is_valid()
+                         , exports$is_valid()
+                         )
+        },
+        is_valid = wrap_validate
+        )
+    )
+setMethod('format', 'NamespaceEntries', function(x, ...){
+    c( format(x$exports)
+     , format(x$imports)
+     )
+})
+if(FALSE){#@testing
+    my.ns <- namespace( export("my name")
+                      , import('utils'), import('methods')
+                      , export_s4methods("initialize")
+                      , export_s3method('c', 'ArgumentList')
+                      , export_pattern("^doc_")
+                      , import_classes_from('documentation', c('Documentation', 'function-Documentation'))
+                      , import_from('utils', c('head', 'tail'))
+                      , import_methods_from('documentation', c('doc_get_aliases', 'doc_get_name'))
+                      , export_class("Documentation")
+                      , export_s3method('c', 'Rd')
+                      )
+    expect_is(my.ns, 'NamespaceEntries')
+    expect_identical( format(my.ns)
+                    , c( "S3method(c,ArgumentList)"
+                       , "S3method(c,Rd)"
+                       , "exportPattern(\"^doc_\")"
+                       , "export(\"my name\")"
+                       , "exportClasses(Documentation)"
+                       , "exportMethods(initialize)"
+                       , 'import(methods)', 'import(utils)'
+                       , 'importFrom(utils,head)', 'importFrom(utils,tail)'
+                       , 'importClassesFrom(documentation,\"function-Documentation\")'
+                       , 'importClassesFrom(documentation,Documentation)'
+                       , 'importMethodsFrom(documentation,doc_get_aliases)'
+                       , 'importMethodsFrom(documentation,doc_get_name)'
+                       ))
+    expect_error( my.ns$add('Hallo, my name is Inigo Montoya...')
+                , "Don't know how to add")
+
+    my.ns$validate()
+
+
+}

@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-NamespaceEntry.R`')
-#line 34 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 35 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('format.Export', {#@testing
     e <- export('my_name')
     expect_is(e, 'Export')
@@ -17,7 +17,7 @@ test_that('format.Export', {#@testing
     expect_identical( format(export("%<<%"))
                     , 'export("%<<%")')
 })
-#line 69 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 70 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('format.ExportPattern', {#@testing
     val <- export_pattern("^[^\\.]")
     expect_is(val, 'NamespaceEntry')
@@ -32,7 +32,7 @@ test_that('format.ExportPattern', {#@testing
 
     expect_identical(format(val), 'exportPattern("^[^\\.]")')
 })
-#line 114 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 115 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ExportS3method', {#@testing Class: ExportS3method
     expect_error(export_s3method())
     expect_error(export_s3method('c'))
@@ -54,7 +54,7 @@ test_that('Class: ExportS3method', {#@testing Class: ExportS3method
     expect_identical( format(export_s3method('[', 'my class'))
                     , 'S3method("[","my class")' )
 })
-#line 153 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 154 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ExportS4methods', {#@testing Class: ExportS4methods
     expect_error(export_s4methods())
     expect_error(export_s4methods(''))
@@ -67,7 +67,7 @@ test_that('Class: ExportS4methods', {#@testing Class: ExportS4methods
     val <- export_s4methods('[[')
     expect_identical(format(val), 'exportMethods("[[")')
 })
-#line 183 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 184 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ExportS4class', {#@testing Class: ExportS4class
     expect_error(export_class())
     expect_error(export_class(''))
@@ -79,7 +79,7 @@ test_that('Class: ExportS4class', {#@testing Class: ExportS4class
 
     expect_identical(format(val), "exportClasses(Documentation)")
 })
-#line 216 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 217 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: Import', {#@testing Class: Import
     expect_error(import())
     expect_error(import(''))
@@ -90,7 +90,7 @@ test_that('Class: Import', {#@testing Class: Import
 
     expect_identical(format(val), 'import(parsetools)')
 })
-#line 251 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 252 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ImportFrom', {#@testing Class: ImportFrom
     expect_error(import_from())
     expect_error(import_from('pkg'))
@@ -110,7 +110,7 @@ test_that('Class: ImportFrom', {#@testing Class: ImportFrom
     expect_identical( format(val)
                     , c("importFrom(pkg,a)", "importFrom(pkg,b)"))
 })
-#line 296 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 298 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ImportClassesFrom', {#@testing Class: ImportClassesFrom
     expect_error(import_classes_from())
     expect_error(import_classes_from('pkg'))
@@ -128,11 +128,11 @@ test_that('Class: ImportClassesFrom', {#@testing Class: ImportClassesFrom
 
     val <- import_classes_from('pkg', c('class1', 'class 2'))
     expect_identical( format(val)
-                    , c( 'importClassesFrom(class1)'
-                       , 'importClassesFrom("class 2")'
+                    , c( 'importClassesFrom(pkg,class1)'
+                       , 'importClassesFrom(pkg,"class 2")'
                        ))
 })
-#line 343 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 345 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('Class: ImportMethodsFrom', {#@testing Class: ImportMethodsFrom
     expect_error(import_methods_from())
     expect_error(import_methods_from('pkg'))
@@ -152,10 +152,122 @@ test_that('Class: ImportMethodsFrom', {#@testing Class: ImportMethodsFrom
                     , c( "importMethodsFrom(pkg,method1)"
                        , "importMethodsFrom(pkg,method2)"))
 })
-#line 367 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+#line 369 "/rdtf/documentation/R/Class-NamespaceEntry.R"
 test_that('namespace_quote', {#@testing
     expect_identical(namespace_quote(character(0)), character(0))
     expect_identical( namespace_quote(c('hi', 'hello world'))
                     , c('hi', '\"hello world\"')
                     )
+})
+#line 424 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+test_that('format,ExportEntries-method', {#@testing
+    val <- new( 'RefVector(ExportS3method)'
+              , export_s3method('c', 'Rd')
+              , export_s3method('c', 'ArgumentList')
+              )
+    expect_is(val, 'RefVector(ExportS3method)')
+    expect_length(val, 2L)
+    expect_identical(format(val), c("S3method(c,ArgumentList)", "S3method(c,Rd)"))
+
+    export.list <- exports( export("my name")
+                          , export_s3method('c', 'Rd')
+                          , export_s3method('c', 'ArgumentList')
+                          , export_pattern("^doc_")
+                          , export_s4methods("initialize")
+                          , export_class("Documentation")
+                          )
+    expect_is(export.list, 'ExportEntries')
+    expect_identical( format(export.list)
+                    , c( "S3method(c,ArgumentList)"
+                       , "S3method(c,Rd)"
+                       , "exportPattern(\"^doc_\")"
+                       , "export(\"my name\")"
+                       , "exportClasses(Documentation)"
+                       , "exportMethods(initialize)"
+                       ))
+
+    expect_error( export.list$add(import('documentation'))
+                , "Don't know how to add")
+})
+#line 543 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+test_that('format,ImportEntries-method', {#@testing
+    bare <- new('RefVector(Import)')
+    expect_valid(bare)
+
+    packages <- new('RefVector(Import)', import('utils'), import('methods'))
+    expect_identical( sort(names(packages)), c('methods', 'utils'))
+    expect_identical(format(packages), c('import(methods)', 'import(utils)'))
+
+    x <- import_from('utils', c('head', 'tail'))
+    objects <- new('RefVector(ImportFrom)', x)
+    expect_identical(format(objects), c('importFrom(utils,head)', 'importFrom(utils,tail)'))
+
+    import.list <- imports( import('utils'), import('methods')
+                          , x
+                          , import_classes_from('documentation', c('Documentation', 'function-Documentation'))
+                          , import_methods_from('documentation', c('doc_get_aliases', 'doc_get_name'))
+                          )
+    expect_is(import.list, 'ImportEntries')
+    expect_equal( import.list$validate()
+                , "package utils already appears as an import," %<<%
+                  "it should not appear in any importFrom calls.")
+
+    expect_identical( format(import.list)
+                    , c( 'import(methods)', 'import(utils)'
+                       , 'importFrom(utils,head)', 'importFrom(utils,tail)'
+                       , 'importClassesFrom(documentation,\"function-Documentation\")'
+                       , 'importClassesFrom(documentation,Documentation)'
+                       , 'importMethodsFrom(documentation,doc_get_aliases)'
+                       , 'importMethodsFrom(documentation,doc_get_name)'
+                       ))
+
+    expect_error( import.list$add(export('Documentation'))
+                , "Don't know how to add")
+
+    expect_identical( import.list$get_packages()
+                    , c('documentation', 'methods', 'utils'))
+
+    ilist <- imports( import_from('purrr', '%||%')
+                    , import_from('rlang', '%||%')
+                    )
+    ilist$objects$get_names()
+
+    expect_equal(ilist$validate(), "Cannot contain duplicate names.")
+
+    expect_true(ilist$check_no_extraneous_import_from())
+})
+#line 619 "/rdtf/documentation/R/Class-NamespaceEntry.R"
+test_that('format,NamespaceEntries-method', {#@testing
+    my.ns <- namespace( export("my name")
+                      , import('utils'), import('methods')
+                      , export_s4methods("initialize")
+                      , export_s3method('c', 'ArgumentList')
+                      , export_pattern("^doc_")
+                      , import_classes_from('documentation', c('Documentation', 'function-Documentation'))
+                      , import_from('utils', c('head', 'tail'))
+                      , import_methods_from('documentation', c('doc_get_aliases', 'doc_get_name'))
+                      , export_class("Documentation")
+                      , export_s3method('c', 'Rd')
+                      )
+    expect_is(my.ns, 'NamespaceEntries')
+    expect_identical( format(my.ns)
+                    , c( "S3method(c,ArgumentList)"
+                       , "S3method(c,Rd)"
+                       , "exportPattern(\"^doc_\")"
+                       , "export(\"my name\")"
+                       , "exportClasses(Documentation)"
+                       , "exportMethods(initialize)"
+                       , 'import(methods)', 'import(utils)'
+                       , 'importFrom(utils,head)', 'importFrom(utils,tail)'
+                       , 'importClassesFrom(documentation,\"function-Documentation\")'
+                       , 'importClassesFrom(documentation,Documentation)'
+                       , 'importMethodsFrom(documentation,doc_get_aliases)'
+                       , 'importMethodsFrom(documentation,doc_get_name)'
+                       ))
+    expect_error( my.ns$add('Hallo, my name is Inigo Montoya...')
+                , "Don't know how to add")
+
+    my.ns$validate()
+
+
 })
