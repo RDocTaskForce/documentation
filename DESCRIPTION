@@ -47,6 +47,7 @@ Collate:
     'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
+    'Class-StaticRefClasses.R'
     'Class-Vector.R'
     'Class-example.R'
     'Class-FormattedText.R'
