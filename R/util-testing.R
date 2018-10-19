@@ -112,8 +112,21 @@ if(FALSE){
 
 }
 
+#' Vectorized version of is
+are <- function(lst, class2){
+    purrr:::map_lgl(lst, is, class2)
+}
+if(FALSE){
+    lst <- list('a', 1L, TRUE)
 
-all_are <- function(lst, what, label=NULL, exact=TRUE){
+    expect_true(all(are(lst, 'ANY')))
+    expect_identical(are(lst, 'character'), c(T,F,F))
+    expect_identical(are(lst, 'integer'), c(F,T,F))
+    expect_identical(are(lst, 'numeric'), c(F,T,F))
+}
+
+
+all_are_exactly <- function(lst, what, label=NULL, exact=TRUE){
     act <- testthat::quasi_label(rlang::enquo(lst), label)
     stopifnot( is.string(what) )
     if (!exact) return(all_inherit(lst, what, label=act$label))
@@ -136,23 +149,23 @@ all_are <- function(lst, what, label=NULL, exact=TRUE){
 if(FALSE){#@testing
     l <- list( 'a', 'b', 'c'
              , 1, 2)
-    expect_identical( validate_that(all_are(l, 'character'))
+    expect_identical( validate_that(all_are_exactly(l, 'character'))
                     , "`l` has bad elements at positions 4 and 5" %<<%
                       "which are not of class" %<<%
                       dQuote("character") %<<<% '.')
-    expect_identical( validate_that(all_are(list(1,2), 'integer', '...'))
+    expect_identical( validate_that(all_are_exactly(list(1,2), 'integer', '...'))
                     , "... has bad elements at positions 1 and 2" %<<%
                       "which are not of class" %<<%
                       dQuote("integer") %<<<% '.')
-    expect_identical( validate_that(all_are(list(1L,2L), 'numeric', '...'))
+    expect_identical( validate_that(all_are_exactly(list(1L,2L), 'numeric', '...'))
                     , "... has bad elements at positions 1 and 2" %<<%
                       "which are not of class" %<<%
                       dQuote("numeric") %<<<% '.')
-    expect_identical( validate_that(all_are(list(1, 2L), 'numeric', '...'))
+    expect_identical( validate_that(all_are_exactly(list(1, 2L), 'numeric', '...'))
                     , "... has bad element at position 2" %<<%
                       "which is not of class" %<<%
                       dQuote("numeric") %<<<% '.')
-    expect_true(all_are(list(1L, 2L), 'integer'))
+    expect_true(all_are_exactly(list(1L, 2L), 'integer'))
 }
 
 
@@ -271,3 +284,54 @@ if(FALSE){#@testing
     expect_identical(validate_that(is_optional_string(bad))
                     , sQuote('bad') %<<% .optional.string.msg)
 }
+
+
+new_namespace_env <- function(name, path = file.path(tempdir(), name)){
+    assert_that(!isNamespaceLoaded(name))
+    new_sub_env <- function(part, parent=baseenv()){
+        s( new.env(parent=parent, hash=TRUE)
+         , name = part %<<<% ':' %<<<% name )
+    }
+
+    if (!dir.exists(path)) dir.create(path)
+    path <- normalizePath(path, "/", TRUE)
+
+    imports <- new_sub_env('imports')
+    ns      <- new.env(TRUE, imports)
+    ns$.__NAMESPACE__. <- new.env(parent = baseenv())
+    ns$.__NAMESPACE__.$spec <- c(name = name, version = "0.0.0")
+    setNamespaceInfo(ns, "exports"  , new_sub_env('exports'))
+    setNamespaceInfo(ns, "lazydata" , new_sub_env('lazydata'))
+    setNamespaceInfo(ns, "imports"  , list(base = TRUE))
+    setNamespaceInfo(ns, "path"     , path)
+    setNamespaceInfo(ns, "dynlibs"  , NULL)
+    setNamespaceInfo(ns, "S3methods", matrix(NA_character_, 0L, 3L))
+    ns$.__S3MethodsTable__. <- new.env(hash = TRUE, parent = baseenv())
+    ns
+}
+if(FALSE){#@testing
+    ns <- new_namespace_env("test package environment")
+    expect_true(isNamespace(ns))
+    expect_false(isNamespaceLoaded("test package environment"))
+}
+new_pkg_test_environment <- function(name = "test package environment"){
+    env <- new_namespace_env(name)
+    env$.__NAMESPACE__.$imports <-
+        list("documentation", 'methods'
+            , documentation = s( getNamespaceExports('documentation')
+                               , names = getNamespaceExports('documentation')
+                               )
+            , methods = s( getNamespaceExports('methods')
+                               , names=getNamespaceExports('methods')
+                               )
+            )
+    setPackageName(name, env)
+    return(env)
+}
+if(FALSE){#@testing
+    ns <- new_pkg_test_environment()
+    expect_true(isNamespace(ns))
+    expect_equal(getPackageName(ns), "test package environment")
+    expect_equal(environmentName(ns), "test package environment")
+}
+

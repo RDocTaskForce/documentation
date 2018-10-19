@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-generics.R`')
-#line 15 "R/util-generics.R"
+#line 15 "/rdtf/documentation/R/util-generics.R"
 test_that('which.list', {#@testing
     l <- list( list(F, T)
                , F
@@ -10,7 +10,7 @@ test_that('which.list', {#@testing
     )
     expect_equal(which.list(l), list(c(1,2), c(3,2,3,2)))
 })
-#line 43 "R/util-generics.R"
+#line 43 "/rdtf/documentation/R/util-generics.R"
 test_that('whichS3Generic', {#@testing
     f <- gen <- function(x, l = TRUE, ...){
         if (l){
@@ -39,7 +39,7 @@ test_that('whichS3Generic', {#@testing
 
     expect_null(whichS3Generic(rnorm))
 })
-#line 78 "R/util-generics.R"
+#line 78 "/rdtf/documentation/R/util-generics.R"
 test_that('is_S3_method_call', {#@testing
     print.my_class <- function(x, ...){return(invisible(is_S3_method_call()))}
 
@@ -50,7 +50,7 @@ test_that('is_S3_method_call', {#@testing
     expect_false(val)
     expect_false(is_S3_method_call())
 })
-#line 100 "R/util-generics.R"
+#line 100 "/rdtf/documentation/R/util-generics.R"
 test_that('get_S3_method_specialization', {#@testing
     print.my_class <- function(x, ...)return(invisible(get_S3_method_specialization()))
 
@@ -60,7 +60,7 @@ test_that('get_S3_method_specialization', {#@testing
     val <- print.my_class(s(list(), class="my_class"))
     expect_null(val)
 })
-#line 118 "R/util-generics.R"
+#line 118 "/rdtf/documentation/R/util-generics.R"
 test_that('is_S4_method_call', {#@testing
     setClass('test_class','list')
     setMethod('show', 'test_class', function(object){
@@ -76,7 +76,7 @@ test_that('is_S4_method_call', {#@testing
     expect_false(other_show(object))
     expect_false(is_S4_method_call())
 })
-#line 145 "R/util-generics.R"
+#line 145 "/rdtf/documentation/R/util-generics.R"
 test_that('get_S4_method_specialization', {#@testing
     setClass('test_class','list')
     setMethod('show', 'test_class', function(object){
@@ -96,14 +96,14 @@ test_that('get_S4_method_specialization', {#@testing
     val <- toRd(object)
     expect_equal(as.character(val), 'test_class')
 })
-#line 179 "R/util-generics.R"
+#line 179 "/rdtf/documentation/R/util-generics.R"
 test_that('is_registered_S3method', {#@testing
     expect_true(is_registered_S3method(html_to_Rd.a))
     expect_true(is_registered_S3method(unique.array))
     expect_false(is_registered_S3method(toRd))
     expect_warning(is_registered_S3method(toRd, environment(toRd)))
 })
-#line 197 "R/util-generics.R"
+#line 197 "/rdtf/documentation/R/util-generics.R"
 test_that('name_me', {#@testing
     obj <- unique.array
     expect_identical(name_me(obj), "unique.array")
@@ -114,4 +114,11 @@ test_that('name_me', {#@testing
 
     expect_error(name_me(iris))
     expect_null(name_me(iris, rlang::base_env()))
+})
+#line 214 "/rdtf/documentation/R/util-generics.R"
+test_that('funky', {#@testing
+    element <- 'Element'
+    expected <- function()"Element"
+    val <- funky(function()!!element)
+    expect_identical(val, expected)
 })

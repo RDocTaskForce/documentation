@@ -366,7 +366,7 @@ if(FALSE){#@testing
     expect_is_not(val, 'Rd')
 
     expect_all_inherit(val, 'Rd')
-    expect_false(all_are(val, 'Rd'))
+    expect_false(all_are_exactly(val, 'Rd'))
 
 
     x <- txt['\\examples'][[1]]

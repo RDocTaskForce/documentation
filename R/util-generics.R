@@ -206,3 +206,14 @@ if(FALSE){#@testing
     expect_null(name_me(iris, rlang::base_env()))
 }
 
+
+funky <- function(expr, vars=parent.frame(), fun.env=parent.frame()){
+    expr <- rlang::enexpr(expr)
+    no_src(eval(expr, fun.env))
+}
+if(FALSE){#@testing
+    element <- 'Element'
+    expected <- function()"Element"
+    val <- funky(function()!!element)
+    expect_identical(val, expected)
+}

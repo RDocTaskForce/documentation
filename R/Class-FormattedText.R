@@ -302,7 +302,7 @@ function(...){
         if (!is(l[[i]], 'FormattedText'))
             l[[i]] <- as(l[[i]], 'FormattedText')
     }
-    if (all_are(l, class(..1))) return(as(NextMethod(), class(..1)))
+    if (all_are_exactly(l, class(..1))) return(as(NextMethod(), class(..1)))
     new('Section(Anonymous)', list(...))
 }
 #' @export
