@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Vector.R`')
-#line 86 "/rdtf/documentation/R/Class-Vector.R"
+#line 88 "/rdtf/documentation/R/Class-Vector.R"
 test_that('setVector', {#! @testing
     new.class <- setVector('name', where=globalenv())
     expect_is(new.class, "classGeneratorFunction")
@@ -54,7 +54,7 @@ test_that('setVector', {#! @testing
 
     removeVector(new.class@className, where=globalenv())
 })
-#line 137 "/rdtf/documentation/R/Class-Vector.R"
+#line 139 "/rdtf/documentation/R/Class-Vector.R"
 test_that('setVector w/ Virtual Class', {#@testing setVector w/ Virtual Class
     velement <- setClass('virtual element', where = globalenv())
     expect_true(isVirtualClass(velement@className))
@@ -75,7 +75,7 @@ test_that('setVector w/ Virtual Class', {#@testing setVector w/ Virtual Class
 
     expect_true(removeVector(vclass, where = globalenv()))
 })
-#line 183 "/rdtf/documentation/R/Class-Vector.R"
+#line 187 "/rdtf/documentation/R/Class-Vector.R"
 test_that('names,refList-method', {#@testing
     val <- refList('a', 1L, TRUE)
     expect_is(val, 'refList')
@@ -92,7 +92,7 @@ test_that('names,refList-method', {#@testing
     expect_length(val, 4L)
     expect_null(names(val))
 })
-#line 388 "/rdtf/documentation/R/Class-Vector.R"
+#line 258 "/rdtf/documentation/R/Class-Vector.R"
 test_that('setRefVector', {#@testing
     test_vector <- setRefVector('logical')
     expect_is(test_vector, 'refObjectGenerator')
@@ -117,4 +117,58 @@ test_that('setRefVector', {#@testing
     expect_identical(val[[3]], NA)
 
     expect_true(val$is_valid())
+
+    val$add(1)
+    expect_length(val, 4L)
+    expect_true(val$is_valid())
+
+    val$. <- as.list(letters[1:5])
+    expect_false(val$is_valid())
+})
+#line 373 "/rdtf/documentation/R/Class-Vector.R"
+test_that('setRefSet', {#@testing
+    test_set <- setRefSet('Documentation', where =globalenv()
+                         , equals = function(x, y)doc_get_name(x) == doc_get_name(y)
+                         , methods = list(sort = function(){
+                             if (length(.)>1L){
+                                o <- order(sapply(., doc_get_name))
+                                . <<- .[o]
+                             }
+                             invisible(.self)
+                         })
+                         )
+
+    expect_is(test_set, 'refObjectGenerator')
+
+    my.set <- test_set()
+    expect_is(my.set, 'RefSet(Documentation)')
+    expect_length(my.set, 0L)
+
+    my.set$add(function_documentation('test_fun'))
+    expect_length(my.set, 1L)
+
+    expect_message( my.set$add(function_documentation('test_fun', title = "testing function"))
+                  , class = "RefSet(Documentation)-message-already.contains"
+                  )
+    my.set$add(function_documentation('another'))
+    expect_length(my.set, 2L)
+    expect_identical( sapply(my.set$., doc_get_name)
+                    , c('another', 'test_fun'))
+})
+#line 402 "/rdtf/documentation/R/Class-Vector.R"
+test_that('setRefSet', {#@testing
+    test_export_set <- setRefSet( 'Export'
+                                , equals = function(e1, e2)format(e1)==format(e2)
+                                )
+    a <- export('a')
+    b <- export('b')
+
+    test.set <- test_export_set(a,b)
+    test.set$add('c')
+
+    expect_true(test.set$is_valid())
+
+    test.set$. <- list(a, b, 'c')
+
+    expect_false(test.set$is_valid())
 })

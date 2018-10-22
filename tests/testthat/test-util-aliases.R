@@ -36,13 +36,24 @@ test_that('.T', {#@testing
                 , c(a='._', s='s', cl='cl', .T='.T')
                 )
 })
-#line 86 "/rdtf/documentation/R/util-aliases.R"
+#line 89 "/rdtf/documentation/R/util-aliases.R"
+test_that('named', {#@testing
+    a <- 1L
+    b <- TRUE
+
+    val <- named(a,b)
+    expect_identical(val, list(a=a, b=b))
+
+    val <- named(a,b,c='hello')
+    expect_identical(val, list(a=a, b=b, c='hello'))
+})
+#line 105 "/rdtf/documentation/R/util-aliases.R"
 test_that('get_attr', {#@testing
     expect_identical(get_attr(s(list(), test='hello'), 'test'), 'hello')
     expect_null     (get_attr(s(list(), test='hello'), 'test2'))
     expect_identical(get_attr(s(list(), test='hello'), 'test3', 'world'), 'world')
 })
-#line 98 "/rdtf/documentation/R/util-aliases.R"
+#line 117 "/rdtf/documentation/R/util-aliases.R"
 test_that('fwd', {#@testing
     a <- s( list(Rd_symb("some"))
           , Rd_tag="\\keyword"
@@ -61,12 +72,12 @@ test_that('fwd', {#@testing
                     , attributes(b)
                     )
 })
-#line 127 "/rdtf/documentation/R/util-aliases.R"
+#line 146 "/rdtf/documentation/R/util-aliases.R"
 test_that('regex_escape', {#@testing
     expect_identical(regex_escape('Vector(name)'), 'Vector\\(name\\)')
     expect_identical(regex_escape('my.function'), 'my\\.function')
 })
-#line 146 "/rdtf/documentation/R/util-aliases.R"
+#line 165 "/rdtf/documentation/R/util-aliases.R"
 test_that('getAs', {#@testing
     f <- getAs( getClass('MethodDefinition')
               , getClass("usage/S4method")

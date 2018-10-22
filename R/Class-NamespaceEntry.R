@@ -28,6 +28,7 @@ setMethod('initialize', 'Export', function(.Object, name){
     .Object@name <- name
     return(.Object)
 })
+setAs('character', 'Export', function(from)new('Export', from))
 #' @export
 format.Export <- function(x, ...){
     paste0( 'export(', namespace_quote(x@name), ')')

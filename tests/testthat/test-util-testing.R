@@ -98,3 +98,9 @@ test_that('new_pkg_test_environment', {#@testing
     expect_equal(getPackageName(ns), "test package environment")
     expect_equal(environmentName(ns), "test package environment")
 })
+#line 347 "/rdtf/documentation/R/util-testing.R"
+test_that('number_of_arguments', {#@testing
+    expect_equal(number_of_arguments(rnorm), 3L)
+    expect_equal(number_of_arguments(paste), Inf)
+    expect_equal(number_of_arguments(xtfrm), 1)
+})

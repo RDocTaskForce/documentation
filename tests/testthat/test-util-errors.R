@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `util-errors.R`')
-#line 12 "R/util-errors.R"
+#line 12 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_error', {#@testing
     expect_error(doc_error("A documentation error."), "A documentation error.")
     x <- tryCatch( doc_error("A documentation error.")
@@ -19,7 +19,7 @@ test_that('doc_error', {#@testing
                  )
     expect_identical(x, "General documentation error.")
 })
-#line 37 "R/util-errors.R"
+#line 37 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_warning', {#@testing
     expect_warning(doc_warning("A documentation warning"), "A documentation warning")
     x <- tryCatch( doc_warning("A documentation warning.")
@@ -36,7 +36,48 @@ test_that('doc_warning', {#@testing
                  )
     expect_identical(x, "General documentation warning.")
 })
-#line 78 "R/util-errors.R"
+#line 100 "/rdtf/documentation/R/util-errors.R"
+test_that('condition', {#@testing
+    expect_message( condition('testing', 'message', scope='base'), 'testing')
+    expect_message( condition('testing', 'message', scope='base', type='testing')
+                  , class = "message-testing"
+                  )
+    expect_message( condition('testing', 'message', scope='test', type='testing')
+                  , class = "test-message-testing"
+                  )
+
+    expect_warning( condition('testing', 'warning', scope='base'), 'testing')
+    expect_warning( condition('testing', 'warning', scope='base', type='testing')
+                  , class = "warning-testing"
+                  )
+    expect_warning( condition('testing', 'warning', scope='test', type='testing')
+                  , class = "test-warning-testing"
+                  )
+
+    expect_error( condition('testing', 'error', scope='base'), 'testing')
+    expect_error( condition('testing', 'error', scope='base', type='testing')
+                , class = "error-testing"
+                )
+    expect_error( condition('testing', 'error', scope='test', type='testing')
+                , class = "test-error-testing"
+                )
+
+    tryCatch( condition('testing', 'error', type='testing'
+                       , scope = .T(test, my_class, my_method)
+                       )
+            , condition = function(obj){
+                expect_is(obj, 'test-error-testing')
+                expect_is(obj, 'test::my_class-error-testing')
+                expect_is(obj, 'test::my_class::my_method-error-testing')
+                expect_is(obj, 'test-error')
+                expect_is(obj, 'test::my_class-error')
+                expect_is(obj, 'test::my_class::my_method-error')
+                expect_is(obj, 'error-testing')
+                expect_is(obj, 'error')
+                expect_is(obj, 'condition')
+            })
+})
+#line 155 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_condition', {#@testing
     expect_null(doc_condition("test message", NULL))
 
@@ -55,7 +96,7 @@ test_that('doc_condition', {#@testing
     expect_error  ( doc_condition("test message", 'error'  , type='testing')
                   , class = "documentation-error-testing" )
 })
-#line 106 "R/util-errors.R"
+#line 183 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_dnf_error', {#@testing
     expect_error(doc_dnf_error(), "Documentation not found.")
     expect_error(doc_dnf_error("throw me"), "Documentation not found for 'throw me'.")
@@ -73,7 +114,7 @@ test_that('doc_dnf_error', {#@testing
                  )
     expect_identical(x, "Documentation not found!")
 })
-#line 130 "R/util-errors.R"
+#line 207 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_invalid', {#@testing
     expect_error(doc_invalid(), "Documentation is not valid.")
     expect_error(doc_invalid("throw me"), "Documentation for 'throw me' is not valid.")
@@ -91,7 +132,7 @@ test_that('doc_invalid', {#@testing
                  )
     expect_identical(x, "Documentation is invalid!")
 })
-#line 153 "R/util-errors.R"
+#line 230 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_incomplete', {#@testing
     expect_warning(doc_incomplete(), "Documentation is incomplete.")
     expect_warning(doc_incomplete("hello"), "Documentation is incomplete for 'hello'.")
@@ -109,11 +150,11 @@ test_that('doc_incomplete', {#@testing
                  )
     expect_identical(x, "Documentation is incomplete")
 })
-#line 180 "R/util-errors.R"
+#line 257 "/rdtf/documentation/R/util-errors.R"
 test_that('doc_no_src', {#@testing
     expect_error(doc_no_src(), class='documentation-error-no_src')
 })
-#line 193 "R/util-errors.R"
+#line 270 "/rdtf/documentation/R/util-errors.R"
 test_that('no_doc_comments', {#@testing
     expect_null(no_doc_comments('testing', NULL))
     expect_message( no_doc_comments('testing', FALSE)

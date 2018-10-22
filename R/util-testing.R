@@ -335,3 +335,17 @@ if(FALSE){#@testing
     expect_equal(environmentName(ns), "test package environment")
 }
 
+number_of_arguments <- function(f){
+    args <- formals(f)
+    if (is.null(args))
+        return(length(head(as.list(args(f)), -1)))
+    if ('...' %in% names(args))
+        return(Inf)
+    else
+        length(args)
+}
+if(FALSE){#@testing
+    expect_equal(number_of_arguments(rnorm), 3L)
+    expect_equal(number_of_arguments(paste), Inf)
+    expect_equal(number_of_arguments(xtfrm), 1)
+}

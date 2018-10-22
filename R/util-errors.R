@@ -61,6 +61,83 @@ doc_message <- function(msg, ..., type=NULL, call=sys.call(1)){
     message(cond)
 }
 
+#' Raise a mutable and classed condition.
+condition <-
+function( msg
+        , cond = .conditions
+        , ... #< objects to be added to the condition as attributes.
+        , scope = environmentName(topenv(parent.frame()))
+        , type = NULL #< optional type of the condition, used to create the class.
+        , call = sys.call(1)
+        ){
+    cond = match.arg(cond)
+    if (cond == 'none') return()
+
+    throw <- function(ball){
+        if (is(ball, 'error')) stop(ball) else
+        if (is(ball, 'warning')) warning(ball) else
+        if (is(ball, 'message')) message(ball)
+    }
+    while (length(scope) && scope[[1]] %in% c("", "R_GlobalEnv", "base"))
+        scope <- scope[-1L]
+    if (length(scope) > 1L)
+        scope <- purrr::accumulate(scope, paste, sep='::')
+    classes <-{
+        c( c( paste0(scope, '-', cond, '-', type) %if% !is.null(type)
+            , paste0(scope, '-', cond)
+            , paste0(scope, '-condition')
+            ) %if% length(scope)
+         , paste0(cond, '-', type) %if% !is.null(type)
+         , cond
+         , 'condition'
+         )
+    }
+    ball <- structure( list(message = msg, call=call)
+                     , class=classes
+                     , ...)
+    throw(ball)
+}
+if(FALSE){#@testing
+    expect_message( condition('testing', 'message', scope='base'), 'testing')
+    expect_message( condition('testing', 'message', scope='base', type='testing')
+                  , class = "message-testing"
+                  )
+    expect_message( condition('testing', 'message', scope='test', type='testing')
+                  , class = "test-message-testing"
+                  )
+
+    expect_warning( condition('testing', 'warning', scope='base'), 'testing')
+    expect_warning( condition('testing', 'warning', scope='base', type='testing')
+                  , class = "warning-testing"
+                  )
+    expect_warning( condition('testing', 'warning', scope='test', type='testing')
+                  , class = "test-warning-testing"
+                  )
+
+    expect_error( condition('testing', 'error', scope='base'), 'testing')
+    expect_error( condition('testing', 'error', scope='base', type='testing')
+                , class = "error-testing"
+                )
+    expect_error( condition('testing', 'error', scope='test', type='testing')
+                , class = "test-error-testing"
+                )
+
+    tryCatch( condition('testing', 'error', type='testing'
+                       , scope = .T(test, my_class, my_method)
+                       )
+            , condition = function(obj){
+                expect_is(obj, 'test-error-testing')
+                expect_is(obj, 'test::my_class-error-testing')
+                expect_is(obj, 'test::my_class::my_method-error-testing')
+                expect_is(obj, 'test-error')
+                expect_is(obj, 'test::my_class-error')
+                expect_is(obj, 'test::my_class::my_method-error')
+                expect_is(obj, 'error-testing')
+                expect_is(obj, 'error')
+                expect_is(obj, 'condition')
+            })
+}
+
 doc_condition <- function(msg, cond, ..., type=NULL, call = sys.call(1)){
     if (is.null(cond)) return()
     if (is.logical(cond))

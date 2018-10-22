@@ -76,7 +76,26 @@ if(FALSE){#@testing
                 )
 }
 
+named <- function(...){
+    . <- substitute(c(...))
+    inferred <- as.character(.)[-1L]
+    val <- list(...)
+    if (is.null(n <- names(val)))
+        names(val) <- inferred
+    else
+        names(val) <- ifelse( is.na(n) | n == '', inferred, n)
+    val
+}
+if(FALSE){#@testing
+    a <- 1L
+    b <- TRUE
 
+    val <- named(a,b)
+    expect_identical(val, list(a=a, b=b))
+
+    val <- named(a,b,c='hello')
+    expect_identical(val, list(a=a, b=b, c='hello'))
+}
 
 
 clean_Rd <- tools:::toRd.default
