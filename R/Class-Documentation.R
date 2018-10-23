@@ -59,12 +59,7 @@ setMethod("initialize", 'BaseDocumentation',
             } else if(inherits(references, 'bibentry')){
                 .Object@references <- references
             } else {
-                doc_error(._("Invalid argument for references, received %s." %<<%
-                             "Expected a %s"
-                            , dQuote(collapse(class(references), '/'))
-                            , dQuote(getSlots(class(.Object))[['references']])
-                            )
-                         , type="invalid_argument")
+                doc_error_bad_argument(references, getSlots(class(.Object))[['references']])
             }
         return(.Object)
     })

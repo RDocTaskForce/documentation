@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `Class-Documentation.R`')
-#line 71 "R/Class-Documentation.R"
+#line 72 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('initialize,BaseDocumentation-method', {#!@testing
     x <- new('BaseDocumentation')
     expect_identical(x@author, person())
@@ -44,7 +44,7 @@ test_that('initialize,BaseDocumentation-method', {#!@testing
     expect_error(x <- new( 'BaseDocumentation', references = lrf)
                 , class = 'documentation-error-invalid_argument')
 })
-#line 124 "R/Class-Documentation.R"
+#line 125 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('setGeneric("documented", ...)', {#@testing
     object <- function(msg="hello world"){print(msg)}
     dobj <- documented(object, name='object', title="hello world example")
@@ -53,7 +53,7 @@ test_that('setGeneric("documented", ...)', {#@testing
     expect_is(attr(dobj, 'documentation'), 'function-Documentation')
 
 })
-#line 141 "R/Class-Documentation.R"
+#line 142 "/rdtf/documentation/R/Class-Documentation.R"
 test_that('as.list,Documentation-method', {#! @testing
     x <-
     object <- new( "BaseDocumentation"

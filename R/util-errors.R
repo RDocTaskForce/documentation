@@ -293,4 +293,32 @@ doc_overwrite <- function(name = NULL, cond = 'message', call=sys.call(1)){
                  , name=name)
 }
 
+klass <- function(x)collapse(class(x), '/')
 
+doc_error_bad_argument <-
+function( obj
+        , expected
+        , ...
+        , msg = "Invalid `{arg.name}` argument to `{fun.name}`;" %<<%
+                "expected a {sQuote(expected)}," %<<%
+                "received a {sQuote(klass(obj))}."
+        , arg.name = deparse(substitute(obj))
+        , fun.name = deparse(sys.call(-1)[[1]])
+        , scope= c('documentation', fun.name)
+        , type = 'invalid_argument'
+        , cond = 'error'
+        ){
+    msg <- gettext(msg)
+    msg <- glue::glue( msg)
+                     # , obj=obj, expected=expected
+                     # , arg.name = arg.name, fun.name=fun.name
+                     # )
+    condition(msg, ...,  cond = cond, scope = scope, type=type)
+}
+if(FALSE){#@testing
+    f <- function(a){
+        doc_error_bad_argument(a, 'logical')
+    }
+    expect_error( f('hi'), class = "documentation-error-invalid_argument")
+
+}

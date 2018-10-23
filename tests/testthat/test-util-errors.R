@@ -172,3 +172,11 @@ test_that('no_doc_comments', {#@testing
     expect_error  ( no_doc_comments('testing', 'error')
                   , class="documentation-error-no_comments")
 })
+#line 318 "/rdtf/documentation/R/util-errors.R"
+test_that('doc_error_bad_argument', {#@testing
+    f <- function(a){
+        doc_error_bad_argument(a, 'logical')
+    }
+    expect_error( f('hi'), class = "documentation-error-invalid_argument")
+
+})
