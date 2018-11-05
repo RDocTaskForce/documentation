@@ -11,6 +11,7 @@ Maintainer: Andrew Redd <andrew.redd@hsc.utah.edu>
 License: GPL-2
 Imports:
     assertthat, 
+    extendedRef,
     methods,
     parsetools,
     purrr,
@@ -90,7 +91,7 @@ Collate:
     'Funs.R'
     'zzz-Finalize.R'
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "collate"))
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.0.9000
 Enhances: devtools
 Encoding: UTF-8
 Remotes:
