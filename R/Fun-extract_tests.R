@@ -101,8 +101,8 @@ if(F){#! example
     hw()
 }
 '}-> text
-tmp.in  <- tempfile("src-" , fileext=".R")
-tmp.out <- tempfile("test-", fileext=".R")
+tmp.in  <- normalizePath(tempfile("src-" , fileext=".R"), '/', FALSE)
+tmp.out <- normalizePath(tempfile("test-", fileext=".R"), '/', FALSE)
 if (!dir.exists(. <- dirname(tmp.in))) dir.create(.)
 
 writeLines(text, tmp.in)
@@ -124,7 +124,7 @@ expect_equal( lines <- readLines(tmp.out)
                , "    expect_error(f2())"
                , "})"
                ))
-expect_equal(x, c("hello_world", "f2"))
+expect_equal(x, s(c("hello_world", "f2"), test.file = tmp.out))
 unlink(tmp.out)
 
 expect_message( x <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE)
@@ -145,26 +145,27 @@ expect_equal( lines
                , "    expect_error(f2())"
                , "})"
                ))
-expect_equal(x, c("hello_world", "f2"))
+expect_equal(x, s(c("hello_world", "f2"), test.file = tmp.out))
 
 val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=FALSE)
-expect_identical(val, character(0))
+expect_identical(val, s(character(0), test.file=tmp.out))
 expect_message( val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=TRUE, force=FALSE)
               , "  \\+ file `" %<<<% tmp.out %<<<% "` is newer\\.  SKIPPING\\."
               )
 
 val <- extract_tests_to_file_(tmp.in, tmp.out, verbose=FALSE, force=TRUE)
-expect_equal(val, c("hello_world", "f2"))
+expect_equal(val, s(c("hello_world", "f2"), test.file = tmp.out))
 
 unlink(tmp.out)
 
 
 withr::with_dir(dirname(tmp.in), {
+    if (dir.exists('tests')) unlink('tests', recursive = TRUE, force = TRUE)
     x <- extract_tests_to_file_( file = basename(tmp.in)
                                , file.out = NULL
                                , NULL
                                , verbose=FALSE)
-    file.out <- "test-" %<<<% basename(tmp.in)
+    file.out <- file.path('.', "test-" %<<<% basename(tmp.in), fsep='/')
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
                 , c( "#! This file was automatically produced by the documentation package."
@@ -180,18 +181,20 @@ withr::with_dir(dirname(tmp.in), {
                    , "    expect_error(f2())"
                    , "})"
                    ))
-    expect_equal(x, c("hello_world", "f2"))
+    expect_equal(x, s(c("hello_world", "f2")
+                     , test.file = file.out))
     unlink(file.out)
 })
 withr::with_dir(dirname(tmp.in), {
-    dir.create('tests')
+    if (!dir.exists('tests')) dir.create('tests') else
+    if ( dir.exists('tests/testthat')) unlink('tests/testthat', TRUE, TRUE)
     expect_message({
         x <- extract_tests_to_file_( file = basename(tmp.in)
                                    , file.out = NULL
                                    , NULL
                                    , verbose=TRUE)
     }, "  \\+ `test.dir` not provided. Setting to `.*`")
-    file.out <- "tests/test-" %<<<% basename(tmp.in)
+    file.out <- "./tests/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
                 , c( "#! This file was automatically produced by the documentation package."
@@ -207,19 +210,22 @@ withr::with_dir(dirname(tmp.in), {
                    , "    expect_error(f2())"
                    , "})"
                    ))
-    expect_equal(x, c("hello_world", "f2"))
+    expect_equal(x, s(c("hello_world", "f2"), test.file = file.out))
     unlink(file.out)
     unlink("tests", force = TRUE)
 })
 withr::with_dir(dirname(tmp.in), {
-    dir.create('tests/testthat', recursive = TRUE)
+    if (!dir.exists('tests/testthat'))
+        dir.create('tests/testthat', recursive = TRUE)
+    tryCatch({
+    expect_true(file.exists(basename(tmp.in)))
     expect_message({
         x <- extract_tests_to_file_( file = basename(tmp.in)
                                    , file.out = NULL
-                                   , NULL
+                                   , test.dir = NULL
                                    , verbose=TRUE)
     }, "  \\+ Writting extracted tests to `.*`.")
-    file.out <- "tests/testthat/test-" %<<<% basename(tmp.in)
+    file.out <- "./tests/testthat/test-" %<<<% basename(tmp.in)
     expect_true(file.exists(file.out))
     expect_equal( lines <- readLines(file.out)
                 , c( "#! This file was automatically produced by the documentation package."
@@ -235,8 +241,8 @@ withr::with_dir(dirname(tmp.in), {
                    , "    expect_error(f2())"
                    , "})"
                    ))
-    expect_equal(x, c("hello_world", "f2"))
-    unlink(file.path(tempdir(), "tests"), TRUE, TRUE)
+    expect_equal(x, s(c("hello_world", "f2"), test.file = file.out))
+    }, finally = unlink(file.path(tempdir(), "tests"), TRUE, TRUE))
 })
 expect_false(dir.exists(file.path(tempdir(), "tests")))
 
@@ -271,7 +277,7 @@ expect_equal( lines
                , "})"
                )
             )
-expect_equal(x, "setClass(\"Test-Class\", ...)")
+expect_equal(x, s("setClass(\"Test-Class\", ...)", test.file = tmp.out))
 
 unlink(tmp.in)
 unlink(tmp.out)
@@ -302,7 +308,7 @@ expect_equal( lines
                , "})"
                )
             )
-expect_equal(x, "show,Test-Class-method")
+expect_equal(x, s("show,Test-Class-method", test.file = tmp.out))
 
 unlink(tmp.in)
 unlink(tmp.out)
@@ -333,7 +339,7 @@ expect_equal( lines
                , "})"
                )
             )
-expect_equal(x, "setGeneric(\"yolo\", ...)")
+expect_equal(x, s("setGeneric(\"yolo\", ...)", test.file = tmp.out))
 }
 if(FALSE){#@testing extract_tests_to_file_ no test blocks
 'hello_world <- function(){
@@ -426,23 +432,29 @@ function( pkg = '.'     #< package to extract tests for.
 
 }
 if(FALSE){#@testing
-    tmp.dir <- tempdir()
+    tmp.dir <- normalizePath(tempdir(), '/', TRUE)
     if (!dir.exists(tmp.dir)) dir.create(tmp.dir)
     package.skeleton("testExtractionTest", path=tmp.dir
                     , code_files = list.files(system.file("testExtractionTest", "R", package='documentation'), full=TRUE)
                     )
-    pkg <- file.path(tmp.dir, "testExtractionTest")
-    expect_warning(result <- extract_tests(pkg), "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
-    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
-                                  , "show,Test-Class-method"
-                                  , "setGeneric(\"yolo\", ...)"
+    pkg <- file.path(tmp.dir, "testExtractionTest", fsep='/')
+    expect_warning( result <- extract_tests(pkg)
+                  , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
+    test.dir <- file.path(tmp.dir, 'testExtractionTest', 'tests', 'testthat', fsep='/')
+    expected <- structure( list( s(c( "setClass(\"Test-Class\", ...)"
+                                    , "show,Test-Class-method"
+                                    , "setGeneric(\"yolo\", ...)"
+                                    )
+                                  , test.file = file.path(test.dir, 'test-Class.R', fsep='/')
                                   )
-                               , "hello_world"
+                               , s("hello_world"
+                                  , test.file = file.path(test.dir, 'test-function.R', fsep='/')
+                                  )
                                )
                          , names = file.path('R', c('Class.R', 'function.R'))
                          )
 
-    test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/')
+    test.dir <- normalizePath(file.path(pkg, "tests", "testthat"), '/', FALSE)
     expect_identical(list.files(test.dir), c('test-Class.R', 'test-function.R'))
 
     file <- file.path(test.dir, 'test-Class.R')
@@ -460,19 +472,15 @@ if(FALSE){#@testing
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-Class.R")))
     expect_true(file.exists(file.path(pkg, "tests", "testthat", "test-function.R")))
 
+    unlink(sapply(expected, attr, 'test.file'))
     expect_warning( result <- extract_tests(pkg, full.path = TRUE)
                   , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
-    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
-                                  , "show,Test-Class-method"
-                                  , "setGeneric(\"yolo\", ...)"
-                                  )
-                               , "hello_world")
-                         , names = normalizePath(file.path(pkg, 'R', c('Class.R', 'function.R')), "/")
-                         )
+    expected <- s( expected
+                 , names = file.path(pkg, 'R', c('Class.R', 'function.R'), fsep ="/"))
     expect_identical(result, expected)
 
     file <- file.path(test.dir, 'test-Class.R')
-    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/')
+    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/', FALSE)
     expect_identical( readLines(file)[c(1:5)]
                     , c( "#! This file was automatically produced by the documentation package."
                        , "#! Changes will be overwritten."
@@ -483,19 +491,16 @@ if(FALSE){#@testing
                     )
 
 
+    unlink(sapply(expected, attr, 'test.file'))
     expect_warning( result <- extract_tests(pkg, full.path = FALSE)
                   , "testthat not found in suggests. `extract_tests` assumes a testthat infrastructure.")
-    expected <- structure( list( c( "setClass(\"Test-Class\", ...)"
-                                  , "show,Test-Class-method"
-                                  , "setGeneric(\"yolo\", ...)"
-                                  )
-                               , "hello_world")
+    expected <- structure( expected
                          , names = c('Class.R', 'function.R')
                          )
     expect_identical(result, expected)
 
     file <- file.path(test.dir, 'test-Class.R')
-    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/')
+    from <- normalizePath(file.path(pkg, "R", "Class.R"), '/', FALSE)
     expect_identical( readLines(file)[c(1:5)]
                     , c( "#! This file was automatically produced by the documentation package."
                        , "#! Changes will be overwritten."
@@ -518,10 +523,13 @@ if(FALSE){#@testing
     expect_warning( result <- extract_tests(pkg, filter='Class', full.path = FALSE))
 
     expect_identical( result
-                    , list("Class.R" = c( 'setClass("Test-Class", ...)'
-                                        , 'show,Test-Class-method'
-                                        , 'setGeneric("yolo", ...)'
-                                        )))
+                    , list("Class.R" = s(c( 'setClass("Test-Class", ...)'
+                                          , 'show,Test-Class-method'
+                                          , 'setGeneric("yolo", ...)'
+                                          )
+                                        , test.file = file.path(test.dir, 'test-Class.R', fsep='/')
+                                        )
+                           ))
 
     expect_true(dir.exists(test.dir))
     expect_identical( list.files(test.dir, full.names = FALSE)
