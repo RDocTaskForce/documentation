@@ -377,28 +377,28 @@ if(FALSE){#@testing
 # Collection Classes -------
 ## Export Collections ======
 
-setRefVector( 'Export')
-setRefVector( 'ExportPattern')
-setRefVector( 'ExportS3method')
-setRefVector( 'ExportS4methods')
-setRefVector( 'ExportS4class')
+newDocSet( 'Export')
+newDocSet( 'ExportPattern')
+newDocSet( 'ExportS3method')
+newDocSet( 'ExportS4methods')
+newDocSet( 'ExportS4class')
 
 pass.format <- function(x, ...){
-    sort(as.character(unlist(purrr:::map(x$., format, ...))))
+    sort(as.character(unlist(purrr:::map(as.list(x), format, ...))))
 }
-setMethod('format', "RefVector(Export)"         , pass.format)
-setMethod('format', "RefVector(ExportPattern)"  , pass.format)
-setMethod('format', "RefVector(ExportS3method)" , pass.format)
-setMethod('format', "RefVector(ExportS4methods)", pass.format)
-setMethod('format', "RefVector(ExportS4class)"  , pass.format)
+setMethod('format', "ReferenceSet<Export>"         , pass.format)
+setMethod('format', "ReferenceSet<ExportPattern>"  , pass.format)
+setMethod('format', "ReferenceSet<ExportS3method>" , pass.format)
+setMethod('format', "ReferenceSet<ExportS4methods>", pass.format)
+setMethod('format', "ReferenceSet<ExportS4class>"  , pass.format)
 
 #' @export
 exports <- setRefClass('ExportEntries',
-    fields = c( names    = "RefVector(Export)"
-              , patterns = "RefVector(ExportPattern)"
-              , S3       = "RefVector(ExportS3method)"
-              , S4       = "RefVector(ExportS4methods)"
-              , Classes  = "RefVector(ExportS4class)"
+    fields = c( names    = "ReferenceSet<Export>"
+              , patterns = "ReferenceSet<ExportPattern>"
+              , S3       = "ReferenceSet<ExportS3method>"
+              , S4       = "ReferenceSet<ExportS4methods>"
+              , Classes  = "ReferenceSet<ExportS4class>"
               ),
     methods = list(
         add = function(ex){
@@ -423,11 +423,11 @@ setMethod('format', 'ExportEntries', function(x, ...){
      )
 })
 if(FALSE){#@testing
-    val <- new( 'RefVector(ExportS3method)'
+    val <- new( 'ReferenceSet<ExportS3method>'
               , export_s3method('c', 'Rd')
               , export_s3method('c', 'ArgumentList')
               )
-    expect_is(val, 'RefVector(ExportS3method)')
+    expect_is(val, 'ReferenceSet<ExportS3method>')
     expect_length(val, 2L)
     expect_identical(format(val), c("S3method(c,ArgumentList)", "S3method(c,Rd)"))
 
@@ -454,46 +454,58 @@ if(FALSE){#@testing
 
 
 ## ImportCollections ======
-#' @export
-# exports <- setRefVector( 'ExportEntry', 'ExportEntries')
-get_packages <- function(){as.character(unlist(purrr::map(., slot, 'package')))}
-get_names <- function(){as.character(unlist(purrr::map(., slot, 'names')))}
-no_duplicate_names <- function(){
-    validate_that( !anyDuplicated(get_names())
-                 , msg = "Cannot contain duplicate names.")
-}
+
 wrap_validate <- function(){
     valid <- validate()
     if (isTRUE(valid)) return(valid) else
-    return(s(FALSE, msg=valid))
+        return(s(FALSE, msg=valid))
 }
-vec.methods <- list( get_packages = get_packages
-                   , get_names    = get_names
-                   , validate     = no_duplicate_names
-                   , is_valid     = wrap_validate
-                   )
-rv_import <- setRefVector( 'Import'
-  , methods=list( get_packages=get_packages
-                , validate = function()validate_that(!anyDuplicated(get_packages()))
-                , is_valid = wrap_validate
-                ))
-rv_import_from    <- setRefVector( 'ImportFrom'       , methods=vec.methods)
-rv_import_classes <- setRefVector( 'ImportClassesFrom', methods=vec.methods)
-rv_import_methods <- setRefVector( 'ImportMethodsFrom', methods=vec.methods)
-rm(get_packages, get_names, no_duplicate_names, vec.methods)
 
-setMethod('format', "RefVector(Import)"           , pass.format)
-setMethod('format', "RefVector(ImportFrom)"       , pass.format)
-setMethod('format', "RefVector(ImportClassesFrom)", pass.format)
-setMethod('format', "RefVector(ImportMethodsFrom)", pass.format)
+#' @export
+rv_import         <- newDocSet( 'Import'
+                              , private.methods = list(
+                                  no_duplicates = function()
+                                      see_if(!anyDuplicated(.self$get_packages())
+                                            , msg = 'Cannot contain duplicate imports of packages.')
+                              )
+                              , methods = list(
+                                  is_valid = function(){
+                                      see_if( no_duplicates()
+                                            , all_inherit(., element)
+                                            )
+                                  },
+                                  validate = function()validate_that(is_valid))
+                              )
+rv_import_from    <- newDocSet( 'ImportFrom'
+                              , methods = list(
+                                  is_valid = function(){
+                                      see_if( all_inherit(., element)
+                                            , no_duplicate_names()
+                                            )
+                                  },
+                                  validate = function()validate_that(is_valid())
+                              )
+                              , private.methods = list(
+                                  no_duplicate_names = function(){
+                                    see_if( !anyDuplicated(.self$get_names())
+                                          , msg = "Cannot contain duplicate names")
+                                  })
+                              )
+rv_import_classes <- newDocSet( 'ImportClassesFrom')
+rv_import_methods <- newDocSet( 'ImportMethodsFrom')
 
-setMethod('names', 'RefVector(Import)', function(x)purrr::map_chr(x$., slot, 'package'))
+setMethod('format', "ReferenceSet<Import>"           , pass.format)
+setMethod('format', "ReferenceSet<ImportFrom>"       , pass.format)
+setMethod('format', "ReferenceSet<ImportClassesFrom>", pass.format)
+setMethod('format', "ReferenceSet<ImportMethodsFrom>", pass.format)
+
+# setMethod('names', 'ReferenceSet<Import>', function(x)purrr::map_chr(x$., slot, 'package'))
 
 imports <- setRefClass('ImportEntries',
-    fields = c( packages = "RefVector(Import)"
-              , objects  = "RefVector(ImportFrom)"
-              , classes  = "RefVector(ImportClassesFrom)"
-              , methods  = "RefVector(ImportMethodsFrom)"
+    fields = c( packages = "ReferenceSet<Import>"
+              , objects  = "ReferenceSet<ImportFrom>"
+              , classes  = "ReferenceSet<ImportClassesFrom>"
+              , methods  = "ReferenceSet<ImportMethodsFrom>"
               ),
     methods = list(
         add = function(ex){
@@ -542,15 +554,15 @@ setMethod('format', 'ImportEntries', function(x, ...){
      )
 })
 if(FALSE){#@testing
-    bare <- new('RefVector(Import)')
+    bare <- new('ReferenceSet<Import>')
     expect_valid(bare)
 
-    packages <- new('RefVector(Import)', import('utils'), import('methods'))
-    expect_identical( sort(names(packages)), c('methods', 'utils'))
+    packages <- new('ReferenceSet<Import>', import('utils'), import('methods'))
+    expect_identical( sort(names(packages)), c('import(methods)', 'import(utils)'))
     expect_identical(format(packages), c('import(methods)', 'import(utils)'))
 
     x <- import_from('utils', c('head', 'tail'))
-    objects <- new('RefVector(ImportFrom)', x)
+    objects <- new('ReferenceSet<ImportFrom>', x)
     expect_identical(format(objects), c('importFrom(utils,head)', 'importFrom(utils,tail)'))
 
     import.list <- imports( import('utils'), import('methods')
@@ -559,6 +571,10 @@ if(FALSE){#@testing
                           , import_methods_from('documentation', c('doc_get_aliases', 'doc_get_name'))
                           )
     expect_is(import.list, 'ImportEntries')
+    import.list$objects$is_valid()
+    import.list$packages$is_valid()
+    import.list$classes$is_valid()
+    import.list$methods$is_valid()
     expect_equal( import.list$validate()
                 , "package utils already appears as an import," %<<%
                   "it should not appear in any importFrom calls.")
@@ -583,7 +599,7 @@ if(FALSE){#@testing
                     )
     ilist$objects$get_names()
 
-    expect_equal(ilist$validate(), "Cannot contain duplicate names.")
+    expect_equal(ilist$validate(), "Cannot contain duplicate names")
 
     expect_true(ilist$check_no_extraneous_import_from())
 }

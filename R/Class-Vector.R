@@ -170,3 +170,18 @@ removeVector <- function(Class, where=topenv(parent.frame())){
       ,  envir = where)
     removeClass(Class, where=where)
 }
+
+newDocSet <- function( element, ...
+                     , methods=list()
+                     ){
+    elemDef <- getClass(element)
+    if ('names' %in% slotNames(elemDef))
+        methods$get_names <- function()as.character(unlist(purrr::map(., slot, 'names')))
+    if ('package' %in% slotNames(elemDef))
+        methods$get_packages <- function()as.character(unlist(purrr::map(., slot, 'package')))
+    methods$names <- function()sapply(., format)
+    setRefSet( element = element, ...
+             , methods=methods
+             , static.methods = list(equals = function(x, y)any(doc_get_name(x) %in% doc_get_name(y)))
+             )
+}

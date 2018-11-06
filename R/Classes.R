@@ -8,6 +8,7 @@
 #' @include Class-example.R
 #' @include Class-FormattedText.R
 #' @include Class-function-Documentation.R
+#' @include Class-NamespaceEntry.R
 #' @include Class-option-Documentation.R
 #' @include Class-Rd.R
 #' @include Class-S4-Documentation.R

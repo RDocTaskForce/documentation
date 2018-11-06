@@ -3,6 +3,7 @@
 #' @include utils.R
 #' @include setup.R
 #' @include Fun-accessors-function.R
+#' @include Fun-accessors-NamespaceEntry.R
 #' @include Fun-accessors-option.R
 #' @include Fun-accessors-Shared.R
 #' @include Fun-accessors.R
