@@ -116,7 +116,7 @@ if(FALSE){
 are <- function(lst, class2){
     purrr:::map_lgl(lst, is, class2)
 }
-if(FALSE){
+if(FALSE){#@testing
     lst <- list('a', 1L, TRUE)
 
     expect_true(all(are(lst, 'ANY')))
@@ -335,17 +335,29 @@ if(FALSE){#@testing
     expect_equal(environmentName(ns), "test package environment")
 }
 
-number_of_arguments <- function(f){
-    args <- formals(f)
-    if (is.null(args))
-        return(length(head(as.list(args(f)), -1)))
-    if ('...' %in% names(args))
-        return(Inf)
-    else
-        length(args)
+
+
+ngettextf <-
+function( n
+        , msg1
+        , msg2
+        , ...
+        , domain=NULL
+        ){
+    if (n<=1) gettextf(msg1, ..., domain = domain)
+         else gettextf(msg2, ..., domain = domain)
 }
-if(FALSE){#@testing
-    expect_equal(number_of_arguments(rnorm), 3L)
-    expect_equal(number_of_arguments(paste), Inf)
-    expect_equal(number_of_arguments(xtfrm), 1)
+
+is_valid <- function(object, complete=FALSE){
+    valid <- is_valid(object, test=TRUE, complete=complete)
+    if(isTRUE(valid)) return(TRUE)
+                 else return(s(FALSE, msg=valid))
 }
+are_valid <-
+function(lst, complete=FALSE, simplify=NA){
+    valid <- lapply(lst, is_valid, complete=complete)
+    if (isFALSE(simplify)) return(valid) else
+    if (isTRUE(simplify) || all(valid)) return(simplify2array(valid))
+    else return(valid)
+}
+
