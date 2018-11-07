@@ -64,11 +64,11 @@ doc_error_html5_malformed <- function(tag, msg=NULL){
              , type = c("html_to_Rd", "html_to_Rd-malformed_html"))
 }
 html_conversion_information_loss <- function(tag, cond='warning'){
-    doc_condition( type = c('html_to_Rd', 'html_to_Rd-info_loss')
-                 , cond = cond
-                 , ._('Extracting text from HTML tag %s, information will be lost'
-                     , sQuote(tag))
-                 )
+    condition( type = c('html_to_Rd', 'html_to_Rd-info_loss')
+             , cond = cond
+             , ._('Extracting text from HTML tag %s, information will be lost'
+                 , sQuote(tag))
+             )
 }
 html_get_type <- function(x){
     if (identical(class(x), 'list')) return(sapply(x, html_get_type))

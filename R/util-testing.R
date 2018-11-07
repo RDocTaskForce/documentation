@@ -361,3 +361,12 @@ function(lst, complete=FALSE, simplify=NA){
     else return(valid)
 }
 
+catch_condition <- function(code){
+    val <- tryCatch(force(code), condition = function(cond)cond)
+    if (is(val, 'condition')) return(val)
+}
+if(FALSE){#@testing
+    val <- catch_condition(pkg_message("testing"))
+    expect_is(val, 'condition')
+    expect_is(val, 'message')
+}

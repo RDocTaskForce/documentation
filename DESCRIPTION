@@ -14,6 +14,7 @@ Imports:
     extendedRef,
     methods,
     parsetools,
+    pkgcond,
     purrr,
     rlang,
     roxygen2(>= 6.0.1.9000),
@@ -48,7 +49,6 @@ Collate:
     'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
-    'Class-StaticRefClasses.R'
     'Class-Vector.R'
     'Class-example.R'
     'Class-FormattedText.R'
@@ -70,6 +70,7 @@ Collate:
     'Fun-accessors-Shared.R'
     'Fun-accessors-function.R'
     'Fun-accessors-option.R'
+    'Fun-accessors-NamespaceEntry.R'
     'Fun-check_documented.R'
     'Fun-default.R'
     'Fun-document.R'

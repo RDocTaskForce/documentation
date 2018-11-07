@@ -17,10 +17,12 @@
 #' @param fun the function or name of a function to use to format.
 #' @param dir the default directory output should be directed to.
 #' @param ext the default file extention to use.
-#' @param overwrite allow overwritting?
+#' @param overwrite condition to raise if overwriting.
 #' @export
 set_formatter<- # nocov start
-function(format, fun, dir = '.', ext = paste0('.', format[[1]]), overwrite=NA){
+function(format, fun, dir = '.', ext = paste0('.', format[[1]])
+        , overwrite='warn'
+        ){
     assert_that(is.character(format), is.string(dir), is.string(ext))
     if(is.string(fun))
         fun <- match.fun(fun)
@@ -29,14 +31,12 @@ function(format, fun, dir = '.', ext = paste0('.', format[[1]]), overwrite=NA){
     for(fmt in unique(tolower(format))){
         if (exists(fmt, envir = .documentation_formatters)){
             if (identical(get(fmt, envir=.documentation_formatters), info))
-                doc_message(._("Formatter already recorded for '%s'.", fmt)
+                pkg_message(._("Formatter already recorded for '%s'.", fmt)
                            , type ="format-overwrite"
                            )
             else
-                doc_condition(._("Formatter already exists for '%s'.", fmt)
-                             , overwrite
-                             , type ="format-overwrite"
-                             )
+                condition(._("Formatter already exists for '%s'.", fmt)
+                         , overwrite, type ="format-overwrite")
         }
         assign(fmt, info, envir=.documentation_formatters)
     }
