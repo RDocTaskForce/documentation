@@ -15,10 +15,12 @@ Imports:
     methods,
     parsetools,
     pkgcond,
+    postlogic,
     purrr,
     rlang,
     roxygen2(>= 6.0.1.9000),
     stringi,
+    testextra,
     tools,
     utils 
 Suggests:
@@ -33,16 +35,14 @@ Description: This package provides infrastructure for containing
     and exporting documentation objects into different formats.
 Collate:
     'util-undefined.R'
-    'util-str_rep.R'
     'util-infix.R'
     'util-testing.R'
-    'util-postlogic.R'
+    'util-str_rep.R'
     'util-interleave.R'
     'util-generics.R'
     'util-aliases.R'
     'util-errors.R'
     'util-documentationMetaName.R'
-    'util-comma_list.R'
     'setup-set_old_classes.R'
     'setup-globals.R'
     'setup.R'
@@ -67,10 +67,10 @@ Collate:
     'Conversions.R'
     'Fun-documentation.R'
     'Fun-accessors.R'
+    'Fun-accessors-NamespaceEntry.R'
     'Fun-accessors-Shared.R'
     'Fun-accessors-function.R'
     'Fun-accessors-option.R'
-    'Fun-accessors-NamespaceEntry.R'
     'Fun-check_documented.R'
     'Fun-default.R'
     'Fun-document.R'
@@ -78,7 +78,6 @@ Collate:
     'Fun-documentation-Shared.R'
     'Fun-extract_documentation.R'
     'Fun-extract_documentation-classGeneratorFunction.R'
-    'Fun-extract_tests.R'
     'Fun-toRd.R'
     'Fun-format.R'
     'Fun-toRd-Documentation.R'
@@ -92,7 +91,7 @@ Collate:
     'Funs.R'
     'zzz-Finalize.R'
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "collate"))
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1
 Enhances: devtools
 Encoding: UTF-8
 Remotes:

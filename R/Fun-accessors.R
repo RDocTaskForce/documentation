@@ -4,9 +4,12 @@
 
 # nocov start
 .define_generic_doc_accessor <-
-function( name, valueClass="character", where = topenv()
-        , setter=TRUE #< Define `doc_*<-` function
-        , has=TRUE   #< Define `doc_has_*` function
+function( name
+        , valueClass="character"  #< Type of object methods are expected to return
+        , where = topenv()        #< Namespace to place definition of generic in.
+        , setter=TRUE             #< Define `doc_*<-` function
+        , has=TRUE                #< Define `doc_has_*` function
+        , ...                     #< Passes on to setGeneric
         ){
     if (length(name)>1L) return(lapply(name, .define_generic_doc_accessor
                                       , where=where, setter=setter))
@@ -16,15 +19,17 @@ function( name, valueClass="character", where = topenv()
         if (hasMethod(fun.name, class(doc)))
             return(standardGeneric(fun.name))
         else if (!.hasSlot(doc, name))
-            doc_error(._("Class '%s' does not have a slot named '%s'"
-                        , class(doc), name)
-                     , type = 'invalid-slot'
-                     , class = class(doc), slot=name)
+            documentation::doc_error(._("Class '%s' does not have a slot named '%s'"
+                                       , class(doc), name)
+                                    , type = 'invalid-slot'
+                                    , class = class(doc), slot=name)
         else
             return(as(slot(doc, name), valueClass))
     }, env = list(name = name, fun.name = fun.name, valueClass=valueClass ))
     fun = eval(def, envir = where)
-    setGeneric(fun.name, valueClass=valueClass, def=fun, where = where)
+    setGeneric( fun.name, valueClass=valueClass, def=fun, where = where
+              , package = getPackageName(where)
+              , ...)
     if (.document.generated) {
         documentation(where[[fun.name]]) <-
             function_documentation( name = fun.name
@@ -42,17 +47,19 @@ function( name, valueClass="character", where = topenv()
         setter.def <- substitute(function(doc, value){
             if (hasMethod(setter.name, class(doc)))
                 return(standardGeneric(setter.name))
-            if (.hasSlot(doc, name)){
-                doc@name <- as(value, getElement(getSlots(getClass(class(doc))), name))
-                return(doc)
+            if (!.hasSlot(doc, name)){
+                documentation::doc_error(._("Class '%s' does not have a '%s' which can be set."
+                                           , class(doc), name)
+                                        , type = 'invalid-slot'
+                                        , class = class(doc), slot=name)
             }
-            doc_error(._("Class '%s' does not have a '%s' which can be set."
-                        , class(doc), name)
-                     , type = 'invalid-slot'
-                     , class = class(doc), slot=name)
+            doc@name <- as(value, getElement(getSlots(getClass(class(doc))), name))
+            return(invisible(doc))
         }, env = list(name = name, setter.name = setter.name, valueClass=valueClass))
         setter <- no_src(eval(setter.def, envir=where))
-        setGeneric( setter.name, def = setter, where=where)
+        setGeneric( setter.name, def = setter, where=where
+                  , package = getPackageName(where)
+                  , ...)
     }
     if (has){
         has.name <- 'doc_has_' %<<<% name
@@ -60,7 +67,9 @@ function( name, valueClass="character", where = topenv()
             length(get(doc)) > 0L
         }, list(get = as.name(fun.name)))
         has <- no_src(eval(has.def, envir=where))
-        setGeneric( has.name, def = has, where=where)
+        setGeneric( has.name, def = has, where=where
+                  , package = getPackageName(where)
+                  , ...)
     }
     invisible(TRUE)
 }
@@ -69,16 +78,12 @@ if(FALSE){#@testing
     if (isNamespaceLoaded("my-test-package"))
         unloadNamespace('my-test-package')
 
-    env <- devtools:::makeNamespace('my-test-package')
-    env$.__NAMESPACE__.$imports <- list("documentation", 'methods'
-                                       , documentation = s( getNamespaceExports('documentation')
-                                                          , names = getNamespaceExports('documentation')
-                                                          )
-                                       , methods = s( getNamespaceExports('methods')
-                                                    , names=getNamespaceExports('methods')
-                                                    )
-                                       )
-    setPackageName('my-test-package', env)
+    env <- pkgcond::suppress_warnings(pattern = "replacing previous import",{
+        testextra::new_pkg_environment('my-test-package', import = c('methods', 'documentation')
+                                      , register = TRUE)
+    })
+    env$env <- env
+    # tryCatch({
     .define_generic_doc_accessor('test_slot', where = env)
 
     expect_true(exists('doc_get_test_slot', where = env))
@@ -93,7 +98,6 @@ if(FALSE){#@testing
     has <- get('doc_has_test_slot', env)
     expect_is(has, "standardGeneric")
 
-
     val <- .define_generic_doc_accessor(c('test1', 'test2'), where=env)
     expect_identical(val, list(TRUE, TRUE))
     expect_true(exists('doc_get_test1', where = env))
@@ -105,7 +109,8 @@ if(FALSE){#@testing
                      )
     setMethod('doc_get_test2', 'myDoc', function(doc)"prepare to die."
              , where = env )
-    setMethod('doc_test_slot<-', 'myDoc', function(doc, value){
+    setMethod('doc_test_slot<-', 'myDoc'
+             , function(doc, value){
         value <- as.name(value)
         doc@test_slot <- value
         return(invisible(doc))
@@ -124,19 +129,19 @@ if(FALSE){#@testing
     expect_identical(with(env, doc_get_test1(doc)), "you kill my father")
     expect_identical(with(env, doc_get_test2(doc)), "prepare to die.")
 
-
     with(env, doc_test_slot(doc) <- "Thanos")
     expect_identical(with(env, doc_get_test_slot(doc)), "Thanos")
     with(env, doc_test1(doc) <- "I kill everyone.")
     expect_identical(with(env, doc_get_test1(doc)), "I kill everyone.")
     expect_error(with(env, doc_test2(doc) <- "I'll kill you to."))
 
-
     .define_generic_doc_accessor(c('bad_slot'), where=env)
-    expect_error( with(env, doc_get_bad_slot(doc))
-                , class='documentation-error-invalid-slot' )
-
-    unloadNamespace('my-test-package')
+    # expect_error(
+        cond <- catch_condition(with(env, doc_get_bad_slot(doc)))
+                # , class='error-invalid-slot' )
+    # }, finally =
+        testextra::unregister_namespace(env)
+    # )
 }
 
 
@@ -214,7 +219,7 @@ setMethod('doc_details<-', 'Documentation', function(doc, value){
 })
 if(FALSE){#@testing
     doc <- function_documentation(name='test-doc')
-    det <- FT(stringi::stri_rand_lipsum(3))
+    det <- asection(list(FT(stringi::stri_rand_lipsum(3))))
 
     expect_null(doc_get_details(doc))
     doc_details(doc) <- det

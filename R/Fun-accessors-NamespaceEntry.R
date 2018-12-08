@@ -1,3 +1,7 @@
+#' @include utils.R
+#' @include Fun-accessors.R
+
+
 
 setMethod('doc_get_name', 'NamespaceEntry', function(doc)format(doc))
 

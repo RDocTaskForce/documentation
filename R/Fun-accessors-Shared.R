@@ -3,9 +3,10 @@
 
 
 ### Generate accessors for Shared-Documentation #####
-for (fname in objects( envir=topenv(environment(doc_get_aliases))
-                     , pattern = "^doc_get_"
-                     )) {
+for (fname in setdiff(objects( envir=topenv(environment(doc_get_aliases))
+                             , pattern = "^doc_get_"
+                             ), 'doc_get_export')
+     ) {
     setMethod(fname, signature = c('Shared-Documentation'),
         s( eval(substitute( function(doc)fun(doc$docs)
                           , list(fun=rlang::sym(fname))))
@@ -43,5 +44,25 @@ if(FALSE){#@testing
     expect_false(doc_has_name(doc))
     doc_name(doc) <- "test"
     expect_true(doc_has_name(doc))
+}
+
+### Exports #####
+setMethod("doc_get_export", "Shared-Documentation", function(doc)doc$exports)
+setMethod("doc_export<-", "Shared-Documentation", function(doc, value){
+    pkg_error("Replacement of exports for shared documentation is not allowed." %<<%
+              "Add or delete individual entries.")
+})
+if (FALSE) {#@testing
+    doc <- shared_function_documentation('test')
+
+    expect_length(doc_get_export(doc), 0L)
+    expect_error(doc_export(doc) <- TRUE)
+    expect_error(doc_export(doc) <- 'test')
+    expect_error(doc_export(doc) <- as('test', 'Export'))
+
+    expect_identical(doc$add_export(export('test')), doc)
+    expect_length(doc_get_export(doc), 1L)
+
+    expect_error(doc_export(doc) <- new('ReferenceSet<Export>'), 'not allowed')
 }
 

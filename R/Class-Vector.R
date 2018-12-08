@@ -1,5 +1,6 @@
 #' @include utils.R
-#' @import extededRef
+#' @import extendedRef
+NULL
 
 # S4 Vectors -----
 
@@ -86,75 +87,97 @@ function( element                                   #< name of the class that el
     return(val)
 }
 if(FALSE){#! @testing
-    new.class <- setVector('name', where=globalenv())
+    pkgcond::suppress_warnings(pattern="", {
+        pkg <- testextra::new_pkg_environment( "test Vector(name) package", register = TRUE
+                                             , import=c('methods', 'testthat', 'testextra'))
+    })
+    pkg$new.class <-
+    new.class <- setVector('name', where=pkg)
     expect_is(new.class, "classGeneratorFunction")
+    expect_equal(new.class@package, getPackageName(pkg))
 
-    expect_is(name.vector <- new.class(), 'Vector(name)')
-    name.vector[[1]] <- 'a'
-    name.vector[[2]] <- 'b'
-    expect_equal(length(name.vector), 2)
-    expect_true(validObject(name.vector))
-    expect_error( withr::with_options( list(useFancyQuotes=FALSE)
-                                     , name.vector[[3]] <- rnorm
-                                     )
-                , "value does not inherit from class 'name', nor can it be coerced.")
-    expect_error( withr::with_options( list(useFancyQuotes=FALSE)
-                                     , name.vector[3] <- 'c'
-                                     )
-                , "value does not inherit from class 'Vector\\(name\\)', nor can it be coerced\\.")
-
-    expect_error(name.vector[3] <- 'c')
-    name.vector[3] <- as.name('c')
-
-    x <- new.class(list( a <- as.name('a')
-                       , b <- as.name('b')
-                       ))
-    expect_is(x, 'Vector(name)')
-    expect_equal(x[[1]], a)
-    expect_equal(x[[2]], b)
-
-    expect_is(y <- c(x, b), 'Vector(name)')
-    expect_length(y, 3L)
-
-    expect_identical(unique(y), x)
-
-    expect_is(.undefined, 'name')
-    expect_identical( as(.undefined, "Vector(name)")
-                    , new.class(list(.undefined))
-                    )
-
-    expect_false(is(x, 'name'))
-
-    expect_error( new('Vector(name)', list(as.name('a'), as.name('b'), 'c'))
-                , "Element of Vector at position 3 is not a name")
+    expect_true(exists("[.Vector(name)", pkg))
+    expect_true(exists("[<-.Vector(name)", pkg))
+    expect_true(exists("[[<-.Vector(name)", pkg))
+    expect_true(exists("c.Vector(name)", pkg))
+    expect_true(exists("unique.Vector(name)", pkg))
+    expect_true(exists("c.name", pkg))
 
 
-    y <- new.class(list( as.name('a')))
-    z <- c(y, 'b')
-    expect_is(z, "Vector(name)")
-    expect_length(z, 2L)
+    with(new.env(parent=pkg), {
+        expect_is(name.vector <- new('Vector(name)'), 'Vector(name)')
+        name.vector[[1]] <- 'a'
+        name.vector[[2]] <- 'b'
+        expect_equal(length(name.vector), 2)
+        expect_true(validObject(name.vector))
+        expect_error( withr::with_options( list(useFancyQuotes=FALSE)
+                                         , name.vector[[3]] <- rnorm
+                                         )
+                    , "value does not inherit from class 'name', nor can it be coerced.")
+        expect_error( withr::with_options( list(useFancyQuotes=FALSE)
+                                         , name.vector[3] <- 'c'
+                                         )
+                    , "value does not inherit from class 'Vector\\(name\\)', nor can it be coerced\\.")
 
-    removeVector(new.class@className, where=globalenv())
+        expect_error(name.vector[3] <- 'c')
+        name.vector[3] <- as.name('c')
+
+        x <- new.class(list( a <- as.name('a')
+                           , b <- as.name('b')
+                           ))
+        expect_is(x, 'Vector(name)')
+        expect_equal(x[[1]], a)
+        expect_equal(x[[2]], b)
+
+        expect_is(y <- c(x, b), 'Vector(name)')
+        expect_length(y, 3L)
+
+        expect_identical(unique(y), x)
+
+        expect_is(.undefined, 'name')
+        expect_identical( as(.undefined, "Vector(name)")
+                        , new.class(list(.undefined))
+                        )
+
+        expect_false(is(x, 'name'))
+
+        expect_error( new('Vector(name)', list(as.name('a'), as.name('b'), 'c'))
+                    , "Element of Vector at position 3 is not a name")
+
+
+        y <- new.class(list( as.name('a')))
+        z <- c(y, 'b')
+        expect_is(z, "Vector(name)")
+        expect_length(z, 2L)
+    })
+    removeVector(new.class@className, where=pkg)
+    unloadNamespace(pkg)
 }
 if(FALSE){#@testing setVector w/ Virtual Class
-    velement <- setClass('virtual element', where = globalenv())
-    expect_true(isVirtualClass(velement@className))
+    pkg <- pkgcond::suppress_warnings(pattern = "replacing previous import", {
+        testextra::new_pkg_environment("test Vector w/Virtual package", register=TRUE
+                                         , import = c("methods", "testthat", "documentation") )
+    })
+    tryCatch(with(pkg, {
+        velement <- setClass('virtual element', where = globalenv())
+        expect_true(isVirtualClass(velement@className))
 
-    element <- setClass('logical element', where = globalenv()
-                       , contains = c('virtual element', 'logical') )
+        element <- setClass('logical element', where = globalenv()
+                           , contains = c('virtual element', 'logical') )
 
-    vclass <- setVector(velement@className, where =globalenv())
+        vclass <- setVector(velement@className, where =globalenv())
 
-    x <- TRUE
-    expect_false(is(x, element@className))
-    y <- as(x, element@className)
-    expect_is(y, velement@className)
-    expect_is_exactly(y, element@className)
-    z <- new(vclass@className, list(y))
-    expect_is_exactly(z, vclass@className)
-    expect_is(z, velement@className)
+        x <- TRUE
+        expect_false(is(x, element@className))
+        y <- as(x, element@className)
+        expect_is(y, velement@className)
+        expect_is_exactly(y, element@className)
+        z <- new(vclass@className, list(y))
+        expect_is_exactly(z, vclass@className)
+        expect_is(z, velement@className)
 
-    expect_true(removeVector(vclass, where = globalenv()))
+        expect_true(removeVector(vclass, where = globalenv()))
+    }), finally = unregister_namespace(pkg))
 }
 
 

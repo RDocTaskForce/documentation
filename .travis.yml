@@ -1,0 +1,22 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+
+r_github_packages:
+  - RDocTaskForce/parsetools
+  - RDocTaskForce/testextra
+
+r_packages:
+  - testthat
+  - pkgcond
+  - covr
+  - roxygen2
+
+before_script:
+  - Rscript -e 'testextra::extract_tests()'
+  - Rscript -e 'roxygen2::roxygenise(".", "rd")'
+
+after_success:
+  - Rscript -e 'covr::codecov()'

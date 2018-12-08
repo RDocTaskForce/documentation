@@ -110,5 +110,6 @@ if(FALSE){#@testing
                   , class="documentation-warning-roxy_block")
 
     expect_equal( doc_get_name(doc), "hello_world")
-    expect_equal( doc_get_aliases(doc), c("example_hello_world", "hw"))
+    expect_equal( doc@aliases, c("example_hello_world", "hw"))
+    expect_equal( doc_get_aliases(doc), c("hello_world", "example_hello_world", "hw"))
 }

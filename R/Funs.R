@@ -15,7 +15,6 @@
 #' @include Fun-documentation.R
 #' @include Fun-extract_documentation-classGeneratorFunction.R
 #' @include Fun-extract_documentation.R
-#' @include Fun-extract_tests.R
 #' @include Fun-format.R
 #' @include Fun-toRd-arg.R
 #' @include Fun-toRd-Documentation.R

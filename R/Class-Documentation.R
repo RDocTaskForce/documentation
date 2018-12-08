@@ -5,7 +5,7 @@
 #' @include Class-example.R
 #' @importFrom utils person
 #' @import methods
-
+NULL
 
 #' @export
 setClass('Documentation', contains='VIRTUAL')

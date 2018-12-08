@@ -1,3 +1,5 @@
+#' @include utils.R
+#' @include Class-Vector.R
 
 ### Class: Virtual/Usage #####
 #' @export

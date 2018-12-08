@@ -116,10 +116,11 @@ is_S4_method_call <- function(which=-1L){
         )
 }
 if(FALSE){#@testing
-    setClass('test_class','list')
+    try(removeClass('test_class', where=globalenv()), silent=TRUE)
+    setClass('test_class', contains='list', where=globalenv())
     setMethod('show', 'test_class', function(object){
         invisible(is_S4_method_call())
-    })
+    }, where=globalenv())
     other_show <- function(object){
         is_S4_method_call()
     }
@@ -143,23 +144,19 @@ get_S4_method_specialization <-
             stop("Could not determine target of S4 method.") # nocov
     }
 if(FALSE){#@testing
-    setClass('test_class','list')
+    setClass('test_class','list', where=globalenv())
     setMethod('show', 'test_class', function(object){
         invisible(get_S4_method_specialization())
-    })
-    setMethod('toRd', 'test_class', function(obj){
-        get_S4_method_specialization()
-    })
-    other_show <- function(object){
-        is_S4_method_call()
-    }
+    }, where=globalenv())
+    setGeneric('get_spec', function(object)get_S4_method_specialization(), where=globalenv())
     object <- new('test_class')
 
     val <- show(object)
     expect_equal(val, 'test_class')
 
-    val <- toRd(object)
+    val <- get_spec(object)
     expect_equal(as.character(val), 'test_class')
+    expect_true(removeClass('test_class', where = globalenv()))
 }
 
 is_registered_S3method <- function(fun, env = topenv(environment(fun))){
