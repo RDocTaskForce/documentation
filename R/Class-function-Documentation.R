@@ -163,12 +163,12 @@ function(from){
     return(new)
 })
 if(FALSE){#@testing
-    from <- S3method_documentation('html_to_Rd', 'a'
+    from <- S3method_documentation('f', 'a'
                                   , description = "convert html link to Rd Link"
                                   )
     new <- as(from, 'function-Documentation')
     expect_is_exactly(new, 'function-Documentation')
-    expect_identical(doc_get_name(new), 'html_to_Rd.a')
+    expect_identical(doc_get_name(new), 'f.a')
     expect_identical(new@usage, doc_get_usage(from))
     expect_identical(new@description, doc_get_description(from))
 }

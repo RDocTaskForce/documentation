@@ -77,7 +77,7 @@ if(FALSE){#@testing
     expect_identical(val2, exp2)
 
 
-    val <- as(html_to_Rd.a, 'usage')
+    val <- as(solve.qr, 'usage')
     expect_is(val, 'usage')
     expect_is_exactly(val, 'usage/S3method')
 }
@@ -168,10 +168,10 @@ setAs("function", 'usage/S3method', function(from){
                         )
 })
 if(FALSE){#@testing
-    val <- as(html_to_Rd.a, 'usage/S3method')
-    exp <- s3usage( expression(html_to_Rd.a(html, ...))
-                  , generic= 'html_to_Rd'
-                  , signature = 'a'
+    val <- as(solve.qr, 'usage/S3method')
+    exp <- s3usage( expression(solve.qr(a, b, ...))
+                  , generic= 'solve'
+                  , signature = 'qr'
                   )
     expect_identical(val, exp)
 }
@@ -245,17 +245,17 @@ if(FALSE){#@testing Coersion from MethodDefinition
 #' @S3method c Virtual/Usage
 #' @S3method c UsageList
 #' @S3method unique UsageList
-UsageList <- setVector("Virtual/Usage", "UsageList")
+UsageList <- setVector("Virtual/Usage", "UsageList", where=environment())
 if(FALSE){#@testing c.Virtual/Usage
-    U <- as(html_to_Rd, 'usage')
-    V <- as(html_to_Rd.a, 'usage/S3method')
+    U <- as(solve, 'usage')
+    V <- as(solve.qr, 'usage/S3method')
     val <- c(U,V)
 
     expect_identical(val[[1]], U)
     expect_identical(val[[2]], V)
     expect_identical(S3Part(val, TRUE), list(U,V))
 
-    W <- as(html_to_Rd.abbr, 'usage/S3method')
+    W <- as(solve.default, 'usage/S3method')
     val2 <- c(val, W)
     expect_is(val2, 'UsageList')
     expect_length(val2, 3L)

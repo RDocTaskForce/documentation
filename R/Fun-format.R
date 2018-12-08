@@ -43,7 +43,7 @@ function(format, fun, dir = '.', ext = paste0('.', format[[1]])
     invisible(NULL)
 }# nocov end
 
-set_formatter(c("Rd", "toRd", ".Rd"), function(...)toRd(...), 'man', '.Rd')
+set_formatter(c("Rd", "toRd", ".Rd"), toRd, 'man', '.Rd')
 
 
 get_formatter <-
@@ -157,8 +157,6 @@ if(FALSE){#@testing
     docs <- function_documentation('test', arguments = arg_('x', 'argument'))
     frd <- format(docs, fmt='Rd')
     expect_identical( collapse0(frd)
-                    , '\\name{test}' %\%
-                      '\\usage{test(x)}' %\%
-                      '\\arguments{\\item{x}{argument}}'
+                    , collapse0(toRd(docs))
                     )
 }

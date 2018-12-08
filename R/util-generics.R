@@ -61,10 +61,12 @@ if(FALSE){#@testing
     }
     expect_identical(whichS3Generic(g), c('case_a', 'case_b', 'case_c') )
 
-    f <- html_to_Rd
+    f <- function(x){
+        assert_that(is.atomic(x))
+        UseMethod("test_generic", html)
+    }
     expect_true(isS3Generic(f))
     expect_true(any(unlist(.is_UseMethod(body(f)))))
-    # expect_identical(.find_UseMethod(body(f)), 2L)
 
     expect_null(whichS3Generic(rnorm))
 }
@@ -174,7 +176,8 @@ is_registered_S3method <- function(fun, env = topenv(environment(fun))){
     return(FALSE)
 }
 if(FALSE){#@testing
-    expect_true(is_registered_S3method(html_to_Rd.a))
+    fun <- getAnywhere("get_parse_data.srcfile")[1]
+    expect_true(is_registered_S3method(fun))
     expect_true(is_registered_S3method(unique.array))
     expect_false(is_registered_S3method(toRd))
     expect_warning(is_registered_S3method(toRd, environment(toRd)))

@@ -34,7 +34,7 @@ function( obj                     #< Documentation Object.
     to_tag <- function(name)
         if (length(elem <- getElement(obj, name)))
             Rd_tag(tag=name, content=toRd(elem, ...), ...)
-    .exclude <- c('author', 'keywords', 'aliases', 'concepts', 'sections')
+    .exclude <- c('author', 'keywords', 'aliases', 'concepts', 'sections', 'export')
 
     slots <- setdiff(slotNames(obj), c(.exclude, exclude))
     rd <- structure(lapply(slots, slot_to_tag, obj=obj, control=control), names = slots)

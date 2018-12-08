@@ -1,4 +1,3 @@
-#' @include Conversions.R
 #' @include Classes.R
 #' @include utils.R
 #' @include setup.R
@@ -19,7 +18,6 @@
 #' @include Fun-toRd-example.R
 #' @include Fun-toRd-function.R
 #' @include Fun-toRd-option.R
-#' @include Fun-toRd-shiny.R
 #' @include Fun-toRd-usage.R
 #' @include Fun-toRd.R
 #' @include Fun-write_documentation.R

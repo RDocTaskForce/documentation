@@ -33,11 +33,9 @@ setMethod('set_documentation_', signature = c('function', 'Shared-Documentation'
         invisible(doc)
     })
 if(FALSE){#@testing
-    doc <- new( 'Shared-Documentation'
-              , docs = function_documentation( name = 'Normal'
-                                             , title = 'The Normal Distribution'
-                                             )
-              )
+    doc <- shared(function_documentation( name = 'Normal'
+                                        , title = 'The Normal Distribution'
+                                        ))
 
     rnorm <- stats::rnorm
     dnorm <- stats::dnorm

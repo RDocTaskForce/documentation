@@ -18,7 +18,7 @@ function( element                                   #< name of the class that el
         ){
     assert_that( is.string(element), is.string(Class)
                , is.flag(c.element), is.flag(safe.replace)
-               , is.environment(where)
+               , isNamespace(where) || identical(where, globalenv())
                )
     val <-
     setClass( Class=Class, contains = c(contains, 'list')

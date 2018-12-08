@@ -199,7 +199,7 @@ if(FALSE){#! @testing
         invisible(x)
     }
 
-    if (interactive() && tracingState()) {
+    if(F) if (interactive() && tracingState()) {
         trace(default_, exit =
                   substitute(doc_error("Documentation debugging\n"
                                       , domains=domains

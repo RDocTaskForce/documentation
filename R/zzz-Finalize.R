@@ -1,4 +1,4 @@
-#' @importFrom assertthat
+# @importFrom assertthat
 #' @include setup.R
 #' @include utils.R
 #' @include Classes.R

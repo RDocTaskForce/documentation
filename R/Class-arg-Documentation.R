@@ -44,14 +44,20 @@ function( name                   #< name of the argument
         )
 }
 
+#' @export
+`[.ArgumentList` <- function(x,...)pkg_error("Not implimented")
+#' @export
+`[<-.ArgumentList` <- function(x,...)pkg_error("Not implimented")
+#' @export
+`c.arg-Documentation` <- function(x,...)pkg_error("Not implimented")
+#' @export
+`c.ArgumentList` <- function(x,...)pkg_error("Not implimented")
+#' @export
+unique.ArgumentList <- function(x,...)pkg_error("Not implimented")
 #' @exportClass ArgumentList
-#' @S3method [ ArgumentList
-#' @S3method [<- ArgumentList
-#' @S3method c arg-Documentation
-#' @S3method c ArgumentList
-#' @S3method unique ArgumentList
 setVector( element = "arg-Documentation"
          , Class   = "ArgumentList"
+         , where = environment()
          )
 #' @export
 ArgumentList <- function(...){new('ArgumentList', list(...))}
