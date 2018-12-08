@@ -34,3 +34,22 @@ if(FALSE){#! @testing
     expect_error(new('Documentation-Keyword', 'utils'))
     expect_true(validObject(as('utilities', 'Documentation-Keyword')))
 }
+
+#' @export
+`c.Documentation-Keyword` <- function(...)as(NextMethod(), 'Documentation-Keyword')
+#' @export
+`sort.Documentation-Keyword` <- function(...)as(NextMethod(), 'Documentation-Keyword')
+#' @export
+`unique.Documentation-Keyword` <- function(...)as(NextMethod(), 'Documentation-Keyword')
+#' @export
+setAs( 'character', 'Documentation-Keyword'
+     , function(from)new('Documentation-Keyword', from))
+if(FALSE){#@testing
+    val <- keyword('programming')
+    val2 <- c(val, 'methods')
+    expect_is(val2, 'Documentation-Keyword')
+    expect_length(val2, 2L)
+
+    expect_error( val3 <- c(val2, 'not a keyword')
+                , "the following are not valid keywords")
+}
