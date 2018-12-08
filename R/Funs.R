@@ -13,8 +13,6 @@
 #' @include Fun-documentation-S4.R
 #' @include Fun-documentation-Shared.R
 #' @include Fun-documentation.R
-#' @include Fun-extract_documentation-classGeneratorFunction.R
-#' @include Fun-extract_documentation.R
 #' @include Fun-format.R
 #' @include Fun-toRd-arg.R
 #' @include Fun-toRd-Documentation.R
