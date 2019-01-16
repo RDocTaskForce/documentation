@@ -8,7 +8,6 @@
 #' @include Fun-accessors.R
 #' @include Fun-check_documented.R
 #' @include Fun-default.R
-#' @include Fun-document.R
 #' @include Fun-documentation-S4.R
 #' @include Fun-documentation-Shared.R
 #' @include Fun-documentation.R
@@ -19,5 +18,4 @@
 #' @include Fun-toRd-function.R
 #' @include Fun-toRd-option.R
 #' @include Fun-toRd-usage.R
-#' @include Fun-toRd.R
 #' @include Fun-write_documentation.R

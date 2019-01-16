@@ -1,3 +1,4 @@
+#' @include setup.R
 #' @include util-aliases.R
 #' @import pkgcond
 
@@ -153,18 +154,17 @@ doc_error_bad_argument <-
 function( obj
         , expected
         , ...
-        , msg = "Invalid `{arg.name}` argument to `{fun.name}`;" %<<%
-                "expected a {sQuote(expected)}," %<<%
-                "received a {sQuote(klass(obj))}."
         , arg.name = deparse(substitute(obj))
         , fun.name = deparse(sys.call(-1)[[1]])
         , scope= c('documentation', fun.name)
         , type = 'invalid_argument'
         , cond = 'error'
         ){
-    msg <- gettext(msg)
-    msg <- glue::glue( msg)
-
+    msg <- ._("Invalid `%1$s` argument to `%2$s`;" %<<%
+                "expected a %3$s," %<<%
+                "received a %4$s."
+             , arg.name, fun.name
+             , sQuote(expected), sQuote(class0(obj)))
     condition(msg, ...,  cond = cond, type=type)
 }
 if(FALSE){#@testing

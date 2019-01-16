@@ -1,3 +1,4 @@
+#' @include setup.R
 #' @include util-infix.R
 expect_rd_output <- function(rd, file, info=NULL, label=NULL){
     act <- testthat::quasi_label(rlang::enquo(rd), label)

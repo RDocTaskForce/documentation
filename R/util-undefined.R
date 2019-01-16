@@ -1,5 +1,4 @@
-
-
+#' @include setup.R
 
 #' Check if an name is undefined
 #'

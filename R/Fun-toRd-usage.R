@@ -1,5 +1,4 @@
 #' @include Classes.R
-#' @include Fun-toRd.R
 
 #' @export
 setMethod('toRd', 'usage',
@@ -7,35 +6,32 @@ function(obj, ...){
     content <- lapply(obj, deparse)
     content <- lapply(content, clean_Rd)
     content <- lapply(content, Rd_rcode)
-    if (length(content)>1L) {
-        content <- c(.Rd.code.newline, Rd_lines(content))
-        content <- Rd_canonize(cl(content, 'Rd'), ...)
-    }
-    Rd_usage(content=content)
+    if (length(content)>1) content <- Rd_lines(content)
+    Rd_tag("\\usage", content=content, ...)
 })
 if(FALSE){#@testing
     obj <- as(expression(function_documentation(name, arguments, usage, ...)), 'usage')
     expect_identical( toRd(obj)
-                    , Rd(Rd_usage(Rd_rcode("function_documentation(name, arguments, usage, ...)")))
+                    , Rd_usage(Rd_rcode("function_documentation(name, arguments, usage, ...)"))
                     )
 
     obj <- as(expression( value %if% proposition
                         , value %if% proposition %otherwise% alternate
                         ), 'usage')
     rd <- toRd(obj)
-    expect_is_exactly(rd, 'Rd')
-    expect_true(is_Rd_tag(rd[[1]], '\\usage'))
+    expect_is_exactly(rd, 'Rd_tag')
+    expect_true(is_Rd_tag(rd, '\\usage'))
     expect_identical( rd
-                    , Rd(Rd_usage( .Rd.code.newline
-                                 , Rd_rcode('value \\%if\\% proposition\n')
-                                 , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
-                                 )))
+                    , Rd_tag( "\\usage"
+                            , Rd_rcode('\n')
+                            , Rd_rcode('value \\%if\\% proposition\n')
+                            , Rd_rcode('value \\%if\\% proposition \\%otherwise\\% alternate\n')
+                            ))
 
-    expect_identical( toRd(obj, indent=TRUE, indent.with=.Rd.default.indent)
-                    , Rd(Rd_usage( .Rd.code.newline
-                                 , Rd_rcode('    value \\%if\\% proposition\n')
-                                 , Rd_rcode('    value \\%if\\% proposition \\%otherwise\\% alternate\n')
-                                 )))
+    expect_identical( toRd(obj, indent=TRUE, indent.with='    ')
+                    , Rd_usage( '    value \\%if\\% proposition'
+                              , '    value \\%if\\% proposition \\%otherwise\\% alternate'
+                              ))
 }
 
 setMethod('toRd', 'usage/S3method',
@@ -49,18 +45,17 @@ function(obj, ...){
     content <- clean_Rd(content)
     content <- Rd_rcode(content)
 
-    content=Rd_tag('S3method', Rd(toRd(obj@generic)), Rd(toRd(obj@signature)), content)
-
-    Rd_usage(content)
+    tag <- Rd_tag('\\S3method', Rd(toRd(obj@generic)), Rd(toRd(obj@signature)))
+    Rd_tag("\\usage", content=list(tag, content))
 })
 if(FALSE){#@testing
     ex <- expression(html_to_Rd.em(html, ...))
     obj <- new('usage/S3method', ex, generic = 'html_to_Rd', signature = 'em')
     rd <- toRd(obj)
-    expect_is_exactly(rd, 'Rd')
-    expect_true(is_Rd_tag(rd[[1]], '\\usage'))
-    expect_true(is_Rd_tag(rd[[c(1,1)]], '\\S3method'))
-    expect_identical(collapse0(rd), "\\usage{\\S3method{html_to_Rd}{em}(html, ...)}")
+    expect_is_exactly(rd, 'Rd_tag')
+    expect_true(is_Rd_tag(rd, '\\usage'))
+    expect_true(is_Rd_tag(rd[[1]], '\\S3method'))
+    expect_identical(format(rd), "\\usage{\\S3method{html_to_Rd}{em}(html, ...)}")
 }
 
 setMethod('toRd', 'usage/S4method',
@@ -76,9 +71,10 @@ function(obj, ...){
 
     sig <- Rd_rcode(collapse(obj@signature, ','))
     gen <- toRd(obj@generic)
-    content <- Rd_tag('S4method', Rd(gen), Rd(sig), content)
+    tag <- Rd_tag('\\S4method', content = list(Rd(gen), Rd(sig)))
 
-    Rd_usage(content)
+                      # , content), .check = FALSE)
+    Rd_tag('\\usage', content = list(tag,  content))
 })
 if(FALSE){#@testing
     # Taken from stat4 package file src/library/stats4/man/plot-methods.Rd
@@ -91,10 +87,10 @@ if(FALSE){#@testing
               , signature = signature(x='profile.mle', y='missing')
               )
     rd <- toRd(obj)
-    expect_is_exactly(rd, 'Rd')
-    expect_true(is_Rd_tag(rd[[1]], '\\usage'))
-    expect_true(is_Rd_tag(rd[[c(1,1)]], '\\S4method'))
-    expect_identical( collapse0(rd)
+    expect_is_exactly(rd, 'Rd_tag')
+    expect_true(is_Rd_tag(rd, '\\usage'))
+    expect_true(is_Rd_tag(rd[[1]], '\\S4method'))
+    expect_identical( format(rd)
                     , "\\usage{\\S4method{plot}{profile.mle,missing}" %<<<%
                       "(x, levels, conf = c(99, 95, 90, 80, 50)/100" %<<<%
                       ", nseg = 50, absVal = TRUE, ...)}"

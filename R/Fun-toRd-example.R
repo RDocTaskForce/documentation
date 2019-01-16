@@ -131,7 +131,7 @@ function( obj, ...
         , use.source = default(use.source, TRUE) #< use source lines over reconstructed.
         , trimws = TRUE  #< Trim whitespace from sourcelines.
         ){
-    if (length(obj)==0) return(Rd(character(0)))
+    if (length(obj)==0) return(Rd())
     lines <-
         if (use.source && !is.null(src <- attr(obj, 'wholeSrcref'))) {
             doc_example_get_src_lines(src)
@@ -143,8 +143,8 @@ function( obj, ...
         }
     if (trimws)
         lines <- trimws_example(lines)
-    lines <- undim(paste0(lines, ifelse(grepl("\n$", lines), '', '\n')))
-    return(Rd_canonize_code(Rd_rcode(lines)))
+    lines <- collapse0(paste0(lines, ifelse(grepl("\n$", lines), '', '\n')))
+    return(Rd(Rd_rcode(lines)))
 })
 if(FALSE){#@testing
     simple.text <- "
@@ -176,7 +176,7 @@ if(FALSE){#@testing
 }
 if(FALSE){#@testing
     ex.blank <- new('example')
-    expect_identical(toRd(ex.blank), Rd(character(0)))
+    expect_identical(toRd(ex.blank), Rd())
 
 
     ex.file <- system.file("examples", "example_character.R", package='documentation')
@@ -184,7 +184,7 @@ if(FALSE){#@testing
 
     lines <- readLines(ex.file)
     expect_identical( toRd(obj)
-                    , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
+                    , Rd(Rd_rcode(collapse0(paste0(lines[nchar(lines)>0L], '\n'))))
                     )
 
     whole.src <- attr(obj, 'wholeSrcref')
@@ -192,19 +192,19 @@ if(FALSE){#@testing
     expect_true( is.null(src <- attr(obj, 'wholeSrcref')))
     expect_true(!is.null(src <- attr(obj, 'srcref')))
     expect_identical( toRd(obj)
-                    , Rd_canonize(Rd_rcode(paste0(lines[nchar(lines)>0L], '\n')))
+                    , Rd(Rd_rcode(collapse0(paste0(lines[nchar(lines)>0L], '\n'))))
                     )
 }
 
 # toRd,Documentation-Examples ##################################################
 #' @export
 setMethod('toRd', "Documentation-Examples",
-function( obj, ...) {
+function( obj, ..., indent=getOption("Rd::indent", FALSE)) {
     if (length(obj)==0) return(Rd())
     content <- lapply(obj, toRd, ...)
-    if (length(content) > 1L)
-        content <- Rd_lines(content)
-    content <- Rd_canonize(cl(content, 'Rd'), ...)
+    content <- head(undim(rbind(content, list(Rd(Rd_rcode('\n'))))), -1L)
+    content <- unlist(content, recursive = FALSE)
+    if(indent) content <- Rd::Rd_indent(content, ...)
     Rd_examples(content=content)
 })
 if(FALSE){#@testing
@@ -222,9 +222,10 @@ if(FALSE){#@testing
     examples <- new('Documentation-Examples', list(ex, ex2, ex3))
 
     rd <- toRd(examples)
-    expect_is_exactly(rd, 'Rd')
-    expect_true(is_Rd_tag(rd[[1]], "\\examples"))
-    expect_identical( collapse0(as.character(rd))
+    expect_is_exactly(rd, 'Rd_tag')
+    expect_identical(attr(rd, 'Rd_tag'), '\\examples')
+    expect_true(is_Rd_tag(rd, "\\examples"))
+    expect_identical( format(rd)
                     , "\\examples{" %\%
                       "# prints hello world." %\%
                       "hw()" %\%
@@ -236,10 +237,11 @@ if(FALSE){#@testing
                       'expect_is(b, "Rd")' %\%
                       "}")
 
-    rd <- toRd(examples, control=list(indent=TRUE, indent.with=space(4)))
-    expect_is_exactly(rd, 'Rd')
-    expect_true(is_Rd_tag(rd[[1]], "\\examples"))
-    expect_identical( collapse0(rd)
+    rd <- suppress_warnings( toRd(examples, indent=TRUE, indent.with=space(4))
+                           , pattern = "only the first element will be used")
+    expect_is_exactly(rd, 'Rd_tag')
+    expect_true(is_Rd_tag(rd, "\\examples"))
+    expect_identical( format(rd)
                     , exp <- "\\examples{" %\%
                       "    # prints hello world." %\%
                       "    hw()" %\%

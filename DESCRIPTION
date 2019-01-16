@@ -17,6 +17,7 @@ Imports:
     pkgcond,
     postlogic,
     purrr,
+    Rd,
     rlang,
     roxygen2(>= 6.0.1.9000),
     stringi,
@@ -34,6 +35,9 @@ Description: This package provides infrastructure for containing
     documentation within R object, creating documentation objects
     and exporting documentation objects into different formats.
 Collate:
+    'setup-set_old_classes.R'
+    'setup-globals.R'
+    'setup.R'
     'util-undefined.R'
     'util-infix.R'
     'util-testing.R'
@@ -43,9 +47,6 @@ Collate:
     'util-aliases.R'
     'util-errors.R'
     'util-documentationMetaName.R'
-    'setup-set_old_classes.R'
-    'setup-globals.R'
-    'setup.R'
     'utils.R'
     'Class-Documentation-Default-Value.R'
     'Class-Documentation-Keyword.R'
@@ -54,7 +55,6 @@ Collate:
     'Class-FormattedText.R'
     'Class-Documentation.R'
     'Class-NamespaceEntry.R'
-    'Class-Rd.R'
     'Class-usage.R'
     'Class-arg-Documentation.R'
     'Class-function-Documentation.R'
@@ -73,9 +73,9 @@ Collate:
     'Fun-default.R'
     'Fun-documentation-S4.R'
     'Fun-documentation-Shared.R'
-    'Fun-toRd.R'
     'Fun-format.R'
     'Fun-toRd-Documentation.R'
+    'Fun-toRd-FormattedText.R'
     'Fun-toRd-arg.R'
     'Fun-toRd-example.R'
     'Fun-toRd-function.R'

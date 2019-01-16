@@ -34,7 +34,7 @@ if(FALSE){#@testing
 
 usageClass <- getClass('usage', where = topenv(environment()))
 
-### call → usage #####
+### call to usage #####
 setAs("call", 'usage', function(from)new(as.expression(from), Class=usageClass))
 if(FALSE){#@usage
     call <- substitute(test(x,y))
@@ -42,7 +42,7 @@ if(FALSE){#@usage
     expect_is(as(call, 'usage'), "usage")
     expect_identical(as(call, 'usage'), usage(expression(test(x,y))))
 }
-### name → usage #####
+### name to usage #####
 setAs("name", 'usage', function(from)new(as.expression(from), Class=usageClass))
 if(FALSE){#@usage
     name <- substitute(hello)
@@ -51,7 +51,7 @@ if(FALSE){#@usage
     expect_identical(as(name, 'usage'), usage(expression(hello)))
 }
 
-### function → usage #####
+### function to usage #####
 setAs("function", 'usage', function(from){
     name <- attr(from, 'name') %||% name_me(from) %||% match.call(call=sys.call(-1))$from
     args <- formals(from)
@@ -148,7 +148,7 @@ if(FALSE){#@testing
     expect_identical(obj@signature, as.name('em'))
 }
 
-### function → usage/S3method #####
+### function to usage/S3method #####
 setAs("function", 'usage/S3method', function(from){
     name <- attr(from, 'name') %||% name_me(from) %||% match.call(call=sys.call(-1))$from
     generic <- attr(from, 'generic') %||%
@@ -206,7 +206,7 @@ if(FALSE){#@testing
     expect_identical(val@signature, as(c(.Object='usage/S4method'), 'signature'))
 }
 
-### function → usage/S4method #####
+### function to usage/S4method #####
 setAs("MethodDefinition", 'usage/S4method', function(from){
     generic <- as.name(from@generic)
     signature <- from@defined

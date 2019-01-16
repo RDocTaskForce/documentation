@@ -1,4 +1,4 @@
-
+#' @include setup.R
 
 
 which.list.recurser <- function(j, l=get('l', parent.frame())){

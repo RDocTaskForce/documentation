@@ -1,3 +1,5 @@
+#' @include setup.R
+
 #' Create a cannonical name for independent documentation objects
 documentationMetaName <-
 function( object.name   #< [character] name of the object that is being documented such as class

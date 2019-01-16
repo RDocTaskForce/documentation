@@ -57,8 +57,7 @@ function( pkg='.'   #< package name to check.
         , ...
         ){
     pkg <- devtools::as.package(pkg, create=FALSE)
-    env <- devtools::pkg_env(pkg)
-    if (is.null(env))
+    if (!isNamespaceLoaded(pkg$package))
         devtools::load_all(pkg)
     ns <- asNamespace(pkg$package)
     exports <- getNamespaceExports(ns)

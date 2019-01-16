@@ -1,5 +1,4 @@
 #' @include Classes.R
-#' @include Fun-toRd.R
 
 
 .default.functiondocumentation.order <-
@@ -17,20 +16,18 @@
 setMethod('toRd', 'function-Documentation',
 function( obj
         , ...
-        , control = list()
         , raw.list = FALSE
         ){
-
     order <- get_option( "Documentation::function-Documentation::documentation-order"
                        , .default.functiondocumentation.order
                        )
     order <- unique(c(order, slotNames(obj)))
-    order <- setdiff(order, 'exclude')
+    order <- setdiff(order, 'export')
 
     rd <- callNextMethod(obj, exclude=c('usage','arguments'), ..., raw.list=TRUE)
     rd$name      <- Rd_name(doc_get_name(obj))
-    rd$arguments <- toRd(doc_get_arguments(obj), ..., control=control)
-    rd$usage     <- toRd(doc_get_usage(obj), ..., control=control)
+    rd$arguments <- toRd(doc_get_arguments(obj), ...)
+    rd$usage     <- toRd(doc_get_usage(obj), ...)
     rd$value     <- Rd_value(toRd(doc_get_value(obj))) %if% !is.na(doc_get_value(obj))
 
     order <- intersect(order, names(rd))
@@ -38,7 +35,8 @@ function( obj
     rd <- rd[nchar(rd)>0]
 
     if (raw.list) return(rd)
-
+    for (i in seq_along(rd)) if (!is_exactly(rd[[i]], 'Rd'))
+        rd[[i]] <- Rd(rd[[i]])
     Rd_lines(rd)
 })
 if(FALSE){#! @testing
@@ -55,11 +53,11 @@ if(FALSE){#! @testing
                                         )
               , value = "A function-Documentation obj."
               )
-    rd <- toRd(obj)
+    rd <- toRd(obj, indent=FALSE)
     expect_is_exactly(rd, 'Rd')
 
     expect_equal(rd[['\\name']], Rd_name('function_documentation'))
-    expect_equal(rd[['\\value']], Rd_tag('value', Rd_text('A function-Documentation obj.')))
+    expect_equal(rd[['\\value']], Rd_tag('\\value', Rd_text('A function-Documentation obj.')))
     expect_equal(rd[['\\usage']], Rd_usage(Rd_rcode('function_documentation(name, arguments, usage, ...)')))
     expect_equal(rd[['\\arguments']]
                 , Rd_arguments( Rd_item('name', "Name of the function")

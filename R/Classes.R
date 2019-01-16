@@ -10,7 +10,6 @@
 #' @include Class-function-Documentation.R
 #' @include Class-NamespaceEntry.R
 #' @include Class-option-Documentation.R
-#' @include Class-Rd.R
 #' @include Class-S4-Documentation.R
 #' @include Class-Shared-Documenation.R
 #' @include Class-usage.R

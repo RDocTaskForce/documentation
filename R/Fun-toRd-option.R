@@ -1,5 +1,4 @@
 #' @include Classes.R
-#' @include Fun-toRd.R
 #' @include Fun-accessors.R
 
 
@@ -27,10 +26,10 @@ setMethod("doc_get_aliases", 'option-Documentation', function(doc){
 
 #' @export
 setMethod("toRd", 'option-Documentation', function(obj, ..., raw.list=FALSE){
-    l <- list( name        = Rd_name(doc_get_name(obj))
-             , aliases     = Rd_aliases(doc_get_aliases(obj))
-             , title       = Rd_title(doc_get_title(obj))
-             , description = Rd_description(toRd(doc_get_description(obj)))
+    l <- list( name        = Rd(Rd_name(doc_get_name(obj)))
+             , aliases     = Rd(Rd_aliases(doc_get_aliases(obj)))
+             , title       = Rd(Rd_title(doc_get_title(obj)))
+             , description = Rd(Rd_description(toRd(doc_get_description(obj))))
              )
     if (raw.list) return(l)
     Rd_lines(l)

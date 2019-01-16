@@ -24,8 +24,8 @@ FT_Rd <- setClass("FormattedText/Rd", list('FormattedText', 'Rd'))
 setMethod('initialize', "FormattedText/Rd",
 function( .Object, value=list(), ...){
     if (is.character(value))
-        value <- Rd_text(value)
-    if (is(value, 'Rd') && !is_exactly(value, 'Rd'))
+        value <- Rd(value)
+    if (is(value, 'Rd_tag'))
         value <- Rd(value)
     S3Part(.Object) <- Rd_canonize(value, ...)
     .Object
@@ -34,7 +34,7 @@ setValidity('FormattedText/Rd', function(object){
     assert_that(inherits(S3Part(object, strictS3 = TRUE), 'Rd'))
 })
 if(FALSE){#@testing FormattedText/Rd
-    x <- Rd_tag("note", Rd_text("Rd format text"))
+    x <- Rd_tag("\\note", Rd_text("Rd format text"))
     obj <- FT_Rd(x)
     expect_is(obj, 'Rd')
     expect_is(obj, 'FormattedText/Rd')
@@ -43,13 +43,8 @@ if(FALSE){#@testing FormattedText/Rd
     y <- S3Part(x, strictS3 = TRUE)
     expect_identical(x, y)
 
-    control = list(wrap.lines = TRUE, wrap.at=72)
-    description <- withr::with_seed(20180921, stringi::stri_rand_lipsum(3))
-    description <- Rd_canonize( Rd(collapse(description, '\n\n')), control=control)
-    expect_is(description, 'Rd')
-    expect_true(length(description)>5L)
-
-    x <- FT_Rd(Rd(description))
+    description <- Rd(Rd_description(stringi::stri_rand_lipsum(1)))
+    x <- FT_Rd(description)
     z <- S3Part(x, strictS3 = TRUE)
     attr(class(z), 'package') <- NULL
     expect_identical(z, description)
@@ -127,7 +122,7 @@ if(FALSE){#@testing Section(Virtual)
     expect_error(new('Section'), "trying to generate an object from a virtual class")
 }
 
-### Section ≜ FormattedText #####
+### Section to FormattedText #####
 setIs('Section', 'FormattedText')
 if(FALSE){#@testing Section is FormattedText
     x <- asection(list(FT(stringi::stri_rand_lipsum(3))))
@@ -289,7 +284,7 @@ if(FALSE){#@testing
 #' @exportClass SectionList
 setVector( element = "Section"
          , Class   = "SectionList"
-         )
+         , where = environment())
 
 
 ### c #####

@@ -1,4 +1,3 @@
-#' @import assertthat
 #' @include Classes.R
 
 #' Write all documentation for a package.

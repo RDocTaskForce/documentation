@@ -53,6 +53,14 @@ setRefClass( "Shared-Documentation", contains=c('VIRTUAL')
                         slot(docs, what) <<- c(slot(docs, what), s(value, names=name))
                     }
                 },
+                add_alias = function(alias)add_aliases(alias),
+                add_aliases = function(aliases){
+                    assert_that( is.character(aliases)
+                               , !any(is.na(aliases))
+                               , nchar(aliases) > 0L
+                               )
+                    .add('aliases', aliases, TRUE, TRUE)
+                },
                 add_argument  = function(arg)add_arguments(arg),
                 add_arguments = function(args){
                     if (!is(args, 'ArgumentList')) {
@@ -254,7 +262,7 @@ function(name, slot, ...){doc_warning( ._("Documentation of %s already has a %s.
                                          , sQuote(name), slot)
                                      , type="shared-existing", ...)}
 
-### Documentation → Shared-Documentation ≝ #####
+### Documentation to Shared-Documentation #####
 shared <- function(doc){
     assert_that(is(doc, 'Documentation'))
 
@@ -275,7 +283,7 @@ if(FALSE){#@testing
     expect_is_exactly(dcs, 'Shared-data-Documentation')
 }
 
-### Shared-Documentation ≜ Documentation #####
+### Shared-Documentation is Documentation #####
 setIs('Shared-Documentation', 'Documentation'
      , coerce = function(from)from$docs
      , replace = function(object, value)
@@ -390,7 +398,7 @@ doc_combine <- function (...) UseMethod("doc_combine")
     if (length(docs) == 1L)
         return(docs[[1]])
 
-    names(docs) <- purrr:::map_chr(docs, doc_get_name)
+    names(docs) <- purrr::map_chr(docs, doc_get_name)
 
     shared <- as(docs[[1]], 'Shared-Documentation')
 }

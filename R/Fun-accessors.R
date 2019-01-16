@@ -2,7 +2,6 @@
 #' @include Fun-documentation.R
 
 
-# nocov start
 .define_generic_doc_accessor <-
 function( name
         , valueClass="character"  #< Type of object methods are expected to return
@@ -19,10 +18,10 @@ function( name
         if (hasMethod(fun.name, class(doc)))
             return(standardGeneric(fun.name))
         else if (!.hasSlot(doc, name))
-            documentation::doc_error(._("Class '%s' does not have a slot named '%s'"
-                                       , class(doc), name)
-                                    , type = 'invalid-slot'
-                                    , class = class(doc), slot=name)
+            pkgcond::pkg_error(._("Class '%s' does not have a slot named '%s'"
+                                 , class(doc), name)
+                              , type = 'invalid-slot'
+                              , class = class(doc), slot=name)
         else
             return(as(slot(doc, name), valueClass))
     }, env = list(name = name, fun.name = fun.name, valueClass=valueClass ))
@@ -31,16 +30,22 @@ function( name
               , package = getPackageName(where)
               , ...)
     if (.document.generated) {
-        documentation(where[[fun.name]]) <-
-            function_documentation( name = fun.name
-                                  , title = "Documentation accessor for" %<<% name
-                                  , description = FT("This is an automatically generated function for accessing the" %<<%
+        docs <-
+        documentation(where[[fun.name]]) <- #
+            shared_function_documentation( name = fun.name
+                                         , title = "Documentation accessor for" %<<% name
+                                         , description = FT("This is an automatically generated function for accessing the" %<<%
                                         name %<<% "of a documentation object." %<<%
                                         "Specific methods may override the default behavior, " %<<%
                                         "especially when the" %<<% name %<<%
                                         "is expected to conform to a standard" %<<%
-                                        "or is generated form other known information.")
-                                  )
+                                        "or is generated from other known information.")
+                                  , arguments = AL(doc = arg( doc, "documentation object"
+                                                            , constraints = list(~is(., "Documentation"))
+                                                            ))
+                                  # , sections = section( "functions"
+                                  #                     , FT_Rd(Rd_item(fun.name, "Get the documentation " %<<% name )))
+                                  )#)
     }
     if (setter){
         setter.name <- "doc_" %<<<% name %<<<% '<-'
@@ -48,10 +53,10 @@ function( name
             if (hasMethod(setter.name, class(doc)))
                 return(standardGeneric(setter.name))
             if (!.hasSlot(doc, name)){
-                documentation::doc_error(._("Class '%s' does not have a '%s' which can be set."
-                                           , class(doc), name)
-                                        , type = 'invalid-slot'
-                                        , class = class(doc), slot=name)
+                pkgcond::pkg_error(._("Class '%s' does not have a '%s' which can be set."
+                                     , class(doc), name)
+                                  , type = 'invalid-slot'
+                                  , class = class(doc), slot=name)
             }
             doc@name <- as(value, getElement(getSlots(getClass(class(doc))), name))
             return(invisible(doc))
@@ -60,6 +65,11 @@ function( name
         setGeneric( setter.name, def = setter, where=where
                   , package = getPackageName(where)
                   , ...)
+        if (.document.generated){
+            # docs$add_argument(arg(value, "Replacement value."))
+            # docs$add_alias(setter.name)
+            # documentation(setter) <- docs
+        }
     }
     if (has){
         has.name <- 'doc_has_' %<<<% name
@@ -73,7 +83,6 @@ function( name
     }
     invisible(TRUE)
 }
-# nocov end
 if(FALSE){#@testing
     if (isNamespaceLoaded("my-test-package"))
         unloadNamespace('my-test-package')
@@ -184,7 +193,8 @@ if(FALSE){#@testing generic accessors
                                     "Specific methods may override the default behavior, " %<<%
                                     "especially when the name" %<<%
                                     "is expected to conform to a standard" %<<%
-                                    "or is generated form other known information."))
+                                    "or is generated from other known information."))
+        expect_equal(names(doc@arguments), "doc")
 
         expect_is(doc <- documentation(doc_get_title), 'function-Documentation')
         expect_equal(doc@title, "Documentation accessor for title")
@@ -194,7 +204,8 @@ if(FALSE){#@testing generic accessors
                                     "Specific methods may override the default behavior, " %<<%
                                     "especially when the title" %<<%
                                     "is expected to conform to a standard" %<<%
-                                    "or is generated form other known information."))
+                                    "or is generated from other known information."))
+        expect_equal(names(doc@arguments), "doc")
     }
 }
 if(FALSE){#@testing doc_has_*

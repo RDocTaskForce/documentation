@@ -1,4 +1,4 @@
-
+#' @include setup.R
 
 interleave <-
 function(x, y, simplify=TRUE){

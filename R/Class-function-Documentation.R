@@ -152,7 +152,7 @@ if(FALSE){#@testing
     expect_identical(doc@signature, as.name('em'))
 }
 
-### S3method → function-Documentation #####
+### S3method to function-Documentation #####
 setAs('S3method-Documentation', 'function-Documentation',
 function(from){
     new <- new('function-Documentation')

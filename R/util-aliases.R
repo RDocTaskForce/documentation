@@ -1,3 +1,4 @@
+#' @include setup.R
 
 #' alias for structure
 #'

@@ -1,6 +1,4 @@
-#' @import assertthat
 #' @include Classes.R
-#' @include Fun-toRd.R
 
 
 .documentation_formatters <- new.env(hash = TRUE)
@@ -69,12 +67,12 @@ if(FALSE){#@testing
     formatter.toRd <- get_formatter('toRd')
     expect_is(formatter.toRd, 'nonstandardGenericFunction')
     expect_identical( formatter.toRd@generic
-                    , s('toRd', package="documentation"))
+                    , s('toRd', package="Rd"))
 
     formatter.Rd <- get_formatter('toRd')
     expect_is(formatter.Rd, 'nonstandardGenericFunction')
     expect_identical( formatter.Rd@generic
-                    , s('toRd', package="documentation"))
+                    , s('toRd', package="Rd"))
 
     expect_identical(formatter.Rd, formatter.toRd)
 

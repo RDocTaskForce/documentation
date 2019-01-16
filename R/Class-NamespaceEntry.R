@@ -384,7 +384,7 @@ newDocSet( 'ExportS4methods')
 newDocSet( 'ExportS4class')
 
 pass.format <- function(x, ...){
-    sort(as.character(unlist(purrr:::map(as.list(x), format, ...))))
+    sort(as.character(unlist(purrr::map(as.list(x), format, ...))))
 }
 setMethod('format', "ReferenceSet<Export>"         , pass.format)
 setMethod('format', "ReferenceSet<ExportPattern>"  , pass.format)
